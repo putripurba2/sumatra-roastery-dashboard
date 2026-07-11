@@ -11,8 +11,17 @@ import lightgbm as lgb
 import os
 import glob
 import base64
+from PIL import Image
 
-st.set_page_config(page_title="Dashboard Prediksi Pendapatan - Sumatra Roastery Medan", page_icon="🍒", layout="wide")
+def _load_favicon():
+    """Ikon tab browser custom (biji + bubuk kopi), fallback ke emoji kalau file tidak ada."""
+    try:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        return Image.open(os.path.join(script_dir, "favicon.png"))
+    except Exception:
+        return "☕"
+
+st.set_page_config(page_title="Dashboard Prediksi Pendapatan - Sumatra Roastery Medan", page_icon=_load_favicon(), layout="wide")
 
 def render_hero_banner():
     """Banner atas dashboard memakai foto asli produk Sumatra Roastery Medan."""
