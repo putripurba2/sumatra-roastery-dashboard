@@ -390,7 +390,7 @@ with tab1:
     per_jenis_show['% dari Total Bulan'] = (per_jenis_show['% dari Total Bulan'] * 100).round(2).astype(str) + '%'
     st.dataframe(per_jenis_show, use_container_width=True, hide_index=True)
 
-    st.subheader("Contoh Data Transaksi Harian")
+    st.subheader("Data Transaksi Harian")
     daily_show = daily.head(50).copy()
     daily_show['Harga (Rp)'] = daily_show['Harga (Rp)'].apply(rupiah)
     daily_show['Pendapatan (Rp)'] = daily_show['Pendapatan (Rp)'].apply(rupiah)
