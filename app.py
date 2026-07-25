@@ -11,22 +11,116 @@ import lightgbm as lgb
 import os
 import glob
 import base64
-from PIL import Image
 
-def _load_favicon():
-    """Ikon tab browser custom (biji + bubuk kopi), fallback ke emoji kalau file tidak ada."""
-    try:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        return Image.open(os.path.join(script_dir, "favicon.png"))
-    except Exception:
-        return "☕"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_FAVICON_PATH = os.path.join(SCRIPT_DIR, "favicon.png")
+_PAGE_ICON = _FAVICON_PATH if os.path.exists(_FAVICON_PATH) else "☕"
 
-st.set_page_config(page_title="Dashboard Prediksi Pendapatan - Sumatra Roastery Medan", page_icon=_load_favicon(), layout="wide")
+st.set_page_config(page_title="Dashboard Prediksi Pendapatan - Sumatra Roastery Medan", page_icon=_PAGE_ICON, layout="wide")
+
+def inject_custom_css():
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+    h1, h2, h3 { font-family: 'Fraunces', Georgia, serif !important; }
+
+    /* Latar utama */
+    .stApp { background: #12201C; }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background: #0E1C17;
+        border-right: 1px solid rgba(181,80,45,0.25);
+    }
+    section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3 {
+        color: #F5EFE4 !important;
+        font-size: 20px !important;
+    }
+
+    /* Judul subbagian (st.subheader) */
+    h2 {
+        color: #F5EFE4 !important;
+        border-bottom: 2px solid #B5502D;
+        padding-bottom: 8px;
+        margin-top: 28px !important;
+    }
+
+    /* Tab navigasi jadi pill segmented control */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 4px;
+        background: #0E1C17;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.06);
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 42px;
+        border-radius: 8px;
+        color: #B9AC93;
+        font-weight: 500;
+        background: transparent;
+    }
+    .stTabs [aria-selected="true"] {
+        background: #0F6B5C !important;
+        color: #F5EFE4 !important;
+        font-weight: 600;
+    }
+
+    /* Kartu metrik */
+    div[data-testid="stMetric"] {
+        background: #1B2E27;
+        border: 1px solid rgba(181,80,45,0.25);
+        border-radius: 12px;
+        padding: 16px 18px;
+    }
+    div[data-testid="stMetricLabel"] { color: #B9AC93 !important; }
+    div[data-testid="stMetricValue"] { color: #F5EFE4 !important; font-family: 'Fraunces', serif !important; }
+
+    /* Tombol */
+    .stButton button, .stDownloadButton button {
+        background: #0F6B5C;
+        color: #F5EFE4;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    .stButton button:hover, .stDownloadButton button:hover {
+        background: #B5502D;
+        color: #F5EFE4;
+    }
+
+    /* Kotak upload file */
+    div[data-testid="stFileUploaderDropzone"] {
+        background: #1B2E27;
+        border: 1.5px dashed rgba(181,80,45,0.5);
+        border-radius: 10px;
+    }
+
+    /* Slider aksen warna terracotta */
+    div[data-testid="stSlider"] [role="slider"] { background-color: #B5502D !important; }
+    div[data-testid="stSliderTrackFilled"] { background-color: #B5502D !important; }
+
+    /* Kotak info/success/warning */
+    div[data-testid="stAlert"] { border-radius: 10px; }
+
+    /* Divider */
+    hr { border-color: rgba(181,80,45,0.3) !important; }
+
+    /* Expander */
+    details { background: #1B2E27; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06); }
+
+    /* Footer bawaan Streamlit disembunyikan, footer kustom dipakai */
+    footer[data-testid="stFooter"] { visibility: hidden; }
+    </style>
+    """, unsafe_allow_html=True)
+
+inject_custom_css()
 
 def render_hero_banner():
-    """Banner atas dashboard memakai foto asli produk Sumatra Roastery Medan."""
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    photo_path = os.path.join(script_dir, "banner_kopi.jpg")
+    """Banner atas dashboard memakai foto asli produk Sumatra Roastery Medan. Muncul di halaman login maupun dashboard utama."""
+    photo_path = os.path.join(SCRIPT_DIR, "banner_kopi.jpg")
 
     if os.path.exists(photo_path):
         with open(photo_path, "rb") as f:
@@ -41,19 +135,20 @@ def render_hero_banner():
         {img_tag}
       </div>
       <div style="flex:1; background:linear-gradient(135deg, #0F6B5C, #0B4F44); padding:28px 36px; display:flex; flex-direction:column; justify-content:center;">
-        <h1 style="color:#F5EFE4; font-family:Georgia,'Times New Roman',serif; font-size:32px; font-weight:700; margin:0 0 6px 0; line-height:1.25;">
+        <h1 style="color:#F5EFE4; font-family:'Fraunces',Georgia,serif; font-size:32px; font-weight:700; margin:0 0 6px 0; line-height:1.25;">
           Dashboard Analisis Tren &amp; Prediksi Pendapatan
         </h1>
-        <p style="color:#D9CBB4; font-family:Verdana,sans-serif; font-size:16px; margin:0 0 12px 0;">
+        <p style="color:#D9CBB4; font-family:'Inter',sans-serif; font-size:16px; margin:0 0 12px 0;">
           Sumatra Roastery Medan — Random Forest vs LightGBM
         </p>
         <div style="width:220px; height:2px; background:#B5502D; opacity:0.8; margin-bottom:10px;"></div>
-        <p style="color:#B9AC93; font-family:Verdana,sans-serif; font-size:13px; margin:0;">
+        <p style="color:#B9AC93; font-family:'Inter',sans-serif; font-size:13px; margin:0;">
           Kopi asli Sumatra Roastery Medan — dari kebun hingga wawasan bisnis
         </p>
       </div>
     </div>
     """, unsafe_allow_html=True)
+
 
 BULAN_ORDER = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
 BULAN_MAP = {b: i + 1 for i, b in enumerate(BULAN_ORDER)}
@@ -210,12 +305,52 @@ def forecast_next_month(df):
 
 render_hero_banner()
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# ---------- LOGIN DUA PERAN ----------
+CREDENTIALS = {
+    "peneliti": {"password": "peneliti123", "role": "Peneliti"},
+    "pemilik": {"password": "pemilik123", "role": "Pemilik/Pengelola"},
+}
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+    st.session_state.role = None
+
+if not st.session_state.logged_in:
+    st.subheader("🔒 Login")
+    st.caption("Masukkan akun sesuai peran Anda untuk mengakses dashboard.")
+    with st.form("login_form"):
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Masuk")
+    if submitted:
+        user = CREDENTIALS.get(username.strip().lower())
+        if user and user["password"] == password:
+            st.session_state.logged_in = True
+            st.session_state.role = user["role"]
+            st.rerun()
+        else:
+            st.error("Username atau password salah.")
+    st.stop()
+
+with st.sidebar:
+    st.success(f"Login sebagai: **{st.session_state.role}**")
+    if st.button("Logout"):
+        st.session_state.logged_in = False
+        st.session_state.role = None
+        st.rerun()
+    st.divider()
+
+IS_PENELITI = st.session_state.role == "Peneliti"
 
 with st.sidebar:
     st.header("Data & Pengaturan")
-    uploaded = st.file_uploader("Unggah dataset (.xlsx)", type=["xlsx"])
-    split_ratio = st.slider("Proporsi data training", 0.6, 0.9, 0.8, 0.05)
+    uploaded = None
+    split_ratio = 0.8
+    if IS_PENELITI:
+        uploaded = st.file_uploader("Unggah dataset (.xlsx)", type=["xlsx"])
+        split_ratio = st.slider("Proporsi data training", 0.6, 0.9, 0.8, 0.05)
+    else:
+        st.caption("Data & pengaturan hanya dapat diubah oleh Peneliti. Anda melihat hasil analisis terkini.")
     st.caption("Sesuai BAB III: time-based split 80:20")
 
 def find_local_dataset():
@@ -345,5 +480,14 @@ with tab5:
 
     st.info("Catatan asumsi: harga rata-rata memakai rata-rata 3 bulan terakhir per jenis kopi, dan kategori tren memakai kategori bulan terakhir yang datanya tersedia (karena kategori tren bulan depan belum bisa diketahui sebelum pendapatan aktualnya terjadi).")
 
-st.divider()
-st.caption("Dashboard ini dijalankan di Google Colab menggunakan Python, Streamlit, Scikit-learn, dan LightGBM — sesuai BAB IV.")
+st.markdown("""
+<div style="margin-top:32px; padding:18px 24px; background:#0E1C17; border-radius:12px;
+            border:1px solid rgba(181,80,45,0.25); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+  <span style="color:#B9AC93; font-family:'Inter',sans-serif; font-size:13px;">
+    ☕ Sumatra Roastery Medan — Dashboard Analisis Tren &amp; Prediksi Pendapatan
+  </span>
+  <span style="color:#7C8F86; font-family:'Inter',sans-serif; font-size:12px;">
+    Dibangun dengan Python, Streamlit, Scikit-learn &amp; LightGBM — sesuai BAB IV
+  </span>
+</div>
+""", unsafe_allow_html=True)
