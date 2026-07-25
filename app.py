@@ -135,15 +135,18 @@ def render_hero_banner():
         {img_tag}
       </div>
       <div style="flex:1; background:linear-gradient(135deg, #0F6B5C, #0B4F44); padding:28px 36px; display:flex; flex-direction:column; justify-content:center;">
-        <h1 style="color:#F5EFE4; font-family:'Fraunces',Georgia,serif; font-size:32px; font-weight:700; margin:0 0 6px 0; line-height:1.25;">
-          Dashboard Analisis Tren &amp; Prediksi Pendapatan
+        <h1 style="color:#F5EFE4; font-family:'Fraunces',Georgia,serif; font-size:34px; font-weight:700; margin:0 0 6px 0; line-height:1.2;">
+          Sumatra Roastery Medan
         </h1>
-        <p style="color:#D9CBB4; font-family:'Inter',sans-serif; font-size:16px; margin:0 0 12px 0;">
-          Sumatra Roastery Medan — Random Forest vs LightGBM
+        <p style="color:#D9CBB4; font-family:'Inter',sans-serif; font-size:16px; margin:0 0 10px 0;">
+          Usaha Kopi Specialty — Medan, Sumatera Utara
+        </p>
+        <p style="color:#B9AC93; font-family:'Inter',sans-serif; font-size:14px; margin:0 0 14px 0; max-width:420px; line-height:1.5;">
+          Menghadirkan kopi specialty pilihan dari dataran tinggi Sumatra — mulai dari Arabika Gayo, Arabika Sumut, hingga Robusta — diracik dan disangrai langsung untuk penikmat kopi sejati.
         </p>
         <div style="width:220px; height:2px; background:#B5502D; opacity:0.8; margin-bottom:10px;"></div>
-        <p style="color:#B9AC93; font-family:'Inter',sans-serif; font-size:13px; margin:0;">
-          Kopi asli Sumatra Roastery Medan — dari kebun hingga wawasan bisnis
+        <p style="color:#7C8F86; font-family:'Inter',sans-serif; font-size:12px; margin:0;">
+          Dashboard Analisis Tren &amp; Prediksi Pendapatan — Random Forest vs LightGBM
         </p>
       </div>
     </div>
