@@ -487,10 +487,10 @@ st.markdown("""
 <div style="margin-top:32px; padding:18px 24px; background:#0E1C17; border-radius:12px;
             border:1px solid rgba(181,80,45,0.25); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
   <span style="color:#B9AC93; font-family:'Inter',sans-serif; font-size:13px;">
-    ☕ Sumatra Roastery Medan — Dashboard Analisis Tren &amp; Prediksi Pendapatan
+    ☕ Sumatra Roastery Medan — Dashboard Analisis Tren dan Prediksi Pendapatan Penjualan Kopi
   </span>
   <span style="color:#7C8F86; font-family:'Inter',sans-serif; font-size:12px;">
-    Dibangun dengan Python, Streamlit, Scikit-learn &amp; LightGBM — 
+    Dibangun dengan Python, Streamlit, Scikit-learn &amp; LightGBM 
   </span>
 </div>
 """, unsafe_allow_html=True)
