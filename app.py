@@ -376,7 +376,7 @@ df, rekap, avg_overall = build_dataset(daily, per_jenis, rekap_raw)
 results, fi, test_out, split_periode = train_models(df, split_ratio)
 forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Data Aktual", "📈 Analisis Tren", "🤖 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
 
 with tab1:
     st.subheader("Rekap Pendapatan Bulanan")
@@ -483,14 +483,55 @@ with tab5:
 
     st.info("Catatan asumsi: harga rata-rata memakai rata-rata 3 bulan terakhir per jenis kopi, dan kategori tren memakai kategori bulan terakhir yang datanya tersedia (karena kategori tren bulan depan belum bisa diketahui sebelum pendapatan aktualnya terjadi).")
 
-st.markdown("""
-<div style="margin-top:32px; padding:18px 24px; background:#0E1C17; border-radius:12px;
-            border:1px solid rgba(181,80,45,0.25); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-  <span style="color:#B9AC93; font-family:'Inter',sans-serif; font-size:13px;">
-    ☕ Sumatra Roastery Medan — Dashboard Analisis Tren &amp; Prediksi Pendapatan
-  </span>
-  <span style="color:#7C8F86; font-family:'Inter',sans-serif; font-size:12px;">
-    Dibangun dengan Python, Streamlit, Scikit-learn &amp; LightGBM — sesuai BAB IV
-  </span>
+sst.markdown("""
+<div style="
+    margin-top:35px;
+    padding:20px 28px;
+    background:#0E1C17;
+    border-radius:14px;
+    border-top:3px solid #B5502D;
+    text-align:center;
+">
+
+<p style="
+    color:#F5EFE4;
+    font-size:16px;
+    font-weight:600;
+    margin-bottom:6px;
+    font-family:'Fraunces', Georgia, serif;
+">
+Dashboard Analisis Tren dan Prediksi Pendapatan Penjualan Kopi
+</p>
+
+<p style="
+    color:#D9CBB4;
+    font-size:14px;
+    margin-bottom:6px;
+">
+Sumatra Roastery Medan
+</p>
+
+<p style="
+    color:#9CA3AF;
+    font-size:12px;
+    margin-bottom:10px;
+">
+Dikembangkan menggunakan Python, Streamlit, Random Forest, dan LightGBM
+</p>
+
+<hr style="
+    border:none;
+    border-top:1px solid rgba(181,80,45,0.35);
+    margin:12px 0;
+">
+
+<p style="
+    color:#7C8F86;
+    font-size:11px;
+    margin:0;
+">
+© 2026 Sumatra Roastery Medan • Dashboard Pendukung Analisis Tren dan Prediksi Pendapatan
+</p>
+
 </div>
 """, unsafe_allow_html=True)
