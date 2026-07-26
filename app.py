@@ -119,36 +119,117 @@ def inject_custom_css():
 inject_custom_css()
 
 def render_hero_banner():
-    """Banner atas dashboard memakai foto asli produk Sumatra Roastery Medan. Muncul di halaman login maupun dashboard utama."""
+    """Banner Dashboard Sumatra Roastery Medan"""
+
     photo_path = os.path.join(SCRIPT_DIR, "banner_kopi.jpg")
 
     if os.path.exists(photo_path):
         with open(photo_path, "rb") as f:
             photo_b64 = base64.b64encode(f.read()).decode()
-        img_tag = f'<img src="data:image/jpeg;base64,{photo_b64}" style="width:100%;height:100%;object-fit:cover;border-radius:16px 0 0 16px;display:block;min-height:220px;"/>'
+
+        img_tag = f"""
+        <img src="data:image/jpeg;base64,{photo_b64}"
+             style="
+                width:100%;
+                height:100%;
+                object-fit:cover;
+                display:block;
+                border-radius:18px 0 0 18px;
+             ">
+        """
     else:
-        img_tag = '<div style="width:100%;height:100%;min-height:220px;background:#0B4F44;border-radius:16px 0 0 16px;"></div>'
+        img_tag = """
+        <div style="
+            width:100%;
+            height:100%;
+            background:#0B4F44;
+            border-radius:18px 0 0 18px;">
+        </div>
+        """
 
     st.markdown(f"""
-    <div style="display:flex; border-radius:16px; overflow:hidden; box-shadow:0 4px 18px rgba(0,0,0,0.18); margin-bottom:14px;">
-      <div style="flex:0 0 260px;">
-        {img_tag}
-      </div>
-      <div style="flex:1; background:linear-gradient(135deg, #0F6B5C, #0B4F44); padding:28px 36px; display:flex; flex-direction:column; justify-content:center;">
-        <h1 style="color:#F5EFE4; font-family:'Fraunces',Georgia,serif; font-size:34px; font-weight:700; margin:0 0 6px 0; line-height:1.2;">
-          Sumatra Roastery Medan
-        </h1>
-        <p style="color:#D9CBB4; font-family:'Inter',sans-serif; font-size:16px; margin:0 0 10px 0;">
-          Usaha Kopi Specialty — Medan, Sumatera Utara
-        </p>
-        <p style="color:#B9AC93; font-family:'Inter',sans-serif; font-size:14px; margin:0 0 14px 0; max-width:420px; line-height:1.5;">
-          Menghadirkan kopi specialty pilihan dari dataran tinggi Sumatra — mulai dari Arabika Gayo, Arabika Sumut, hingga Robusta — diracik dan disangrai langsung untuk penikmat kopi sejati.
-        </p>
-        <div style="width:220px; height:2px; background:#B5502D; opacity:0.8; margin-bottom:10px;"></div>
-        <p style="color:#7C8F86; font-family:'Inter',sans-serif; font-size:12px; margin:0;">
-          Dashboard Analisis Tren &amp; Prediksi Pendapatan — Random Forest vs LightGBM
-        </p>
-      </div>
+    <div style="
+        display:flex;
+        overflow:hidden;
+        border-radius:18px;
+        background:#155F55;
+        box-shadow:0 8px 25px rgba(0,0,0,.28);
+        margin-bottom:18px;
+        min-height:210px;
+    ">
+
+        <!-- FOTO -->
+        <div style="
+            flex:0 0 250px;
+            overflow:hidden;
+        ">
+            {img_tag}
+        </div>
+
+        <!-- TEKS -->
+        <div style="
+            flex:1;
+            padding:28px 34px;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+        ">
+
+            <h1 style="
+                color:#F5EFE4;
+                font-family:'Fraunces',serif;
+                font-size:46px;
+                margin:0;
+                font-weight:700;
+                line-height:1.15;
+            ">
+                Sumatra Roastery Medan
+            </h1>
+
+            <div style="
+                color:#E5D0A8;
+                font-size:18px;
+                margin-top:10px;
+                font-weight:600;
+            ">
+                Usaha Pengolahan dan Penjualan Kopi Specialty
+            </div>
+
+            <div style="
+                color:#ECECEC;
+                font-size:15px;
+                line-height:1.8;
+                margin-top:15px;
+                max-width:700px;
+            ">
+                Sumatra Roastery Medan merupakan usaha yang bergerak di bidang
+                pengolahan dan penjualan kopi specialty dengan berbagai pilihan
+                produk seperti Arabika Gayo, Arabika Sumut, Arabika Nusantara,
+                Robusta, Kopi Blend, Grade Super, serta produk pendukung lainnya.
+                Dashboard ini membantu pemilik memantau tren pendapatan,
+                melakukan prediksi pendapatan, serta mengevaluasi performa model
+                machine learning sebagai dasar pengambilan keputusan bisnis.
+            </div>
+
+            <div style="
+                width:260px;
+                height:3px;
+                background:#B5502D;
+                margin-top:18px;
+                margin-bottom:12px;
+                border-radius:20px;
+            ">
+            </div>
+
+            <div style="
+                color:#D2D2D2;
+                font-size:13px;
+            ">
+                Dashboard Analisis Tren dan Prediksi Pendapatan • Random Forest & LightGBM
+            </div>
+
+        </div>
+
     </div>
     """, unsafe_allow_html=True)
 
