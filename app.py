@@ -27,6 +27,10 @@ st.set_page_config(
     layout="wide",
 )
 
+PRIMARY = "#0F6B5C"
+ACCENT = "#B5502D"
+GRID = "#e5e0d8"
+
 CREAM = "#FAF6F0"
 CREAM_DARK = "#F0E8DC"
 ESPRESSO = "#3B2A20"
@@ -163,10 +167,6 @@ h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, .stCaption {{
 
 BULAN_ORDER = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
 BULAN_MAP = {b: i + 1 for i, b in enumerate(BULAN_ORDER)}
-
-PRIMARY = "#0F6B5C"
-ACCENT = "#B5502D"
-GRID = "#e5e0d8"
 
 
 @st.cache_data
