@@ -95,17 +95,37 @@ h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, .stCaption {{
     border: 1px solid {BORDER} !important;
 }}
 
-/* ---- Buttons ---- */
+/* ---- Buttons (target inner text explicitly so it doesn't get overridden) ---- */
 .stButton button, .stFormSubmitButton button {{
     background-color: {ESPRESSO} !important;
-    color: {CREAM} !important;
     border: none !important;
     border-radius: 6px;
     font-weight: 600;
 }}
+.stButton button p, .stFormSubmitButton button p,
+.stButton button div, .stFormSubmitButton button div,
+.stButton button span, .stFormSubmitButton button span {{
+    color: {CREAM} !important;
+}}
 .stButton button:hover, .stFormSubmitButton button:hover {{
     background-color: {ESPRESSO_SOFT} !important;
-    color: {CREAM} !important;
+}}
+
+/* ---- Neutralize Chrome/browser autofill styling on inputs ---- */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {{
+    -webkit-box-shadow: 0 0 0px 1000px #FFFFFF inset !important;
+    -webkit-text-fill-color: {ESPRESSO} !important;
+    caret-color: {ESPRESSO} !important;
+}}
+
+/* ---- Banner images: cap height so they never dominate the page ---- */
+[data-testid="stImage"] img {{
+    max-height: 220px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px;
 }}
 
 /* ---- Slider track/thumb ---- */
