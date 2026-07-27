@@ -26,6 +26,35 @@ def inject_custom_css():
     html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     h1, h2, h3 { font-family: 'Fraunces', Georgia, serif !important; }
 
+    /* Header bar Streamlit (bar putih di paling atas) */
+    header[data-testid="stHeader"] {
+        background: #12201C !important;
+    }
+    div[data-testid="stToolbar"] { background: transparent !important; }
+    div[data-testid="stDecoration"] { background: transparent !important; }
+
+    /* Kotak input teks (username, password, dsb) */
+    div[data-testid="stTextInput"] input {
+        background: #1B2E27 !important;
+        color: #F5EFE4 !important;
+        border: 1px solid rgba(181,80,45,0.4) !important;
+        border-radius: 8px !important;
+    }
+    div[data-testid="stTextInput"] input::placeholder { color: #7C8F86 !important; }
+    div[data-testid="stTextInput"] label { color: #B9AC93 !important; }
+    div[data-testid="stTextInput"] svg { fill: #B9AC93 !important; }
+
+    /* Kotak angka & pilihan lain (kalau ada) */
+    div[data-testid="stNumberInput"] input,
+    div[data-baseweb="select"] > div {
+        background: #1B2E27 !important;
+        color: #F5EFE4 !important;
+        border-color: rgba(181,80,45,0.4) !important;
+    }
+
+    /* Label umum widget (proporsi data training, dsb) */
+    label { color: #B9AC93 !important; }
+
     /* Latar utama */
     .stApp { background: #12201C; }
 
@@ -125,20 +154,20 @@ def render_hero_banner():
     if os.path.exists(photo_path):
         with open(photo_path, "rb") as f:
             photo_b64 = base64.b64encode(f.read()).decode()
-        img_tag = f'<img src="data:image/jpeg;base64,{photo_b64}" style="width:100%;height:100%;object-fit:cover;border-radius:14px 0 0 16px;display:block;min-height:200px;"/>'
+        img_tag = f'<img src="data:image/jpeg;base64,{photo_b64}" style="width:100%;height:100%;object-fit:cover;border-radius:16px 0 0 16px;display:block;min-height:220px;"/>'
     else:
-        img_tag = '<div style="width:100%;height:100%;min-height:200px;background:#0B4F44;border-radius:14px 0 0 16px;"></div>'
+        img_tag = '<div style="width:100%;height:100%;min-height:220px;background:#0B4F44;border-radius:16px 0 0 16px;"></div>'
 
     st.markdown(f"""
-    <div style="display:flex; border-radius:14px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.18); margin-bottom:14px;">
-      <div style="flex:0 0 230px;">
+    <div style="display:flex; border-radius:16px; overflow:hidden; box-shadow:0 4px 18px rgba(0,0,0,0.18); margin-bottom:14px;">
+      <div style="flex:0 0 260px;">
         {img_tag}
       </div>
-      <div style="flex:1; background:linear-gradient(135deg, #0F6B5C, #0B4F44); padding:25px 33px; display:flex; flex-direction:column; justify-content:center;">
+      <div style="flex:1; background:linear-gradient(135deg, #0F6B5C, #0B4F44); padding:28px 36px; display:flex; flex-direction:column; justify-content:center;">
         <h1 style="color:#F5EFE4; font-family:'Fraunces',Georgia,serif; font-size:34px; font-weight:700; margin:0 0 6px 0; line-height:1.2;">
           Sumatra Roastery Medan
         </h1>
-        <p style="color:#D9CBB4; font-family:'Inter',sans-serif; font-size:15px; margin:0 0 10px 0;">
+        <p style="color:#D9CBB4; font-family:'Inter',sans-serif; font-size:16px; margin:0 0 10px 0;">
           Usaha Kopi Specialty — Medan, Sumatera Utara
         </p>
         <p style="color:#B9AC93; font-family:'Inter',sans-serif; font-size:14px; margin:0 0 14px 0; max-width:420px; line-height:1.5;">
@@ -146,6 +175,7 @@ def render_hero_banner():
         </p>
         <div style="width:220px; height:2px; background:#B5502D; opacity:0.8; margin-bottom:10px;"></div>
         <p style="color:#7C8F86; font-family:'Inter',sans-serif; font-size:12px; margin:0;">
+          Dashboard Analisis Tren &amp; Prediksi Pendapatan — Random Forest vs LightGBM
         </p>
       </div>
     </div>
@@ -375,7 +405,7 @@ df, rekap, avg_overall = build_dataset(daily, per_jenis, rekap_raw)
 results, fi, test_out, split_periode = train_models(df, split_ratio)
 forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Data Aktual", "📈 Analisis Tren", "🤖 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
 
 with tab1:
     st.subheader("Rekap Pendapatan Bulanan")
@@ -486,10 +516,10 @@ st.markdown("""
 <div style="margin-top:32px; padding:18px 24px; background:#0E1C17; border-radius:12px;
             border:1px solid rgba(181,80,45,0.25); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
   <span style="color:#B9AC93; font-family:'Inter',sans-serif; font-size:13px;">
-    ☕ Sumatra Roastery Medan — Dashboard Analisis Tren dan Prediksi Pendapatan Penjualan Kopi
+    ☕ Sumatra Roastery Medan — Dashboard Analisis Tren &amp; Prediksi Pendapatan
   </span>
   <span style="color:#7C8F86; font-family:'Inter',sans-serif; font-size:12px;">
-    Dibangun dengan Python, Streamlit, Scikit-learn &amp; LightGBM 
+    Dibangun dengan Python, Streamlit, Scikit-learn &amp; LightGBM — sesuai BAB IV
   </span>
 </div>
 """, unsafe_allow_html=True)
