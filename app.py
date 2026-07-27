@@ -334,9 +334,6 @@ def forecast_next_month(df):
     return forecast_df, next_bulan_nama, next_tahun
 
 
-st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
-st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
-
 # ---------- LOGIN DUA PERAN ----------
 CREDENTIALS = {
     "peneliti": {"password": "peneliti123", "role": "Peneliti"},
@@ -348,6 +345,8 @@ if "logged_in" not in st.session_state:
     st.session_state.role = None
 
 if not st.session_state.logged_in:
+    st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
+    st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
     if BANNER_LOGIN:
         st.image(BANNER_LOGIN, use_container_width=True)
     st.subheader("🔒 Login")
@@ -367,7 +366,26 @@ if not st.session_state.logged_in:
     st.stop()
 
 if BANNER_MAIN:
-    st.image(BANNER_MAIN, use_container_width=True)
+    import base64
+    with open(BANNER_MAIN, "rb") as f:
+        banner_b64 = base64.b64encode(f.read()).decode()
+    ext = BANNER_MAIN.split(".")[-1]
+    st.markdown(f"""
+    <div style="display:flex; height:230px; border-radius:10px; overflow:hidden; margin-bottom:1.2rem; box-shadow:0 2px 8px rgba(0,0,0,0.12);">
+        <div style="flex:0 0 42%;">
+            <img src="data:image/{ext};base64,{banner_b64}" style="width:100%; height:100%; object-fit:cover; display:block;">
+        </div>
+        <div style="flex:1; background-color:{PRIMARY}; padding:1.6rem 2rem; display:flex; flex-direction:column; justify-content:center;">
+            <h1 style="color:{CREAM}; margin:0 0 0.3rem 0; font-size:1.9rem; font-weight:800;">Dashboard Analisis Tren &amp; Prediksi Pendapatan</h1>
+            <div style="width:60px; height:3px; background-color:{ACCENT}; margin-bottom:0.6rem;"></div>
+            <p style="color:{CREAM}; opacity:0.85; margin:0 0 0.3rem 0; font-size:1rem;">Sumatra Roastery Medan — Random Forest vs LightGBM</p>
+            <p style="color:{ACCENT}; margin:0; font-size:0.9rem; font-style:italic;">Kopi asli Sumatra Roastery Medan — dari kebun hingga wawasan bisnis</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
+    st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
 
 with st.sidebar:
     st.success(f"Login sebagai: **{st.session_state.role}**")
