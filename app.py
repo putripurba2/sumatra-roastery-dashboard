@@ -5,7 +5,6 @@ import time
 import os
 import glob
 import base64
-import math
 import plotly.graph_objects as go
 import plotly.express as px
 from sklearn.ensemble import RandomForestRegressor
@@ -387,61 +386,64 @@ if BANNER_MAIN:
         photo_ext = "jpeg"
 
     GOLD = "#C9A24B"
+    W, H = 1600, 480
+    X_TOP, X_BULGE = 900, 800
 
-    # Kurva dihitung dengan fungsi sinus: x_top di y=0 & y=100, menjorok ke
-    # x_bulge (lebih kecil) di y=50. Titik yang sama dipakai utk clip-path
-    # (bentuk hijau) dan garis emas, jadi keduanya selalu pas menyatu.
-    X_TOP = 55.0
-    X_BULGE = 47.0
-    N_POINTS = 40
-    curve_points = []
-    for i in range(N_POINTS + 1):
-        y = i * 100.0 / N_POINTS
-        x = X_TOP - (X_TOP - X_BULGE) * math.sin(math.pi * y / 100.0)
-        curve_points.append((round(x, 2), round(y, 2)))
+    curve = (
+        f"C {X_TOP-60},{H*0.27:.1f} {X_BULGE},{H*0.27:.1f} {X_BULGE},{H/2:.1f} "
+        f"C {X_BULGE},{H*0.73:.1f} {X_TOP-60},{H*0.73:.1f} {X_TOP},{H}"
+    )
+    photo_d = f"M0,0 L{X_TOP},0 {curve} L0,{H} Z"
+    green_d = f"M{X_TOP},0 {curve} L{W},{H} L{W},0 Z"
 
-    polygon_points = ["100% 0%"] + [f"{x}% {y}%" for x, y in reversed(curve_points)] + ["100% 100%"]
-    GREEN_CLIP = "polygon(" + ", ".join(polygon_points) + ")"
-    GOLD_PATH = "M " + " L ".join(f"{x},{y}" for x, y in curve_points)
+    svg_code = (
+        f'<svg viewBox="0 0 {W} {H}" style="display:block;width:100%;height:auto;">'
+        f'<defs><clipPath id="pc"><path d="{photo_d}"/></clipPath></defs>'
+        f'<rect width="{W}" height="{H}" fill="{PRIMARY}"/>'
+        f'<image href="data:image/{photo_ext};base64,{photo_b64}" x="0" y="0" width="{W}" height="{H}" '
+        f'preserveAspectRatio="xMidYMid slice" clip-path="url(#pc)"/>'
+        f'<path d="{green_d}" fill="{PRIMARY}"/>'
+        f'<g opacity="0.18" stroke="#F4EFE2" fill="none" stroke-width="2.5">'
+        f'<path d="M1360,60 C1300,40 1250,70 1240,120 C1230,170 1270,200 1320,190 '
+        f'C1370,180 1400,130 1390,90 C1385,75 1375,65 1360,60 Z"/>'
+        f'<path d="M1300,80 C1320,110 1330,140 1320,175"/>'
+        f'<ellipse cx="1430" cy="360" rx="46" ry="60"/>'
+        f'<line x1="1430" y1="303" x2="1430" y2="417"/>'
+        f'<ellipse cx="1500" cy="400" rx="42" ry="55" transform="rotate(15 1500 400)"/>'
+        f'<line x1="1500" y1="348" x2="1500" y2="452"/>'
+        f'<ellipse cx="1370" cy="410" rx="40" ry="52" transform="rotate(-12 1370 410)"/>'
+        f'<line x1="1370" y1="360" x2="1370" y2="460"/>'
+        f'</g>'
+        f'<path d="M{X_TOP},0 {curve}" fill="none" stroke="{GOLD}" stroke-width="7" stroke-linecap="round"/>'
+        f'</svg>'
+    )
 
-    banner_html = f"""
-<div style="position:relative;width:100%;height:360px;border-radius:22px;overflow:hidden;
-box-shadow:0 6px 18px rgba(0,0,0,.15);margin-bottom:8px;
-background-image:url('data:image/{photo_ext};base64,{photo_b64}');
-background-size:cover;background-position:center;">
+    text_html = (
+        '<div id="banner-text-1" style="position:absolute;top:0;left:56%;width:41%;height:100%;'
+        'display:flex;flex-direction:column;justify-content:center;padding-right:35px;'
+        'font-family:&quot;Segoe UI&quot;,Arial,sans-serif;">'
+        '<div>Dashboard Analisis Tren<br>&amp; Prediksi Pendapatan</div>'
+        f'<div>Sumatra Roastery Medan &mdash; Random Forest vs LightGBM</div>'
+        f'<div style="width:190px;height:3px;background:{ACCENT};margin:16px 0 18px 0;"></div>'
+        '<div>Kopi asli Sumatra Roastery Medan &mdash; dari kebun hingga wawasan bisnis</div>'
+        '</div>'
+    )
 
-<div style="position:absolute;top:0;left:0;width:100%;height:100%;
-background-color:{PRIMARY};clip-path:{GREEN_CLIP};-webkit-clip-path:{GREEN_CLIP};"></div>
-
-<svg viewBox="0 0 100 100" preserveAspectRatio="none"
-style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;">
-<path d="{GOLD_PATH}" fill="none" stroke="{GOLD}" stroke-width="0.55" />
-<g opacity="0.22" stroke="#F4EFE2" fill="none" stroke-width="0.35">
-<path d="M82,10 C77,7 71,10 70,17 C69,24 74,29 80,27 C86,25 89,18 86,13 C85,11 83,10 82,10 Z" />
-<path d="M76,12 C79,16 80,20 79,25" />
-<ellipse cx="86" cy="80" rx="7" ry="9" />
-<line x1="86" y1="71" x2="86" y2="89" />
-<ellipse cx="94" cy="86" rx="6" ry="8" transform="rotate(15 94 86)" />
-<line x1="94" y1="78" x2="94" y2="94" />
-</g>
-</svg>
-
-<div style="position:absolute;top:0;left:58%;right:4%;height:100%;
-display:flex;flex-direction:column;justify-content:center;
-font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;">
-<div style="color:#ffffff !important;font-size:38px;font-weight:800;line-height:1.18;margin:0 0 14px 0;">
-Dashboard Analisis Tren<br>&amp; Prediksi Pendapatan
-</div>
-<div style="color:#F5EFE3 !important;font-size:19px;margin:0 0 16px 0;">
-Sumatra Roastery Medan &mdash; Random Forest vs LightGBM
-</div>
-<div style="width:190px;height:3px;background:{ACCENT};margin:0 0 18px 0;"></div>
-<div style="color:#FFD9B0 !important;font-size:15px;font-style:italic;margin:0;line-height:1.5;">
-Kopi asli Sumatra Roastery Medan &mdash; dari kebun hingga wawasan bisnis
-</div>
-</div>
-</div>
-"""
+    banner_html = (
+        '<style>'
+        '#banner-text-1 { color:#ffffff !important; }'
+        '#banner-text-1 div:nth-of-type(1) { font-size:40px !important;font-weight:800 !important;'
+        'line-height:1.18 !important;margin:0 0 14px 0 !important;color:#ffffff !important; }'
+        '#banner-text-1 div:nth-of-type(2) { font-size:20px !important;margin:0 !important;'
+        'color:#F5EFE3 !important; }'
+        '#banner-text-1 div:nth-of-type(4) { font-size:16px !important;font-style:italic !important;'
+        'margin:0 !important;line-height:1.5 !important;color:#FFD9B0 !important; }'
+        '</style>'
+        '<div style="position:relative;width:100%;margin-bottom:8px;'
+        'box-shadow:0 6px 18px rgba(0,0,0,.15);border-radius:22px;overflow:hidden;">'
+        + svg_code + text_html +
+        '</div>'
+    )
     st.markdown(banner_html, unsafe_allow_html=True)
 
 
