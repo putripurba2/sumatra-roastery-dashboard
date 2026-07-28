@@ -4,6 +4,7 @@ import numpy as np
 import time
 import os
 import glob
+import base64
 import plotly.graph_objects as go
 import plotly.express as px
 from sklearn.ensemble import RandomForestRegressor
@@ -18,7 +19,6 @@ def asset_path(filename):
     return p if os.path.exists(p) else None
 
 FAVICON = asset_path("favicon.png")
-BANNER_LOGIN = asset_path("preview_banner_dashboard.png")
 BANNER_MAIN = asset_path("banner_kopi.jpg")
 
 st.set_page_config(
@@ -63,6 +63,35 @@ html, body, [class*="css"] {{
 }}
 [data-testid="stSidebar"] * {{
     color: {ESPRESSO} !important;
+}}
+
+/* ---- Menu navigasi sidebar (radio) jadi terlihat seperti daftar menu SIAKAD ---- */
+[data-testid="stSidebar"] div[role="radiogroup"] {{
+    gap: 4px;
+}}
+[data-testid="stSidebar"] div[role="radiogroup"] label {{
+    background-color: #FFFFFF;
+    border: 1px solid {BORDER};
+    border-radius: 8px;
+    padding: 10px 12px !important;
+    width: 100%;
+    transition: background 0.15s;
+}}
+[data-testid="stSidebar"] div[role="radiogroup"] label:hover {{
+    background-color: {CREAM};
+    border-color: {PRIMARY};
+}}
+[data-testid="stSidebar"] div[role="radiogroup"] label div[data-testid="stMarkdownContainer"] p {{
+    font-size: 15px !important;
+    font-weight: 600;
+    color: {ESPRESSO} !important;
+}}
+[data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] {{
+    background-color: {PRIMARY} !important;
+    border-color: {PRIMARY} !important;
+}}
+[data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] div[data-testid="stMarkdownContainer"] p {{
+    color: {CREAM} !important;
 }}
 
 /* ---- Headings, captions, labels, markdown text ---- */
@@ -120,14 +149,6 @@ input:-webkit-autofill:focus {{
     caret-color: {ESPRESSO} !important;
 }}
 
-/* ---- Banner images: cap height so they never dominate the page ---- */
-[data-testid="stImage"] img {{
-    max-height: 220px;
-    width: 100%;
-    object-fit: cover;
-    border-radius: 8px;
-}}
-
 /* ---- Slider track/thumb ---- */
 [data-testid="stSlider"] [role="slider"] {{
     background-color: {PRIMARY} !important;
@@ -140,20 +161,6 @@ input:-webkit-autofill:focus {{
 }}
 [data-testid="stFileUploaderDropzone"] * {{
     color: {ESPRESSO_SOFT} !important;
-}}
-
-/* ---- Tabs ---- */
-.stTabs [data-baseweb="tab-list"] {{
-    gap: 4px;
-    border-bottom: 2px solid {BORDER};
-}}
-.stTabs [data-baseweb="tab"] {{
-    color: {ESPRESSO_SOFT} !important;
-    font-weight: 600;
-}}
-.stTabs [aria-selected="true"] {{
-    color: {PRIMARY} !important;
-    border-bottom: 3px solid {PRIMARY} !important;
 }}
 
 /* ---- Metrics ---- */
@@ -182,11 +189,45 @@ input:-webkit-autofill:focus {{
     border: 1px solid {BORDER};
     border-radius: 8px;
 }}
+
+/* ---- Kode inline (backtick) ---- */
+code {{
+    background-color: {CREAM_DARK} !important;
+    color: {ACCENT} !important;
+    border: 1px solid {BORDER} !important;
+    border-radius: 4px !important;
+    padding: 1px 5px !important;
+}}
 </style>
 """, unsafe_allow_html=True)
 
 BULAN_ORDER = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
 BULAN_MAP = {b: i + 1 for i, b in enumerate(BULAN_ORDER)}
+
+
+def render_hero_banner():
+    """Banner foto asli produk Sumatra Roastery Medan. Dipakai di halaman login maupun dashboard utama."""
+    if BANNER_MAIN:
+        with open(BANNER_MAIN, "rb") as f:
+            banner_b64 = base64.b64encode(f.read()).decode()
+        ext = BANNER_MAIN.split(".")[-1]
+        img_tag = f'<img src="data:image/{ext};base64,{banner_b64}" style="width:100%;height:100%;object-fit:contain;object-position:center;display:block;background-color:{PRIMARY};"/>'
+    else:
+        img_tag = f'<div style="width:100%;height:100%;background-color:{PRIMARY};"></div>'
+
+    st.markdown(f"""
+    <div style="display:flex; min-height:280px; border-radius:10px; overflow:hidden; margin-bottom:1.2rem; box-shadow:0 2px 8px rgba(0,0,0,0.12);">
+        <div style="flex:0 0 260px; background-color:{PRIMARY};">
+            {img_tag}
+        </div>
+        <div style="flex:1; background-color:{PRIMARY}; padding:1.6rem 2rem; display:flex; flex-direction:column; justify-content:center;">
+            <h1 style="color:{CREAM}; margin:0 0 0.3rem 0; font-size:1.9rem; font-weight:800;">Dashboard Analisis Tren &amp; Prediksi Pendapatan</h1>
+            <div style="width:60px; height:3px; background-color:{ACCENT}; margin-bottom:0.6rem;"></div>
+            <p style="color:{CREAM}; opacity:0.85; margin:0 0 0.3rem 0; font-size:1rem;">Sumatra Roastery Medan — Random Forest vs LightGBM</p>
+            <p style="color:{ACCENT}; margin:0; font-size:0.9rem; font-style:italic;">Kopi asli Sumatra Roastery Medan — dari kebun hingga wawasan bisnis</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 @st.cache_data
@@ -353,10 +394,7 @@ if "logged_in" not in st.session_state:
     st.session_state.role = None
 
 if not st.session_state.logged_in:
-    st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
-    st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
-    if BANNER_LOGIN:
-        st.image(BANNER_LOGIN, use_container_width=True)
+    render_hero_banner()
     st.subheader("🔒 Login")
     st.caption("Masukkan akun sesuai peran Anda untuk mengakses dashboard.")
     with st.form("login_form"):
@@ -373,27 +411,7 @@ if not st.session_state.logged_in:
             st.error("Username atau password salah.")
     st.stop()
 
-if BANNER_MAIN:
-    import base64
-    with open(BANNER_MAIN, "rb") as f:
-        banner_b64 = base64.b64encode(f.read()).decode()
-    ext = BANNER_MAIN.split(".")[-1]
-    st.markdown(f"""
-    <div style="display:flex; height:230px; border-radius:10px; overflow:hidden; margin-bottom:1.2rem; box-shadow:0 2px 8px rgba(0,0,0,0.12);">
-        <div style="flex:0 0 42%;">
-            <img src="data:image/{ext};base64,{banner_b64}" style="width:100%; height:100%; object-fit:cover; display:block;">
-        </div>
-        <div style="flex:1; background-color:{PRIMARY}; padding:1.6rem 2rem; display:flex; flex-direction:column; justify-content:center;">
-            <h1 style="color:{CREAM}; margin:0 0 0.3rem 0; font-size:1.9rem; font-weight:800;">Dashboard Analisis Tren &amp; Prediksi Pendapatan</h1>
-            <div style="width:60px; height:3px; background-color:{ACCENT}; margin-bottom:0.6rem;"></div>
-            <p style="color:{CREAM}; opacity:0.85; margin:0 0 0.3rem 0; font-size:1rem;">Sumatra Roastery Medan — Random Forest vs LightGBM</p>
-            <p style="color:{ACCENT}; margin:0; font-size:0.9rem; font-style:italic;">Kopi asli Sumatra Roastery Medan — dari kebun hingga wawasan bisnis</p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-else:
-    st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
-    st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
+render_hero_banner()
 
 with st.sidebar:
     st.success(f"Login sebagai: **{st.session_state.role}**")
@@ -436,9 +454,14 @@ df, rekap, avg_overall = build_dataset(daily, per_jenis, rekap_raw)
 results, fi, test_out, split_periode = train_models(df, split_ratio)
 forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
+MENU_OPTIONS = ["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"]
 
-with tab1:
+with st.sidebar:
+    st.divider()
+    st.header("Menu")
+    menu = st.radio("Navigasi", MENU_OPTIONS, label_visibility="collapsed")
+
+if menu == "📋 Data Aktual":
     st.subheader("Rekap Pendapatan Bulanan")
     rekap_show = rekap[['Tahun', 'Bulan', 'Total Pendapatan (Rp)', 'kategori_tren']].copy()
     rekap_show['Total Pendapatan (Rp)'] = rekap_show['Total Pendapatan (Rp)'].apply(rupiah)
@@ -461,7 +484,7 @@ with tab1:
                         file_name="data_transaksi_harian.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-with tab2:
+if menu == "📈 Analisis Tren":
     st.subheader("Tren Pendapatan Bulanan (2023–2025)")
     colors = [PRIMARY if k == 'Tinggi' else ACCENT for k in rekap['kategori_tren']]
     labels = [f"{b[:3]} {t}" for b, t in zip(rekap['Bulan'], rekap['Tahun'])]
@@ -485,7 +508,7 @@ with tab2:
     fig2.update_layout(height=380, plot_bgcolor="white")
     st.plotly_chart(fig2, use_container_width=True)
 
-with tab3:
+if menu == "🔮 Prediksi & Evaluasi":
     st.subheader("Perbandingan Performa Model")
     res_df = pd.DataFrame(results).T
     res_df.columns = ['MAE', 'RMSE', 'R²', 'Training Time (detik)']
@@ -512,7 +535,7 @@ with tab3:
             test_show[col] = test_show[col].apply(rupiah)
         st.dataframe(test_show, use_container_width=True, hide_index=True)
 
-with tab4:
+if menu == "⭐ Feature Importance":
     st.subheader("Feature Importance — Random Forest vs LightGBM")
     fi_sorted = fi.sort_values('Random Forest', ascending=True)
     fig4 = go.Figure()
@@ -522,7 +545,7 @@ with tab4:
     st.plotly_chart(fig4, use_container_width=True)
     st.caption("Fitur `lag_1` (pendapatan bulan sebelumnya) dan `jenis_kopi_enc` konsisten menjadi variabel paling berpengaruh pada kedua model.")
 
-with tab5:
+if menu == "📅 Prediksi Bulan Depan":
     st.subheader(f"Prediksi Pendapatan {next_bulan_nama} {next_tahun}")
     st.caption("Model dilatih ulang menggunakan seluruh data historis (Januari 2023 – bulan terakhir data) agar prediksi memanfaatkan informasi terbaru yang tersedia.")
 
@@ -549,4 +572,4 @@ with tab5:
     st.info("Catatan asumsi: harga rata-rata memakai rata-rata 3 bulan terakhir per jenis kopi, dan kategori tren memakai kategori bulan terakhir yang datanya tersedia (karena kategori tren bulan depan belum bisa diketahui sebelum pendapatan aktualnya terjadi).")
 
 st.divider()
-st.caption("Dashboard ini dijalankan di Google Colab menggunakan Python, Streamlit, Scikit-learn, dan LightGBM ")
+st.caption("Dashboard ini dijalankan menggunakan Python, Streamlit, Scikit-learn, dan LightGBM — sesuai BAB IV.")
