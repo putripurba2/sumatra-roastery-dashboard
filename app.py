@@ -439,30 +439,43 @@ forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
 
 with tab1:
-    st.subheader("Rekap Pendapatan Bulanan")
+    c1, c2 = st.columns([4, 1.3])
+    c1.subheader("Rekap Pendapatan Bulanan")
     rekap_show = rekap[['Tahun', 'Bulan', 'Total Pendapatan (Rp)', 'kategori_tren']].copy()
     rekap_show['Total Pendapatan (Rp)'] = rekap_show['Total Pendapatan (Rp)'].apply(rupiah)
     rekap_show = rekap_show.rename(columns={'kategori_tren': 'Kategori Tren'})
+    with c2:
+        st.write("")
+        st.download_button("⬇️ Excel", data=to_excel_bytes(rekap_show, "Rekap Bulanan"),
+                            file_name="rekap_pendapatan_bulanan.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True)
     st.dataframe(rekap_show, use_container_width=True, hide_index=True)
-    st.download_button("⬇️ Download Excel — Rekap Pendapatan Bulanan",
-                        data=to_excel_bytes(rekap_show, "Rekap Bulanan"),
-                        file_name="rekap_pendapatan_bulanan.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-    st.subheader("Pendapatan per Jenis Kopi per Bulan")
+    c1, c2 = st.columns([4, 1.3])
+    c1.subheader("Pendapatan per Jenis Kopi per Bulan")
     per_jenis_show = per_jenis.copy()
     per_jenis_show['Total Pendapatan (Rp)'] = per_jenis_show['Total Pendapatan (Rp)'].apply(rupiah)
     per_jenis_show['% dari Total Bulan'] = (per_jenis_show['% dari Total Bulan'] * 100).round(2).astype(str) + '%'
+    with c2:
+        st.write("")
+        st.download_button("⬇️ Excel", data=to_excel_bytes(per_jenis_show, "Per Jenis Kopi"),
+                            file_name="pendapatan_per_jenis_kopi.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True)
     st.dataframe(per_jenis_show, use_container_width=True, hide_index=True)
-    st.download_button("⬇️ Download Excel — Pendapatan per Jenis Kopi",
-                        data=to_excel_bytes(per_jenis_show, "Per Jenis Kopi"),
-                        file_name="pendapatan_per_jenis_kopi.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-    st.subheader("Data Transaksi Harian")
+    c1, c2 = st.columns([4, 1.3])
+    c1.subheader("Data Transaksi Harian")
     daily_show = daily.head(50).copy()
     daily_show['Harga (Rp)'] = daily_show['Harga (Rp)'].apply(rupiah)
     daily_show['Pendapatan (Rp)'] = daily_show['Pendapatan (Rp)'].apply(rupiah)
+    with c2:
+        st.write("")
+        st.download_button("⬇️ Excel", data=to_excel_bytes(daily_show, "Transaksi Harian"),
+                            file_name="data_transaksi_harian.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True)
     st.dataframe(daily_show, use_container_width=True, hide_index=True)
     st.download_button("⬇️ Download Excel — Data Transaksi Harian",
                         data=to_excel_bytes(daily_show, "Transaksi Harian"),
