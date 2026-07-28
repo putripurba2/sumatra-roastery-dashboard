@@ -456,6 +456,9 @@ if BANNER_MAIN:
       </svg>
     </div>
     """
+    # Hapus indentasi di setiap baris supaya Markdown Streamlit tidak
+    # mengira ini blok kode (baris berawalan 4+ spasi dianggap code block)
+    banner_html = "\n".join(line.lstrip() for line in banner_html.strip().split("\n"))
     st.markdown(banner_html, unsafe_allow_html=True)
 
 else:
