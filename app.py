@@ -145,15 +145,15 @@ input:-webkit-autofill:focus {{
 /* ---- Tabs ---- */
 .stTabs [data-baseweb="tab-list"] {{
     gap: 4px;
-    border-bottom: 2px solid {BORDER};
+    border-bottom: 3px solid {BORDER};
 }}
 .stTabs [data-baseweb="tab"] {{
     color: {ESPRESSO_SOFT} !important;
-    font-weight: 600;
+    font-weight: 700;
 }}
 .stTabs [aria-selected="true"] {{
     color: {PRIMARY} !important;
-    border-bottom: 3px solid {PRIMARY} !important;
+    border-bottom: 4px solid {PRIMARY} !important;
 }}
 
 /* ---- Metrics ---- */
@@ -380,13 +380,29 @@ if BANNER_MAIN:
     ext = BANNER_MAIN.split(".")[-1]
     st.markdown(f"""
     <div style="display:flex; height:230px; border-radius:10px; overflow:hidden; margin-bottom:1.2rem; box-shadow:0 2px 8px rgba(0,0,0,0.12);">
-        <div style="flex:0 0 42%;">
-            <img src="data:image/{ext};base64,{banner_b64}" style="width:100%; height:100%; object-fit:cover; display:block;">
-        </div>
+        <div style="
+    flex:0 0 42%;
+    background:#F7F2EA;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+">
+
+    <img src="data:image/{ext};base64,{banner_b64}" style="
+        width:100%;
+        height:100%;
+        max-height:260px;
+        object-fit:contain;
+        object-position:center;
+        display:block;
+    ">
+
+</div>
         <div style="flex:1; background-color:{PRIMARY}; padding:1.6rem 2rem; display:flex; flex-direction:column; justify-content:center;">
-            <h1 style="color:{CREAM}; margin:0 0 0.3rem 0; font-size:1.9rem; font-weight:800;">Dashboard Analisis Tren &amp; Prediksi Pendapatan</h1>
+            <h1 style="color:white; margin:0 0 0.3rem 0; font-size:1.9rem; font-weight:800;">Dashboard Analisis Tren &amp; Prediksi Pendapatan</h1>
             <div style="width:60px; height:3px; background-color:{ACCENT}; margin-bottom:0.6rem;"></div>
-            <p style="color:{CREAM}; opacity:0.85; margin:0 0 0.3rem 0; font-size:1rem;">Sumatra Roastery Medan — Random Forest vs LightGBM</p>
+            <p style="color:white; opacity:0.85; margin:0 0 0.3rem 0; font-size:1rem;">Sumatra Roastery Medan — Random Forest vs LightGBM</p>
             <p style="color:{ACCENT}; margin:0; font-size:0.9rem; font-style:italic;">Kopi asli Sumatra Roastery Medan — dari kebun hingga wawasan bisnis</p>
         </div>
     </div>
