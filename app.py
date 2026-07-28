@@ -386,79 +386,64 @@ if BANNER_MAIN:
         photo_ext = "jpeg"
 
     GOLD = "#C9A24B"
-    W, H = 1600, 480
-    X0, Xb = 860, 780  # X0: titik lengkung di atas & bawah, Xb: puncak lengkungan ke kiri
 
-    curve = (
-        f"C {X0-50},{H*0.27:.1f} {Xb},{H*0.27:.1f} {Xb},{H/2:.1f} "
-        f"C {Xb},{H*0.73:.1f} {X0-50},{H*0.73:.1f} {X0},{H}"
+    # Bentuk lengkung dibuat dengan clip-path polygon (persentase),
+    # meniru garis lengkung: hijau menjorok ke kiri di tengah, balik ke kanan di atas/bawah.
+    GREEN_CLIP = (
+        "polygon(53% 0%, 100% 0%, 100% 100%, 53% 100%, "
+        "50% 88%, 48.5% 75%, 48.5% 55%, 49% 50%, 48.5% 45%, "
+        "48.5% 25%, 50% 12%)"
     )
-    photo_d = f"M0,0 L{X0},0 {curve} L0,{H} Z"
-    green_d = f"M{X0},0 {curve} L{W},{H} L{W},0 Z"
-    gold_d = f"M{X0},0 {curve}"
 
     banner_html = f"""
-    <div style="position:relative;width:100%;border-radius:22px;overflow:hidden;
-                box-shadow:0 6px 18px rgba(0,0,0,.15);margin-bottom:8px;">
-      <svg viewBox="0 0 {W} {H}" preserveAspectRatio="xMidYMid slice"
-           style="display:block;width:100%;height:auto;">
-        <defs>
-          <clipPath id="photoClip"><path d="{photo_d}" /></clipPath>
-        </defs>
-
-        <rect x="0" y="0" width="{W}" height="{H}" fill="{PRIMARY}" />
-
-        <image href="data:image/{photo_ext};base64,{photo_b64}"
-               x="0" y="0" width="{W}" height="{H}"
-               preserveAspectRatio="xMidYMid slice" clip-path="url(#photoClip)" />
-
-        <path d="{green_d}" fill="{PRIMARY}" />
-
-        <!-- motif daun transparan -->
-        <g opacity="0.16" stroke="#F4EFE2" fill="none" stroke-width="2.5">
-          <path d="M1360,60 C1300,40 1250,70 1240,120 C1230,170 1270,200 1320,190
-                   C1370,180 1400,130 1390,90 C1385,75 1375,65 1360,60 Z" />
-          <path d="M1300,80 C1320,110 1330,140 1320,175" />
-          <path d="M1480,140 C1430,120 1390,150 1385,195 C1380,240 1415,265 1460,258
-                   C1505,250 1530,205 1520,165 C1515,150 1500,145 1480,140 Z" />
-          <path d="M1430,155 C1450,180 1460,205 1450,235" />
-        </g>
-
-        <!-- motif biji kopi transparan -->
-        <g opacity="0.14" stroke="#F4EFE2" fill="none" stroke-width="2.5">
-          <ellipse cx="1430" cy="360" rx="46" ry="60" />
-          <line x1="1430" y1="303" x2="1430" y2="417" />
-          <ellipse cx="1500" cy="400" rx="42" ry="55" transform="rotate(15 1500 400)" />
-          <line x1="1500" y1="348" x2="1500" y2="452" />
-          <ellipse cx="1370" cy="410" rx="40" ry="52" transform="rotate(-12 1370 410)" />
-          <line x1="1370" y1="360" x2="1370" y2="460" />
-        </g>
-
-        <!-- garis pembatas emas -->
-        <path d="{gold_d}" fill="none" stroke="{GOLD}" stroke-width="7" stroke-linecap="round" />
-
-        <foreignObject x="{Xb+70}" y="0" width="{W-Xb-120}" height="{H}">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="
-              height:100%;display:flex;flex-direction:column;justify-content:center;
-              font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;padding-right:10px;">
-            <h1 style="color:#ffffff;font-size:44px;font-weight:800;line-height:1.15;margin:0 0 14px 0;">
-              Dashboard Analisis Tren<br>&amp; Prediksi Pendapatan
-            </h1>
-            <p style="color:#F5EFE3;font-size:22px;margin:0 0 16px 0;">
-              Sumatra Roastery Medan — Random Forest vs LightGBM
-            </p>
-            <div style="width:200px;height:3px;background:{ACCENT};margin:0 0 18px 0;"></div>
-            <p style="color:#FFD9B0;font-size:17px;font-style:italic;margin:0;line-height:1.5;">
-              Kopi asli Sumatra Roastery Medan — dari kebun hingga wawasan bisnis
-            </p>
-          </div>
-        </foreignObject>
-      </svg>
-    </div>
-    """
-    # Hapus indentasi di setiap baris supaya Markdown Streamlit tidak
-    # mengira ini blok kode (baris berawalan 4+ spasi dianggap code block)
-    banner_html = "\n".join(line.lstrip() for line in banner_html.strip().split("\n"))
+<div style="position:relative;width:100%;height:360px;border-radius:22px;overflow:hidden;
+box-shadow:0 6px 18px rgba(0,0,0,.15);margin-bottom:8px;
+background-image:url('data:image/{photo_ext};base64,{photo_b64}');
+background-size:cover;background-position:center;">
+<div style="position:absolute;top:0;left:0;width:100%;height:100%;
+background-color:{PRIMARY};clip-path:{GREEN_CLIP};
+-webkit-clip-path:{GREEN_CLIP};">
+<svg width="0" height="0" style="position:absolute;">
+<defs>
+<pattern id="leafPattern" width="260" height="260" patternUnits="userSpaceOnUse">
+<g opacity="0.18" stroke="#F4EFE2" fill="none" stroke-width="2">
+<path d="M180,30 C150,15 120,35 115,70 C110,105 140,130 175,120 C210,110 230,75 215,45 C210,35 195,32 180,30 Z" />
+<path d="M150,45 C165,65 172,90 165,115" />
+<ellipse cx="80" cy="190" rx="30" ry="40" />
+<line x1="80" y1="150" x2="80" y2="230" />
+<ellipse cx="140" cy="210" rx="26" ry="34" transform="rotate(15 140 210)" />
+<line x1="140" y1="176" x2="140" y2="244" />
+</g>
+</pattern>
+</defs>
+</svg>
+<div style="position:absolute;top:0;left:0;width:100%;height:100%;
+background-image:url('#');"></div>
+<div style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;
+background:transparent;">
+<svg viewBox="0 0 400 360" preserveAspectRatio="none" style="width:100%;height:100%;position:absolute;top:0;left:0;">
+<rect width="400" height="360" fill="url(#leafPattern)" />
+</svg>
+</div>
+<div style="position:absolute;left:0;top:0;bottom:0;width:6px;
+background:{GOLD};box-shadow:0 0 6px rgba(0,0,0,.2);"></div>
+<div style="position:relative;height:100%;display:flex;flex-direction:column;
+justify-content:center;padding:38px 45px 38px 60px;
+font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;">
+<h1 style="color:#ffffff;font-size:40px;font-weight:800;line-height:1.15;margin:0 0 14px 0;">
+Dashboard Analisis Tren<br>&amp; Prediksi Pendapatan
+</h1>
+<p style="color:#F5EFE3;font-size:20px;margin:0 0 16px 0;">
+Sumatra Roastery Medan &mdash; Random Forest vs LightGBM
+</p>
+<div style="width:200px;height:3px;background:{ACCENT};margin:0 0 18px 0;"></div>
+<p style="color:#FFD9B0;font-size:16px;font-style:italic;margin:0;line-height:1.5;">
+Kopi asli Sumatra Roastery Medan &mdash; dari kebun hingga wawasan bisnis
+</p>
+</div>
+</div>
+</div>
+"""
     st.markdown(banner_html, unsafe_allow_html=True)
 
 else:
