@@ -4,6 +4,7 @@ import numpy as np
 import time
 import os
 import glob
+import base64
 import plotly.graph_objects as go
 import plotly.express as px
 from sklearn.ensemble import RandomForestRegressor
@@ -372,65 +373,90 @@ if not st.session_state.logged_in:
         else:
             st.error("Username atau password salah.")
     st.stop()
+@st.cache_data
+def get_base64_image(path):
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode("utf-8")
+
+
 if BANNER_MAIN:
+    photo_b64 = get_base64_image(BANNER_MAIN)
+    photo_ext = os.path.splitext(BANNER_MAIN)[1].lower().replace(".", "")
+    if photo_ext == "jpg":
+        photo_ext = "jpeg"
 
-    col1, col2 = st.columns([1.05, 2])
+    GOLD = "#C9A24B"
+    W, H = 1600, 480
+    X0, Xb = 860, 780  # X0: titik lengkung di atas & bawah, Xb: puncak lengkungan ke kiri
 
-    with col1:
-        st.image(
-            BANNER_MAIN,
-            use_container_width=True,
-        )
+    curve = (
+        f"C {X0-50},{H*0.27:.1f} {Xb},{H*0.27:.1f} {Xb},{H/2:.1f} "
+        f"C {Xb},{H*0.73:.1f} {X0-50},{H*0.73:.1f} {X0},{H}"
+    )
+    photo_d = f"M0,0 L{X0},0 {curve} L0,{H} Z"
+    green_d = f"M{X0},0 {curve} L{W},{H} L{W},0 Z"
+    gold_d = f"M{X0},0 {curve}"
 
-    with col2:
-        st.markdown(f"""
-        <div style="
-            background:{PRIMARY};
-            height:100%;
-            min-height:320px;
-            border-radius:18px;
-            padding:45px 40px;
-            display:flex;
-            flex-direction:column;
-            justify-content:center;
-            box-shadow:0 4px 12px rgba(0,0,0,.12);
-        ">
+    banner_html = f"""
+    <div style="position:relative;width:100%;border-radius:22px;overflow:hidden;
+                box-shadow:0 6px 18px rgba(0,0,0,.15);margin-bottom:8px;">
+      <svg viewBox="0 0 {W} {H}" preserveAspectRatio="xMidYMid slice"
+           style="display:block;width:100%;height:auto;">
+        <defs>
+          <clipPath id="photoClip"><path d="{photo_d}" /></clipPath>
+        </defs>
 
-        <h1 style="
-            color:white;
-            font-size:46px;
-            font-weight:800;
-            margin-bottom:10px;
-        ">
-        Dashboard Analisis Tren <br>
-        & Prediksi Pendapatan
-        </h1>
+        <rect x="0" y="0" width="{W}" height="{H}" fill="{PRIMARY}" />
 
-        <p style="
-            color:#F5F5F5;
-            font-size:24px;
-            margin-bottom:18px;
-        ">
-        Sumatra Roastery Medan —
-        Random Forest vs LightGBM
-        </p>
+        <image href="data:image/{photo_ext};base64,{photo_b64}"
+               x="0" y="0" width="{W}" height="{H}"
+               preserveAspectRatio="xMidYMid slice" clip-path="url(#photoClip)" />
 
-        <hr style="
-            width:220px;
-            border:2px solid {ACCENT};
-            margin:0 0 18px 0;
-        ">
+        <path d="{green_d}" fill="{PRIMARY}" />
 
-        <p style="
-            color:#FFD7B5;
-            font-size:18px;
-        ">
-        Kopi asli Sumatra Roastery Medan —
-        dari kebun hingga wawasan bisnis
-        </p>
+        <!-- motif daun transparan -->
+        <g opacity="0.16" stroke="#F4EFE2" fill="none" stroke-width="2.5">
+          <path d="M1360,60 C1300,40 1250,70 1240,120 C1230,170 1270,200 1320,190
+                   C1370,180 1400,130 1390,90 C1385,75 1375,65 1360,60 Z" />
+          <path d="M1300,80 C1320,110 1330,140 1320,175" />
+          <path d="M1480,140 C1430,120 1390,150 1385,195 C1380,240 1415,265 1460,258
+                   C1505,250 1530,205 1520,165 C1515,150 1500,145 1480,140 Z" />
+          <path d="M1430,155 C1450,180 1460,205 1450,235" />
+        </g>
 
-        </div>
-        """, unsafe_allow_html=True)
+        <!-- motif biji kopi transparan -->
+        <g opacity="0.14" stroke="#F4EFE2" fill="none" stroke-width="2.5">
+          <ellipse cx="1430" cy="360" rx="46" ry="60" />
+          <line x1="1430" y1="303" x2="1430" y2="417" />
+          <ellipse cx="1500" cy="400" rx="42" ry="55" transform="rotate(15 1500 400)" />
+          <line x1="1500" y1="348" x2="1500" y2="452" />
+          <ellipse cx="1370" cy="410" rx="40" ry="52" transform="rotate(-12 1370 410)" />
+          <line x1="1370" y1="360" x2="1370" y2="460" />
+        </g>
+
+        <!-- garis pembatas emas -->
+        <path d="{gold_d}" fill="none" stroke="{GOLD}" stroke-width="7" stroke-linecap="round" />
+
+        <foreignObject x="{Xb+70}" y="0" width="{W-Xb-120}" height="{H}">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="
+              height:100%;display:flex;flex-direction:column;justify-content:center;
+              font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;padding-right:10px;">
+            <h1 style="color:#ffffff;font-size:44px;font-weight:800;line-height:1.15;margin:0 0 14px 0;">
+              Dashboard Analisis Tren<br>&amp; Prediksi Pendapatan
+            </h1>
+            <p style="color:#F5EFE3;font-size:22px;margin:0 0 16px 0;">
+              Sumatra Roastery Medan — Random Forest vs LightGBM
+            </p>
+            <div style="width:200px;height:3px;background:{ACCENT};margin:0 0 18px 0;"></div>
+            <p style="color:#FFD9B0;font-size:17px;font-style:italic;margin:0;line-height:1.5;">
+              Kopi asli Sumatra Roastery Medan — dari kebun hingga wawasan bisnis
+            </p>
+          </div>
+        </foreignObject>
+      </svg>
+    </div>
+    """
+    st.markdown(banner_html, unsafe_allow_html=True)
 
 else:
     st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
