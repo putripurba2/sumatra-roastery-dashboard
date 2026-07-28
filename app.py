@@ -5,6 +5,7 @@ import time
 import os
 import glob
 import base64
+import math
 import plotly.graph_objects as go
 import plotly.express as px
 from sklearn.ensemble import RandomForestRegressor
@@ -387,64 +388,62 @@ if BANNER_MAIN:
 
     GOLD = "#C9A24B"
 
-    # Bentuk lengkung dibuat dengan clip-path polygon (persentase),
-    # meniru garis lengkung: hijau menjorok ke kiri di tengah, balik ke kanan di atas/bawah.
-    GREEN_CLIP = (
-        "polygon(53% 0%, 100% 0%, 100% 100%, 53% 100%, "
-        "50% 88%, 48.5% 75%, 48.5% 55%, 49% 50%, 48.5% 45%, "
-        "48.5% 25%, 50% 12%)"
-    )
+    # Kurva dihitung dengan fungsi sinus: x_top di y=0 & y=100, menjorok ke
+    # x_bulge (lebih kecil) di y=50. Titik yang sama dipakai utk clip-path
+    # (bentuk hijau) dan garis emas, jadi keduanya selalu pas menyatu.
+    X_TOP = 55.0
+    X_BULGE = 47.0
+    N_POINTS = 40
+    curve_points = []
+    for i in range(N_POINTS + 1):
+        y = i * 100.0 / N_POINTS
+        x = X_TOP - (X_TOP - X_BULGE) * math.sin(math.pi * y / 100.0)
+        curve_points.append((round(x, 2), round(y, 2)))
+
+    polygon_points = ["100% 0%"] + [f"{x}% {y}%" for x, y in reversed(curve_points)] + ["100% 100%"]
+    GREEN_CLIP = "polygon(" + ", ".join(polygon_points) + ")"
+    GOLD_PATH = "M " + " L ".join(f"{x},{y}" for x, y in curve_points)
 
     banner_html = f"""
 <div style="position:relative;width:100%;height:360px;border-radius:22px;overflow:hidden;
 box-shadow:0 6px 18px rgba(0,0,0,.15);margin-bottom:8px;
 background-image:url('data:image/{photo_ext};base64,{photo_b64}');
 background-size:cover;background-position:center;">
+
 <div style="position:absolute;top:0;left:0;width:100%;height:100%;
-background-color:{PRIMARY};clip-path:{GREEN_CLIP};
--webkit-clip-path:{GREEN_CLIP};">
-<svg width="0" height="0" style="position:absolute;">
-<defs>
-<pattern id="leafPattern" width="260" height="260" patternUnits="userSpaceOnUse">
-<g opacity="0.18" stroke="#F4EFE2" fill="none" stroke-width="2">
-<path d="M180,30 C150,15 120,35 115,70 C110,105 140,130 175,120 C210,110 230,75 215,45 C210,35 195,32 180,30 Z" />
-<path d="M150,45 C165,65 172,90 165,115" />
-<ellipse cx="80" cy="190" rx="30" ry="40" />
-<line x1="80" y1="150" x2="80" y2="230" />
-<ellipse cx="140" cy="210" rx="26" ry="34" transform="rotate(15 140 210)" />
-<line x1="140" y1="176" x2="140" y2="244" />
+background-color:{PRIMARY};clip-path:{GREEN_CLIP};-webkit-clip-path:{GREEN_CLIP};"></div>
+
+<svg viewBox="0 0 100 100" preserveAspectRatio="none"
+style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;">
+<path d="{GOLD_PATH}" fill="none" stroke="{GOLD}" stroke-width="0.55" />
+<g opacity="0.22" stroke="#F4EFE2" fill="none" stroke-width="0.35">
+<path d="M82,10 C77,7 71,10 70,17 C69,24 74,29 80,27 C86,25 89,18 86,13 C85,11 83,10 82,10 Z" />
+<path d="M76,12 C79,16 80,20 79,25" />
+<ellipse cx="86" cy="80" rx="7" ry="9" />
+<line x1="86" y1="71" x2="86" y2="89" />
+<ellipse cx="94" cy="86" rx="6" ry="8" transform="rotate(15 94 86)" />
+<line x1="94" y1="78" x2="94" y2="94" />
 </g>
-</pattern>
-</defs>
 </svg>
-<div style="position:absolute;top:0;left:0;width:100%;height:100%;
-background-image:url('#');"></div>
-<div style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;
-background:transparent;">
-<svg viewBox="0 0 400 360" preserveAspectRatio="none" style="width:100%;height:100%;position:absolute;top:0;left:0;">
-<rect width="400" height="360" fill="url(#leafPattern)" />
-</svg>
-</div>
-<div style="position:absolute;left:0;top:0;bottom:0;width:6px;
-background:{GOLD};box-shadow:0 0 6px rgba(0,0,0,.2);"></div>
-<div style="position:relative;height:100%;display:flex;flex-direction:column;
-justify-content:center;padding:38px 45px 38px 60px;
+
+<div style="position:absolute;top:0;left:58%;right:4%;height:100%;
+display:flex;flex-direction:column;justify-content:center;
 font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;">
-<h1 style="color:#ffffff;font-size:40px;font-weight:800;line-height:1.15;margin:0 0 14px 0;">
+<div style="color:#ffffff !important;font-size:38px;font-weight:800;line-height:1.18;margin:0 0 14px 0;">
 Dashboard Analisis Tren<br>&amp; Prediksi Pendapatan
-</h1>
-<p style="color:#F5EFE3;font-size:20px;margin:0 0 16px 0;">
+</div>
+<div style="color:#F5EFE3 !important;font-size:19px;margin:0 0 16px 0;">
 Sumatra Roastery Medan &mdash; Random Forest vs LightGBM
-</p>
-<div style="width:200px;height:3px;background:{ACCENT};margin:0 0 18px 0;"></div>
-<p style="color:#FFD9B0;font-size:16px;font-style:italic;margin:0;line-height:1.5;">
+</div>
+<div style="width:190px;height:3px;background:{ACCENT};margin:0 0 18px 0;"></div>
+<div style="color:#FFD9B0 !important;font-size:15px;font-style:italic;margin:0;line-height:1.5;">
 Kopi asli Sumatra Roastery Medan &mdash; dari kebun hingga wawasan bisnis
-</p>
 </div>
 </div>
 </div>
 """
     st.markdown(banner_html, unsafe_allow_html=True)
+
 
 else:
     st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
