@@ -122,10 +122,10 @@ input:-webkit-autofill:focus {{
 
 /* ---- Banner images: cap height so they never dominate the page ---- */
 [data-testid="stImage"] img {{
-    max-height: 320px;
+    max-height: 220px;
     width: 100%;
     object-fit: cover;
-    border-radius: 18px;
+    border-radius: 14px;
 }}
 
 /* ---- Slider track/thumb ---- */
