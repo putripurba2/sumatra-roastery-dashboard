@@ -122,7 +122,7 @@ input:-webkit-autofill:focus {{
 
 /* ---- Banner images: cap height so they never dominate the page ---- */
 [data-testid="stImage"] img {{
-    max-height: 220px;
+    max-height: 200px;
     width: 100%;
     object-fit: cover;
     border-radius: 8px;
@@ -161,7 +161,7 @@ input:-webkit-autofill:focus {{
     background-color: #FFFFFF;
     border: 1px solid {BORDER};
     border-radius: 8px;
-    padding: 12px 14px;
+    padding: 14px 16px;
 }}
 [data-testid="stMetricLabel"] {{
     color: {ESPRESSO_SOFT} !important;
