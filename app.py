@@ -122,10 +122,10 @@ input:-webkit-autofill:focus {{
 
 /* ---- Banner images: cap height so they never dominate the page ---- */
 [data-testid="stImage"] img {{
-    max-height: 200px;
+    max-height: 320px;
     width: 100%;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 18px;
 }}
 
 /* ---- Slider track/thumb ---- */
@@ -372,41 +372,66 @@ if not st.session_state.logged_in:
         else:
             st.error("Username atau password salah.")
     st.stop()
-
 if BANNER_MAIN:
-    import base64
-    with open(BANNER_MAIN, "rb") as f:
-        banner_b64 = base64.b64encode(f.read()).decode()
-    ext = BANNER_MAIN.split(".")[-1]
-    st.markdown(f"""
-    <div style="display:flex; height:230px; border-radius:10px; overflow:hidden; margin-bottom:1.2rem; box-shadow:0 2px 8px rgba(0,0,0,0.12);">
+
+    col1, col2 = st.columns([1.05, 2])
+
+    with col1:
+        st.image(
+            BANNER_MAIN,
+            use_container_width=True,
+        )
+
+    with col2:
+        st.markdown(f"""
         <div style="
-    flex:0 0 42%;
-    background:#F7F2EA;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-">
+            background:{PRIMARY};
+            height:100%;
+            min-height:320px;
+            border-radius:18px;
+            padding:45px 40px;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            box-shadow:0 4px 12px rgba(0,0,0,.12);
+        ">
 
-    <img src="data:image/{ext};base64,{banner_b64}" style="
-        width:100%;
-        height:100%;
-        max-height:260px;
-        object-fit:contain;
-        object-position:center;
-        display:block;
-    ">
+        <h1 style="
+            color:white;
+            font-size:46px;
+            font-weight:800;
+            margin-bottom:10px;
+        ">
+        Dashboard Analisis Tren <br>
+        & Prediksi Pendapatan
+        </h1>
 
-</div>
-        <div style="flex:1; background-color:{PRIMARY}; padding:1.6rem 2rem; display:flex; flex-direction:column; justify-content:center;">
-            <h1 style="color:white; margin:0 0 0.3rem 0; font-size:1.9rem; font-weight:800;">Dashboard Analisis Tren &amp; Prediksi Pendapatan</h1>
-            <div style="width:60px; height:3px; background-color:{ACCENT}; margin-bottom:0.6rem;"></div>
-            <p style="color:white; opacity:0.85; margin:0 0 0.3rem 0; font-size:1rem;">Sumatra Roastery Medan — Random Forest vs LightGBM</p>
-            <p style="color:{ACCENT}; margin:0; font-size:0.9rem; font-style:italic;">Kopi asli Sumatra Roastery Medan — dari kebun hingga wawasan bisnis</p>
+        <p style="
+            color:#F5F5F5;
+            font-size:24px;
+            margin-bottom:18px;
+        ">
+        Sumatra Roastery Medan —
+        Random Forest vs LightGBM
+        </p>
+
+        <hr style="
+            width:220px;
+            border:2px solid {ACCENT};
+            margin:0 0 18px 0;
+        ">
+
+        <p style="
+            color:#FFD7B5;
+            font-size:18px;
+        ">
+        Kopi asli Sumatra Roastery Medan —
+        dari kebun hingga wawasan bisnis
+        </p>
+
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+
 else:
     st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
     st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
