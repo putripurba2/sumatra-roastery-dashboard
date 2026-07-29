@@ -388,14 +388,26 @@ if BANNER_MAIN:
     banner_html = f"""
     <style>
 
+    /* Buang padding/border/shadow bawaan wrapper Streamlit di sekitar blok markdown ini */
+    div[data-testid="stMarkdownContainer"]:has(> .hero-banner),
+    div[data-testid="stVerticalBlock"] > div:has(> div > .hero-banner),
+    div[data-testid="element-container"]:has(.hero-banner) {{
+        padding:0 !important;
+        margin:0 !important;
+        border:none !important;
+        box-shadow:none !important;
+        background:transparent !important;
+    }}
+
     .hero-banner{{
         position:relative;
         width:100%;
-        height:320px;
+        aspect-ratio:2.6/1;
         border-radius:18px;
         overflow:hidden;
         margin-bottom:20px;
         box-shadow:0 12px 35px rgba(0,0,0,.18);
+        background:#0d3b2e;
     }}
 
     .hero-image{{
@@ -404,8 +416,9 @@ if BANNER_MAIN:
         top:0;
         width:100%;
         height:100%;
-        object-fit:cover;
+        object-fit:contain;
         object-position:center;
+        display:block;
     }}
 
     </style>
@@ -420,6 +433,7 @@ if BANNER_MAIN:
 
     banner_html_flat = "\n".join(line.lstrip() for line in banner_html.split("\n"))
     st.markdown(banner_html_flat, unsafe_allow_html=True)
+
 
 
 else:
