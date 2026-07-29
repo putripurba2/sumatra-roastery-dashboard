@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import time
@@ -379,60 +380,53 @@ def get_base64_image(path):
         return base64.b64encode(f.read()).decode("utf-8")
 
 
-if BANNER_MAIN: 
+if BANNER_MAIN:
     photo_b64 = get_base64_image(BANNER_MAIN)
     photo_ext = os.path.splitext(BANNER_MAIN)[1].replace(".", "")
     if photo_ext == "jpg":
         photo_ext = "jpeg"
 
+    BANNER_HEIGHT = 320
+
     banner_html = f"""
+    <html>
+    <head>
     <style>
-
-    /* Buang padding/border/shadow bawaan wrapper Streamlit di sekitar blok markdown ini */
-    div[data-testid="stMarkdownContainer"]:has(> .hero-banner),
-    div[data-testid="stVerticalBlock"] > div:has(> div > .hero-banner),
-    div[data-testid="element-container"]:has(.hero-banner) {{
-        padding:0 !important;
-        margin:0 !important;
-        border:none !important;
-        box-shadow:none !important;
-        background:transparent !important;
-    }}
-
-    .hero-banner{{
-        position:relative;
-        width:100%;
-        aspect-ratio:2.6/1;
-        border-radius:18px;
-        overflow:hidden;
-        margin-bottom:20px;
-        box-shadow:0 12px 35px rgba(0,0,0,.18);
-        background:#0d3b2e;
-    }}
-
-    .hero-image{{
-        position:absolute;
-        left:0;
-        top:0;
-        width:100%;
-        height:100%;
-        object-fit:cover;
-        object-position:center;
-        display:block;
-    }}
-
+        html, body {{
+            margin:0;
+            padding:0;
+            background:transparent;
+        }}
+        .hero-banner{{
+            position:relative;
+            width:100%;
+            height:{BANNER_HEIGHT}px;
+            border-radius:18px;
+            overflow:hidden;
+            box-shadow:0 12px 35px rgba(0,0,0,.18);
+            background:#0d3b2e;
+        }}
+        .hero-image{{
+            position:absolute;
+            left:0;
+            top:0;
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            object-position:center;
+            display:block;
+        }}
     </style>
-
-    <div class="hero-banner">
-
-        <img class="hero-image"
-        src="data:image/{photo_ext};base64,{photo_b64}">
-
-    </div>
+    </head>
+    <body>
+        <div class="hero-banner">
+            <img class="hero-image" src="data:image/{photo_ext};base64,{photo_b64}">
+        </div>
+    </body>
+    </html>
     """
 
-    banner_html_flat = "\n".join(line.lstrip() for line in banner_html.split("\n"))
-    st.markdown(banner_html_flat, unsafe_allow_html=True)
+    components.html(banner_html, height=BANNER_HEIGHT + 4, scrolling=False)
 
 
 
