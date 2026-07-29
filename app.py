@@ -14,13 +14,15 @@ import lightgbm as lgb
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def asset_path(filename):
-    p = os.path.join(SCRIPT_DIR, filename)
-    return p if os.path.exists(p) else None
+def find_asset(basename):
+    """Cari file di folder script berdasarkan nama saja, tidak peduli ekstensinya
+    (mis. banner_kopi.jpg / .jpeg / .png / .webp semua akan ketemu)."""
+    matches = sorted(glob.glob(os.path.join(SCRIPT_DIR, basename + ".*")))
+    return matches[0] if matches else None
 
-FAVICON = asset_path("favicon.png")
-BANNER_LOGIN = asset_path("preview_banner_dashboard.png")
-BANNER_MAIN = asset_path("banner_kopi.jpg")
+FAVICON = find_asset("favicon")
+BANNER_LOGIN = find_asset("preview_banner_dashboard")
+BANNER_MAIN = find_asset("banner_kopi")
 
 st.set_page_config(
     page_title="Dashboard Prediksi Pendapatan - Sumatra Roastery Medan",
@@ -403,41 +405,60 @@ if BANNER_MAIN:
         position:absolute;
         left:0;
         top:0;
-        width:52%;
+        width:58%;
         height:100%;
         object-fit:cover;
         object-position:center;
     }}
 
-    .hero-overlay{{
+    .hero-curve-mask{{
         position:absolute;
-        inset:0;
-        background:linear-gradient(
-            90deg,
-            rgba(13,59,46,0) 18%,
-            rgba(13,59,46,.35) 34%,
-            rgba(13,59,46,.75) 44%,
-            rgba(13,59,46,1) 56%
-        );
+        top:-70%;
+        left:33%;
+        width:46%;
+        height:240%;
+        background:#0d3b2e;
+        border-radius:50%;
+        border:5px solid #D9A754;
+        box-sizing:border-box;
+        z-index:5;
+    }}
+
+    .hero-panel-fill{{
+        position:absolute;
+        top:0;
+        right:0;
+        width:52%;
+        height:100%;
+        background:#0d3b2e;
+        z-index:4;
     }}
 
     .hero-content{{
         position:absolute;
-        left:47%;
+        left:46%;
         top:50%;
         transform:translateY(-50%);
-        width:50%;
-        padding-right:4%;
+        width:52%;
+        padding-right:5%;
         color:white;
         z-index:10;
     }}
 
     .hero-title{{
         font-family:'Georgia','Playfair Display',serif;
-        font-size:32px;
+        font-size:38px;
         font-weight:700;
         line-height:1.25;
         color:#FFFFFF;
+        margin-bottom:14px;
+    }}
+
+    .hero-subtitle{{
+        font-family:'Georgia','Playfair Display',serif;
+        font-size:19px;
+        font-weight:600;
+        color:#D9A754;
         margin-bottom:14px;
     }}
 
@@ -446,22 +467,14 @@ if BANNER_MAIN:
         height:4px;
         background:#C0472C;
         border-radius:20px;
-        margin-bottom:16px;
-    }}
-
-    .hero-subtitle{{
-        font-family:'Georgia','Playfair Display',serif;
-        font-size:19px;
-        font-weight:700;
-        color:#F5EBD5;
-        margin-bottom:14px;
+        margin-bottom:18px;
     }}
 
     .hero-desc{{
-        color:#FFE7C3;
+        color:#FFFFFF;
         font-size:15px;
         font-style:italic;
-        line-height:1.55;
+        line-height:1.6;
     }}
 
     </style>
@@ -471,7 +484,9 @@ if BANNER_MAIN:
         <img class="hero-image"
         src="data:image/{photo_ext};base64,{photo_b64}">
 
-        <div class="hero-overlay"></div>
+        <div class="hero-panel-fill"></div>
+
+        <div class="hero-curve-mask"></div>
 
         <div class="hero-content">
 
@@ -479,11 +494,11 @@ if BANNER_MAIN:
             Dashboard Analisis Tren &amp; Prediksi Pendapatan
             </div>
 
-            <div class="hero-line"></div>
-
             <div class="hero-subtitle">
             Sumatra Roastery Medan — Random Forest vs LightGBM
             </div>
+
+            <div class="hero-line"></div>
 
             <div class="hero-desc">
             Kopi asli Sumatra Roastery Medan — dari kebun hingga wawasan bisnis
