@@ -427,6 +427,11 @@ if BANNER_MAIN:
 else:
     st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
     st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
+    st.warning(
+        "File banner `preview_banner_dashboard.*` tidak ditemukan di folder aplikasi "
+        f"({SCRIPT_DIR}). Pastikan file gambar ini sudah di-upload/push ke repository "
+        "yang sama dengan app.py, sejajar (bukan di dalam subfolder lain)."
+    )
 
 with st.sidebar:
     st.success(f"Login sebagai: **{st.session_state.role}**")
