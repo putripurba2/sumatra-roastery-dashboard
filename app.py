@@ -162,8 +162,8 @@ input:-webkit-autofill:focus {{
 }}
 .stTabs [data-baseweb="tab"] *,
 .stTabs [role="tab"] * {{
-    font-weight: 800 !important;
-    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
 }}
 .stTabs [aria-selected="true"] {{
     color: {PRIMARY} !important;
