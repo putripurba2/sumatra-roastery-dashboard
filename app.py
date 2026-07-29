@@ -492,7 +492,8 @@ if BANNER_MAIN:
     </div>
     """
 
-    st.markdown(banner_html, unsafe_allow_html=True)
+    banner_html_flat = "\n".join(line.lstrip() for line in banner_html.split("\n"))
+    st.markdown(banner_html_flat, unsafe_allow_html=True)
 
 
 else:
