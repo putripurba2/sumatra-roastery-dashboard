@@ -403,7 +403,7 @@ if BANNER_MAIN:
         position:absolute;
         left:0;
         top:0;
-        width:46%;
+        width:52%;
         height:100%;
         object-fit:cover;
         object-position:center;
@@ -414,25 +414,27 @@ if BANNER_MAIN:
         inset:0;
         background:linear-gradient(
             90deg,
-            rgba(13,59,46,0) 34%,
-            rgba(13,59,46,.55) 42%,
-            rgba(13,59,46,1) 50%
+            rgba(13,59,46,0) 18%,
+            rgba(13,59,46,.35) 34%,
+            rgba(13,59,46,.75) 44%,
+            rgba(13,59,46,1) 56%
         );
     }}
 
     .hero-content{{
         position:absolute;
-        left:50%;
+        left:47%;
         top:50%;
         transform:translateY(-50%);
-        width:44%;
+        width:50%;
+        padding-right:4%;
         color:white;
         z-index:10;
     }}
 
     .hero-title{{
         font-family:'Georgia','Playfair Display',serif;
-        font-size:34px;
+        font-size:32px;
         font-weight:700;
         line-height:1.25;
         color:#FFFFFF;
