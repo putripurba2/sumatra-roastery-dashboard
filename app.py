@@ -60,6 +60,11 @@ html, body, [class*="css"] {{
     background-color: transparent;
 }}
 
+/* ---- Naikkan konten utama supaya sejajar dengan bagian atas sidebar ---- */
+[data-testid="stMainBlockContainer"], .block-container {{
+    padding-top: 1.5rem !important;
+}}
+
 /* ---- Sidebar ---- */
 [data-testid="stSidebar"] {{
     background-color: {CREAM_DARK};
@@ -387,6 +392,7 @@ if BANNER_MAIN:
         photo_ext = "jpeg"
 
     BANNER_HEIGHT = 320
+    SHADOW_ROOM = 34
 
     banner_html = f"""
     <html>
@@ -396,6 +402,7 @@ if BANNER_MAIN:
             margin:0;
             padding:0;
             background:transparent;
+            overflow:hidden;
         }}
         .hero-banner{{
             position:relative;
@@ -403,7 +410,7 @@ if BANNER_MAIN:
             height:{BANNER_HEIGHT}px;
             border-radius:18px;
             overflow:hidden;
-            box-shadow:0 12px 35px rgba(0,0,0,.18);
+            box-shadow:0 18px 26px rgba(0,0,0,.20);
             background:#0d3b2e;
         }}
         .hero-image{{
@@ -426,7 +433,7 @@ if BANNER_MAIN:
     </html>
     """
 
-    components.html(banner_html, height=BANNER_HEIGHT + 4, scrolling=False)
+    components.html(banner_html, height=BANNER_HEIGHT + SHADOW_ROOM, scrolling=False)
 
 
 
