@@ -159,11 +159,11 @@ input:-webkit-autofill:focus {{
 .stTabs [data-baseweb="tab"] {{
     color: {ESPRESSO_SOFT} !important;
     font-weight: 800;
-    font-size: 17px;
+    font-size: 1.25rem;
 }}
 .stTabs [data-baseweb="tab"] p {{
     font-weight: 800 !important;
-    font-size: 17px !important;
+    font-size: 1.25rem !important;
 }}
 .stTabs [aria-selected="true"] {{
     color: {PRIMARY} !important;
