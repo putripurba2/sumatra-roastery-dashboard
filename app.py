@@ -494,6 +494,30 @@ forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
 
+components.html("""
+<script>
+function attachTabAutoScroll() {
+    const doc = window.parent.document;
+    const tabs = doc.querySelectorAll('[data-baseweb="tab"], [role="tab"]');
+    tabs.forEach(function(tab) {
+        if (tab.dataset.autoscrollBound) return;
+        tab.dataset.autoscrollBound = "1";
+        tab.addEventListener('click', function() {
+            setTimeout(function() {
+                const tabList = doc.querySelector('[data-baseweb="tab-list"], [role="tablist"]');
+                if (tabList) {
+                    const y = tabList.getBoundingClientRect().top + doc.defaultView.scrollY - 70;
+                    doc.defaultView.scrollTo({top: y, behavior: 'smooth'});
+                }
+            }, 60);
+        });
+    });
+}
+attachTabAutoScroll();
+setInterval(attachTabAutoScroll, 1000);
+</script>
+""", height=0)
+
 with tab1:
     st.subheader("Rekap Pendapatan Bulanan")
     rekap_show = rekap[['Tahun', 'Bulan', 'Total Pendapatan (Rp)', 'kategori_tren']].copy()
