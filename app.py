@@ -497,26 +497,28 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren"
 components.html("""
 <script>
 function attachTabAutoScroll() {
-    const doc = window.parent.document;
-    const tabs = doc.querySelectorAll('[data-baseweb="tab"], [role="tab"]');
-    tabs.forEach(function(tab) {
-        if (tab.dataset.autoscrollBound) return;
-        tab.dataset.autoscrollBound = "1";
-        tab.addEventListener('click', function() {
-            setTimeout(function() {
-                const tabList = doc.querySelector('[data-baseweb="tab-list"], [role="tablist"]');
-                if (tabList) {
-                    const y = tabList.getBoundingClientRect().top + doc.defaultView.scrollY - 70;
+    try {
+        const doc = window.parent.document;
+        const containers = doc.querySelectorAll('[data-testid="stTabs"]');
+        containers.forEach(function(container) {
+            if (container.dataset.autoscrollBound) return;
+            container.dataset.autoscrollBound = "1";
+            container.addEventListener('click', function(e) {
+                setTimeout(function() {
+                    const rect = container.getBoundingClientRect();
+                    const y = rect.top + doc.defaultView.scrollY - 70;
                     doc.defaultView.scrollTo({top: y, behavior: 'smooth'});
-                }
-            }, 60);
+                }, 80);
+            });
         });
-    });
+    } catch (err) {
+        // akses cross-origin diblokir browser, abaikan
+    }
 }
 attachTabAutoScroll();
-setInterval(attachTabAutoScroll, 1000);
+setInterval(attachTabAutoScroll, 800);
 </script>
-""", height=0)
+""", height=1)
 
 with tab1:
     st.subheader("Rekap Pendapatan Bulanan")
