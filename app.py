@@ -158,7 +158,12 @@ input:-webkit-autofill:focus {{
 }}
 .stTabs [data-baseweb="tab"] {{
     color: {ESPRESSO_SOFT} !important;
-    font-weight: 700;
+    font-weight: 800;
+    font-size: 17px;
+}}
+.stTabs [data-baseweb="tab"] p {{
+    font-weight: 800 !important;
+    font-size: 17px !important;
 }}
 .stTabs [aria-selected="true"] {{
     color: {PRIMARY} !important;
@@ -391,8 +396,7 @@ if BANNER_MAIN:
     if photo_ext == "jpg":
         photo_ext = "jpeg"
 
-    BANNER_HEIGHT = 320
-    SHADOW_ROOM = 34
+    BANNER_HEIGHT = 360
 
     banner_html = f"""
     <html>
@@ -401,6 +405,7 @@ if BANNER_MAIN:
         html, body {{
             margin:0;
             padding:0;
+            width:100%;
             background:transparent;
             overflow:hidden;
         }}
@@ -410,8 +415,8 @@ if BANNER_MAIN:
             height:{BANNER_HEIGHT}px;
             border-radius:18px;
             overflow:hidden;
-            box-shadow:0 18px 26px rgba(0,0,0,.20);
             background:#0d3b2e;
+            box-sizing:border-box;
         }}
         .hero-image{{
             position:absolute;
@@ -433,7 +438,7 @@ if BANNER_MAIN:
     </html>
     """
 
-    components.html(banner_html, height=BANNER_HEIGHT + SHADOW_ROOM, scrolling=False)
+    components.html(banner_html, height=BANNER_HEIGHT, scrolling=False)
 
 
 
