@@ -22,7 +22,7 @@ def find_asset(basename):
 
 FAVICON = find_asset("favicon")
 BANNER_LOGIN = find_asset("preview_banner_dashboard")
-BANNER_MAIN = find_asset("banner_kopi")
+BANNER_MAIN = find_asset("preview_banner_dashboard")
 
 st.set_page_config(
     page_title="Dashboard Prediksi Pendapatan - Sumatra Roastery Medan",
@@ -422,9 +422,6 @@ if BANNER_MAIN:
 
     banner_html_flat = "\n".join(line.lstrip() for line in banner_html.split("\n"))
     st.markdown(banner_html_flat, unsafe_allow_html=True)
-
-    st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
-    st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
 
 
 else:
