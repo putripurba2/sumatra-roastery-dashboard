@@ -398,83 +398,16 @@ if BANNER_MAIN:
         overflow:hidden;
         margin-bottom:20px;
         box-shadow:0 12px 35px rgba(0,0,0,.18);
-        background:#0d3b2e;
     }}
 
     .hero-image{{
         position:absolute;
         left:0;
         top:0;
-        width:58%;
+        width:100%;
         height:100%;
         object-fit:cover;
         object-position:center;
-    }}
-
-    .hero-curve-mask{{
-        position:absolute;
-        top:-70%;
-        left:33%;
-        width:46%;
-        height:240%;
-        background:#0d3b2e;
-        border-radius:50%;
-        border:5px solid #D9A754;
-        box-sizing:border-box;
-        z-index:5;
-    }}
-
-    .hero-panel-fill{{
-        position:absolute;
-        top:0;
-        right:0;
-        width:52%;
-        height:100%;
-        background:#0d3b2e;
-        z-index:4;
-    }}
-
-    .hero-content{{
-        position:absolute;
-        left:46%;
-        top:50%;
-        transform:translateY(-50%);
-        width:52%;
-        padding-right:5%;
-        color:white;
-        z-index:10;
-    }}
-
-    .hero-title{{
-        font-family:'Georgia','Playfair Display',serif;
-        font-size:38px;
-        font-weight:700;
-        line-height:1.25;
-        color:#FFFFFF;
-        margin-bottom:14px;
-    }}
-
-    .hero-subtitle{{
-        font-family:'Georgia','Playfair Display',serif;
-        font-size:19px;
-        font-weight:600;
-        color:#D9A754;
-        margin-bottom:14px;
-    }}
-
-    .hero-line{{
-        width:64px;
-        height:4px;
-        background:#C0472C;
-        border-radius:20px;
-        margin-bottom:18px;
-    }}
-
-    .hero-desc{{
-        color:#FFFFFF;
-        font-size:15px;
-        font-style:italic;
-        line-height:1.6;
     }}
 
     </style>
@@ -484,33 +417,14 @@ if BANNER_MAIN:
         <img class="hero-image"
         src="data:image/{photo_ext};base64,{photo_b64}">
 
-        <div class="hero-panel-fill"></div>
-
-        <div class="hero-curve-mask"></div>
-
-        <div class="hero-content">
-
-            <div class="hero-title">
-            Dashboard Analisis Tren &amp; Prediksi Pendapatan
-            </div>
-
-            <div class="hero-subtitle">
-            Sumatra Roastery Medan — Random Forest vs LightGBM
-            </div>
-
-            <div class="hero-line"></div>
-
-            <div class="hero-desc">
-            Kopi asli Sumatra Roastery Medan — dari kebun hingga wawasan bisnis
-            </div>
-
-        </div>
-
     </div>
     """
 
     banner_html_flat = "\n".join(line.lstrip() for line in banner_html.split("\n"))
     st.markdown(banner_html_flat, unsafe_allow_html=True)
+
+    st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
+    st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
 
 
 else:
