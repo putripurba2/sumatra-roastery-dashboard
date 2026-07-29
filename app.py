@@ -379,71 +379,119 @@ def get_base64_image(path):
         return base64.b64encode(f.read()).decode("utf-8")
 
 
-if BANNER_MAIN:
+if BANNER_MAIN: 
     photo_b64 = get_base64_image(BANNER_MAIN)
-    photo_ext = os.path.splitext(BANNER_MAIN)[1].lower().replace(".", "")
+    photo_ext = os.path.splitext(BANNER_MAIN)[1].replace(".", "")
     if photo_ext == "jpg":
         photo_ext = "jpeg"
 
-    GOLD = "#C9A24B"
-    W, H = 1600, 480
-    X_TOP, X_BULGE = 900, 800
+    banner_html = f"""
+    <style>
 
-    curve = (
-        f"C {X_TOP-60},{H*0.27:.1f} {X_BULGE},{H*0.27:.1f} {X_BULGE},{H/2:.1f} "
-        f"C {X_BULGE},{H*0.73:.1f} {X_TOP-60},{H*0.73:.1f} {X_TOP},{H}"
-    )
-    photo_d = f"M0,0 L{X_TOP},0 {curve} L0,{H} Z"
-    green_d = f"M{X_TOP},0 {curve} L{W},{H} L{W},0 Z"
+    .hero-banner{{
+        position:relative;
+        width:100%;
+        height:320px;
+        border-radius:18px;
+        overflow:hidden;
+        margin-bottom:20px;
+        box-shadow:0 12px 35px rgba(0,0,0,.18);
+        background:#0d3b2e;
+    }}
 
-    svg_code = (
-        f'<svg viewBox="0 0 {W} {H}" style="display:block;width:100%;height:auto;">'
-        f'<defs><clipPath id="pc"><path d="{photo_d}"/></clipPath></defs>'
-        f'<rect width="{W}" height="{H}" fill="{PRIMARY}"/>'
-        f'<image href="data:image/{photo_ext};base64,{photo_b64}" x="0" y="0" width="{W}" height="{H}" '
-        f'preserveAspectRatio="xMidYMid slice" clip-path="url(#pc)"/>'
-        f'<path d="{green_d}" fill="{PRIMARY}"/>'
-        f'<g opacity="0.18" stroke="#F4EFE2" fill="none" stroke-width="2.5">'
-        f'<path d="M1360,60 C1300,40 1250,70 1240,120 C1230,170 1270,200 1320,190 '
-        f'C1370,180 1400,130 1390,90 C1385,75 1375,65 1360,60 Z"/>'
-        f'<path d="M1300,80 C1320,110 1330,140 1320,175"/>'
-        f'<ellipse cx="1430" cy="360" rx="46" ry="60"/>'
-        f'<line x1="1430" y1="303" x2="1430" y2="417"/>'
-        f'<ellipse cx="1500" cy="400" rx="42" ry="55" transform="rotate(15 1500 400)"/>'
-        f'<line x1="1500" y1="348" x2="1500" y2="452"/>'
-        f'<ellipse cx="1370" cy="410" rx="40" ry="52" transform="rotate(-12 1370 410)"/>'
-        f'<line x1="1370" y1="360" x2="1370" y2="460"/>'
-        f'</g>'
-        f'<path d="M{X_TOP},0 {curve}" fill="none" stroke="{GOLD}" stroke-width="7" stroke-linecap="round"/>'
-        f'</svg>'
-    )
+    .hero-image{{
+        position:absolute;
+        left:0;
+        top:0;
+        width:46%;
+        height:100%;
+        object-fit:cover;
+        object-position:center;
+    }}
 
-    text_html = (
-        '<div id="banner-text-1" style="position:absolute;top:0;left:56%;width:41%;height:100%;'
-        'display:flex;flex-direction:column;justify-content:center;padding-right:35px;'
-        'font-family:&quot;Segoe UI&quot;,Arial,sans-serif;">'
-        '<div>Dashboard Analisis Tren<br>&amp; Prediksi Pendapatan</div>'
-        f'<div>Sumatra Roastery Medan &mdash; Random Forest vs LightGBM</div>'
-        f'<div style="width:190px;height:3px;background:{ACCENT};margin:16px 0 18px 0;"></div>'
-        '<div>Kopi asli Sumatra Roastery Medan &mdash; dari kebun hingga wawasan bisnis</div>'
-        '</div>'
-    )
+    .hero-overlay{{
+        position:absolute;
+        inset:0;
+        background:linear-gradient(
+            90deg,
+            rgba(13,59,46,0) 34%,
+            rgba(13,59,46,.55) 42%,
+            rgba(13,59,46,1) 50%
+        );
+    }}
 
-    banner_html = (
-        '<style>'
-        '#banner-text-1 { color:#ffffff !important; }'
-        '#banner-text-1 div:nth-of-type(1) { font-size:40px !important;font-weight:800 !important;'
-        'line-height:1.18 !important;margin:0 0 14px 0 !important;color:#ffffff !important; }'
-        '#banner-text-1 div:nth-of-type(2) { font-size:20px !important;margin:0 !important;'
-        'color:#F5EFE3 !important; }'
-        '#banner-text-1 div:nth-of-type(4) { font-size:16px !important;font-style:italic !important;'
-        'margin:0 !important;line-height:1.5 !important;color:#FFD9B0 !important; }'
-        '</style>'
-        '<div style="position:relative;width:100%;margin-bottom:8px;'
-        'box-shadow:0 6px 18px rgba(0,0,0,.15);border-radius:22px;overflow:hidden;">'
-        + svg_code + text_html +
-        '</div>'
-    )
+    .hero-content{{
+        position:absolute;
+        left:50%;
+        top:50%;
+        transform:translateY(-50%);
+        width:44%;
+        color:white;
+        z-index:10;
+    }}
+
+    .hero-title{{
+        font-family:'Georgia','Playfair Display',serif;
+        font-size:34px;
+        font-weight:700;
+        line-height:1.25;
+        color:#FFFFFF;
+        margin-bottom:14px;
+    }}
+
+    .hero-line{{
+        width:64px;
+        height:4px;
+        background:#C0472C;
+        border-radius:20px;
+        margin-bottom:16px;
+    }}
+
+    .hero-subtitle{{
+        font-family:'Georgia','Playfair Display',serif;
+        font-size:19px;
+        font-weight:700;
+        color:#F5EBD5;
+        margin-bottom:14px;
+    }}
+
+    .hero-desc{{
+        color:#FFE7C3;
+        font-size:15px;
+        font-style:italic;
+        line-height:1.55;
+    }}
+
+    </style>
+
+    <div class="hero-banner">
+
+        <img class="hero-image"
+        src="data:image/{photo_ext};base64,{photo_b64}">
+
+        <div class="hero-overlay"></div>
+
+        <div class="hero-content">
+
+            <div class="hero-title">
+            Dashboard Analisis Tren &amp; Prediksi Pendapatan
+            </div>
+
+            <div class="hero-line"></div>
+
+            <div class="hero-subtitle">
+            Sumatra Roastery Medan — Random Forest vs LightGBM
+            </div>
+
+            <div class="hero-desc">
+            Kopi asli Sumatra Roastery Medan — dari kebun hingga wawasan bisnis
+            </div>
+
+        </div>
+
+    </div>
+    """
+
     st.markdown(banner_html, unsafe_allow_html=True)
 
 
