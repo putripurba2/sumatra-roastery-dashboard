@@ -156,12 +156,12 @@ input:-webkit-autofill:focus {{
     gap: 4px;
     border-bottom: 3px solid {BORDER};
 }}
-.stTabs [data-baseweb="tab"] {{
+.stTabs [data-baseweb="tab"],
+.stTabs [role="tab"] {{
     color: {ESPRESSO_SOFT} !important;
-    font-weight: 800;
-    font-size: 1.25rem;
 }}
-.stTabs [data-baseweb="tab"] p {{
+.stTabs [data-baseweb="tab"] *,
+.stTabs [role="tab"] * {{
     font-weight: 800 !important;
     font-size: 1.25rem !important;
 }}
