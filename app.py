@@ -358,8 +358,6 @@ if "logged_in" not in st.session_state:
 if not st.session_state.logged_in:
     st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
     st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
-    if BANNER_LOGIN:
-        st.image(BANNER_LOGIN, use_container_width=True)
     st.subheader("🔒 Login")
     st.caption("Masukkan akun sesuai peran Anda untuk mengakses dashboard.")
     with st.form("login_form"):
