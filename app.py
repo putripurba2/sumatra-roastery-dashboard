@@ -62,7 +62,7 @@ st.markdown(f"""
 <style>
 /* ---- Base app background & typography ---- */
 .stApp {{
-    background: linear-gradient(135deg, {PRIMARY} 0%, {CREAM} 55%, {ACCENT} 100%) !important;
+    background: linear-gradient(135deg, #EAF2EF 0%, {CREAM} 45%, #FBEEE4 100%) !important;
     background-attachment: fixed;
 }}
 html, body, [class*="css"] {{
@@ -85,7 +85,7 @@ html, body, [class*="css"] {{
 
 /* ---- Sidebar ---- */
 [data-testid="stSidebar"] {{
-    background: linear-gradient(180deg, {PRIMARY} 0%, {CREAM} 55%, {ACCENT} 100%) !important;
+    background: linear-gradient(180deg, #EAF2EF 0%, {CREAM_DARK} 55%, #FBEEE4 100%) !important;
     border-right: 1px solid {BORDER};
 }}
 [data-testid="stSidebar"] * {{
