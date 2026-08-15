@@ -550,12 +550,13 @@ else:
         "yang sama dengan app.py, sejajar (bukan di dalam subfolder lain)."
     )
 
-with st.sidebar:
-    if st.button("Logout"):
-        st.session_state.logged_in = False
-        st.session_state.role = None
-        st.rerun()
-    st.divider()
+from navbar import render_navbar
+
+render_navbar({
+    "PRIMARY": PRIMARY,
+    "CREAM": CREAM,
+    "ESPRESSO": ESPRESSO,
+})
 
 IS_PENELITI = st.session_state.role == "Peneliti"
 
