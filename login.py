@@ -50,50 +50,43 @@ def require_login(colors: dict):
     [data-testid="stMainBlockContainer"] {{
         padding-top: 4rem !important;
     }}
-    .login-header-box {{
-        background: linear-gradient(135deg, {TEAL} 0%, {TEAL_DARK} 100%);
-        border-radius: 20px 20px 0 0;
-        padding: 2.2rem 1rem 1.6rem 1rem;
-        text-align: center;
-    }}
     [data-testid="stForm"] {{
         background-color: #FFFFFF;
-        border-radius: 0 0 20px 20px;
-        padding: 1.8rem 2.4rem 1.6rem 2.4rem;
-        box-shadow: 0 25px 50px rgba(59, 42, 32, 0.3);
+        border-radius: 20px;
+        padding: 2.6rem 2.4rem 1.6rem 2.4rem;
+        box-shadow: 0 25px 50px rgba(59, 42, 32, 0.28);
         border: 1px solid {BORDER};
-        border-top: none;
-        margin-top: -2px;
     }}
     .login-icon-badge {{
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: #FFFFFF;
+        background: linear-gradient(135deg, {TEAL} 0%, {TEAL_DARK} 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 0.9rem auto;
         font-size: 30px;
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 8px 18px rgba(46, 143, 132, 0.35);
     }}
     .login-title {{
         text-align: center;
         font-size: 1.4rem;
         font-weight: 800;
-        color: #FFFFFF;
+        color: {TEAL_DARK};
         letter-spacing: 1px;
         margin-bottom: 0.15rem;
     }}
     .login-subtitle {{
         text-align: center;
         font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.85);
+        color: {ESPRESSO_SOFT};
+        margin-bottom: 1.8rem;
     }}
     .login-footer {{
         text-align: center;
         font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.75);
+        color: #A8998A;
         margin-top: 1.2rem;
     }}
     [data-testid="stForm"] .stTextInput input:focus {{
@@ -111,14 +104,10 @@ def require_login(colors: dict):
 
     col1, col2, col3 = st.columns([1, 1.1, 1])
     with col2:
-        st.markdown("""
-        <div class="login-header-box">
-            <div class="login-icon-badge">☕</div>
-            <div class="login-title">SUMATRA ROASTERY</div>
-            <div class="login-subtitle">Dashboard Analisis & Prediksi Pendapatan</div>
-        </div>
-        """, unsafe_allow_html=True)
         with st.form("login_form"):
+            st.markdown('<div class="login-icon-badge">☕</div>', unsafe_allow_html=True)
+            st.markdown('<div class="login-title">SUMATRA ROASTERY</div>', unsafe_allow_html=True)
+            st.markdown('<div class="login-subtitle">Dashboard Analisis & Prediksi Pendapatan</div>', unsafe_allow_html=True)
             username = st.text_input("Username", placeholder="Masukkan Username")
             password = st.text_input("Password", type="password", placeholder="Masukkan Password")
             submitted = st.form_submit_button("➜ Login", use_container_width=True)
