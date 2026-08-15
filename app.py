@@ -86,7 +86,7 @@ html, body, [class*="css"] {{
 
 /* ---- Sidebar ---- */
 [data-testid="stSidebar"] {{
-    background: linear-gradient(180deg, #EAF2EF 0%, {CREAM_DARK} 55%, #FBEEE4 100%) !important;
+    background: linear-gradient(180deg, #C9E6DF 0%, {CREAM_DARK} 55%, #F7D9BE 100%) !important;
     border-right: 1px solid {BORDER};
 }}
 [data-testid="stSidebar"] * {{
