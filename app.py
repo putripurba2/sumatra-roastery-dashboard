@@ -657,7 +657,7 @@ with tab2:
     fig.update_layout(height=460, plot_bgcolor="white", yaxis_title="Pendapatan (Rp)",
                        xaxis_tickangle=-60, showlegend=True,
                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     c1, c2, c3 = st.columns(3)
     c1.metric("Rata-rata Pendapatan Bulanan", rupiah(avg_overall))
@@ -668,7 +668,7 @@ with tab2:
     jenis_total = per_jenis.groupby('Jenis Kopi')['Total Pendapatan (Rp)'].sum().sort_values(ascending=False).reset_index()
     fig2 = px.bar(jenis_total, x='Jenis Kopi', y='Total Pendapatan (Rp)', color_discrete_sequence=[PRIMARY])
     fig2.update_layout(height=380, plot_bgcolor="white")
-    st.plotly_chart(fig2, use_container_width=True)
+    st.plotly_chart(fig2, use_container_width=True, config={"displayModeBar": False})
 
 with tab3:
     st.subheader("🔮 Prediksi & Evaluasi Model")
@@ -689,7 +689,7 @@ with tab3:
         fig_rf.add_trace(go.Scatter(x=sub_rf['label'], y=sub_rf['Prediksi Random Forest'], name="Prediksi Random Forest",
                                      mode='lines+markers', line=dict(color=PRIMARY, dash='dash')))
         fig_rf.update_layout(height=420, plot_bgcolor="white", yaxis_title="Pendapatan (Rp)")
-        st.plotly_chart(fig_rf, use_container_width=True)
+        st.plotly_chart(fig_rf, use_container_width=True, config={"displayModeBar": False})
 
         with st.expander("Lihat tabel hasil prediksi Random Forest"):
             rf_show = test_out[['Tahun', 'Bulan', 'Jenis Kopi', 'Total Pendapatan (Rp)', 'Prediksi Random Forest']].copy()
@@ -710,7 +710,7 @@ with tab3:
         fig_lgb.add_trace(go.Scatter(x=sub_lgb['label'], y=sub_lgb['Prediksi LightGBM'], name="Prediksi LightGBM",
                                       mode='lines+markers', line=dict(color=ACCENT, dash='dot')))
         fig_lgb.update_layout(height=420, plot_bgcolor="white", yaxis_title="Pendapatan (Rp)")
-        st.plotly_chart(fig_lgb, use_container_width=True)
+        st.plotly_chart(fig_lgb, use_container_width=True, config={"displayModeBar": False})
 
         with st.expander("Lihat tabel hasil prediksi LightGBM"):
             lgb_show = test_out[['Tahun', 'Bulan', 'Jenis Kopi', 'Total Pendapatan (Rp)', 'Prediksi LightGBM']].copy()
@@ -741,7 +741,7 @@ with tab3:
         fig_perf.add_trace(go.Scatter(x=sub_perf['label'], y=sub_perf['Prediksi LightGBM'], name="Prediksi LightGBM",
                                        mode='lines+markers', line=dict(color=ACCENT, dash='dot')))
         fig_perf.update_layout(height=420, plot_bgcolor="white", yaxis_title="Pendapatan (Rp)")
-        st.plotly_chart(fig_perf, use_container_width=True)
+        st.plotly_chart(fig_perf, use_container_width=True, config={"displayModeBar": False})
 
         with st.expander("Lihat tabel hasil prediksi lengkap (kedua model)"):
             test_show = test_out.copy()
@@ -756,7 +756,7 @@ with tab4:
     fig4.add_trace(go.Bar(y=fi_sorted['Fitur'], x=fi_sorted['Random Forest'], name='Random Forest', orientation='h', marker_color=PRIMARY))
     fig4.add_trace(go.Bar(y=fi_sorted['Fitur'], x=fi_sorted['LightGBM'], name='LightGBM', orientation='h', marker_color=ACCENT))
     fig4.update_layout(height=420, barmode='group', plot_bgcolor="white", xaxis_title="Tingkat Kepentingan (dinormalisasi)")
-    st.plotly_chart(fig4, use_container_width=True)
+    st.plotly_chart(fig4, use_container_width=True, config={"displayModeBar": False})
     st.caption("Fitur `lag_1` (pendapatan bulan sebelumnya) dan `jenis_kopi_enc` konsisten menjadi variabel paling berpengaruh pada kedua model.")
 
 with tab5:
@@ -781,7 +781,7 @@ with tab5:
     fig5.add_trace(go.Bar(x=forecast_df['Jenis Kopi'], y=forecast_df['Prediksi Random Forest (Rp)'], name='Prediksi RF', marker_color=PRIMARY))
     fig5.add_trace(go.Bar(x=forecast_df['Jenis Kopi'], y=forecast_df['Prediksi LightGBM (Rp)'], name='Prediksi LightGBM', marker_color=ACCENT))
     fig5.update_layout(height=420, barmode='group', plot_bgcolor="white", yaxis_title="Prediksi Pendapatan (Rp)")
-    st.plotly_chart(fig5, use_container_width=True)
+    st.plotly_chart(fig5, use_container_width=True, config={"displayModeBar": False})
 
     st.info("Catatan asumsi: harga rata-rata memakai rata-rata 3 bulan terakhir per jenis kopi, dan kategori tren memakai kategori bulan terakhir yang datanya tersedia (karena kategori tren bulan depan belum bisa diketahui sebelum pendapatan aktualnya terjadi).")
 
@@ -853,36 +853,34 @@ with tab6:
             fig_lap = px.bar(ringkasan_jenis, x='Jenis Kopi', y='Total Pendapatan (Rp)',
                               color_discrete_sequence=[PRIMARY])
             fig_lap.update_layout(height=360, plot_bgcolor="white")
-            st.plotly_chart(fig_lap, use_container_width=True)
+            st.plotly_chart(fig_lap, use_container_width=True, config={"displayModeBar": False})
 
             st.markdown("#### Unduh Laporan")
             periode_text = f"{periode_label[periode_awal]} – {periode_label[periode_akhir]}"
             jenis_text = "Semua Jenis Kopi" if len(jenis_filter) == len(jenis_list) else ", ".join(jenis_filter)
             file_tag = f"{periode_awal}_{periode_akhir}"
 
-            colw, colpdf = st.columns(2)
-            with colw:
-                if DOCX_OK:
-                    docx_bytes = generate_laporan_docx(periode_text, jenis_text, total_pendapatan,
-                                                         total_qty, rata_harga, ringkasan_jenis)
-                    st.download_button(
-                        "⬇️ Unduh Laporan (Word)", data=docx_bytes,
-                        file_name=f"laporan_penjualan_{file_tag}.docx",
-                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    )
-                else:
-                    st.warning("Modul `python-docx` belum terpasang. Tambahkan `python-docx` ke requirements.txt.")
-            with colpdf:
-                if REPORTLAB_OK:
-                    pdf_bytes = generate_laporan_pdf(periode_text, jenis_text, total_pendapatan,
-                                                       total_qty, rata_harga, ringkasan_jenis)
-                    st.download_button(
-                        "⬇️ Unduh Laporan (PDF)", data=pdf_bytes,
-                        file_name=f"laporan_penjualan_{file_tag}.pdf",
-                        mime="application/pdf",
-                    )
-                else:
-                    st.warning("Modul `reportlab` belum terpasang. Tambahkan `reportlab` ke requirements.txt.")
+            if DOCX_OK:
+                docx_bytes = generate_laporan_docx(periode_text, jenis_text, total_pendapatan,
+                                                     total_qty, rata_harga, ringkasan_jenis)
+                st.download_button(
+                    "⬇️ Unduh Laporan (Word)", data=docx_bytes,
+                    file_name=f"laporan_penjualan_{file_tag}.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+            else:
+                st.warning("Modul `python-docx` belum terpasang. Tambahkan `python-docx` ke requirements.txt.")
+
+            if REPORTLAB_OK:
+                pdf_bytes = generate_laporan_pdf(periode_text, jenis_text, total_pendapatan,
+                                                   total_qty, rata_harga, ringkasan_jenis)
+                st.download_button(
+                    "⬇️ Unduh Laporan (PDF)", data=pdf_bytes,
+                    file_name=f"laporan_penjualan_{file_tag}.pdf",
+                    mime="application/pdf",
+                )
+            else:
+                st.warning("Modul `reportlab` belum terpasang. Tambahkan `reportlab` ke requirements.txt.")
 
 st.divider()
 st.caption("Dashboard ini dijalankan di Google Colab menggunakan Python, Streamlit, Scikit-learn, dan LightGBM ")
