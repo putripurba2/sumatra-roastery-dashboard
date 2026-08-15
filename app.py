@@ -172,7 +172,7 @@ input:-webkit-autofill:focus {{
 
 /* ---- Tabs ---- */
 .stTabs [data-baseweb="tab-list"] {{
-    gap: 6px;
+    gap: 2px;
     border-bottom: 3px solid {BORDER};
 }}
 .stTabs [data-baseweb="tab"],
@@ -180,22 +180,22 @@ input:-webkit-autofill:focus {{
     color: {ESPRESSO_SOFT} !important;
     background: transparent !important;
     border-radius: 999px !important;
-    padding: 6px 16px !important;
+    padding: 6px 10px !important;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }}
 .stTabs [data-baseweb="tab"] *,
 .stTabs [role="tab"] * {{
     font-weight: 700 !important;
-    font-size: 1rem !important;
+    font-size: 0.95rem !important;
 }}
 .stTabs [data-baseweb="tab"]:hover,
 .stTabs [role="tab"]:hover {{
     color: {ESPRESSO} !important;
 }}
 .stTabs [aria-selected="true"] {{
-    color: #FFFFFF !important;
-    background: linear-gradient(135deg, #4FB6E8 0%, #2E93C9 100%) !important;
-    box-shadow: 0 3px 8px rgba(47, 147, 201, 0.35);
+    color: #D8B26C !important;
+    background: {PRIMARY} !important;
+    box-shadow: 0 3px 8px rgba(15, 107, 92, 0.35);
     border-bottom: none !important;
 }}
 
