@@ -625,11 +625,11 @@ with tab1:
 
 with tab2:
     st.subheader("Tren Pendapatan Bulanan (2023–2025)")
-    colors = [PRIMARY if k == 'Tinggi' else ACCENT for k in rekap['kategori_tren']]
+    bar_colors = [PRIMARY if k == 'Tinggi' else ACCENT for k in rekap['kategori_tren']]
     labels = [f"{b[:3]} {t}" for b, t in zip(rekap['Bulan'], rekap['Tahun'])]
 
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=labels, y=rekap['Total Pendapatan (Rp)'], marker_color=colors, name="Pendapatan"))
+    fig.add_trace(go.Bar(x=labels, y=rekap['Total Pendapatan (Rp)'], marker_color=bar_colors, name="Pendapatan"))
     fig.add_hline(y=avg_overall, line_dash="dash", line_color="#888",
                   annotation_text=f"Rata-rata: {rupiah(avg_overall)}")
     fig.update_layout(height=460, plot_bgcolor="white", yaxis_title="Pendapatan (Rp)",
