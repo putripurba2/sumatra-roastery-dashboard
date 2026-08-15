@@ -139,6 +139,27 @@ h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, .stCaption {{
     background-color: {ESPRESSO_SOFT} !important;
 }}
 
+/* ---- Download buttons (Unduh Laporan) ---- */
+.stDownloadButton button {{
+    background-color: #2E8F84 !important;
+    border: none !important;
+    border-radius: 6px;
+    font-weight: 600;
+}}
+.stDownloadButton button p,
+.stDownloadButton button div,
+.stDownloadButton button span {{
+    color: #FFFFFF !important;
+}}
+.stDownloadButton button:hover {{
+    background-color: #256F66 !important;
+}}
+
+/* ---- Sembunyikan ikon link kecil di samping heading ---- */
+[data-testid="stHeaderActionElements"] {{
+    display: none !important;
+}}
+
 /* ---- Neutralize Chrome/browser autofill styling on inputs ---- */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
