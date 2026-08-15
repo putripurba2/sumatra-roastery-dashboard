@@ -590,7 +590,13 @@ df, rekap, avg_overall = build_dataset(daily, per_jenis, rekap_raw)
 results, fi, test_out, split_periode = train_models(df, split_ratio)
 forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan", "📄 Laporan"])
+IS_PEMILIK = st.session_state.role == "Pemilik/Pengelola"
+
+if IS_PEMILIK:
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan", "📄 Laporan"])
+else:
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
+    tab6 = None
 
 components.html("""
 <script>
@@ -785,102 +791,98 @@ with tab5:
 
     st.info("Catatan asumsi: harga rata-rata memakai rata-rata 3 bulan terakhir per jenis kopi, dan kategori tren memakai kategori bulan terakhir yang datanya tersedia (karena kategori tren bulan depan belum bisa diketahui sebelum pendapatan aktualnya terjadi).")
 
-with tab6:
-    st.subheader("Laporan Penjualan")
-    st.caption(
-        "Pilih filter jenis kopi dan rentang periode, lalu unduh ringkasan laporan dalam format Word atau PDF. "
-        "(Data sumber berupa transaksi per bulan, sehingga filter periode di sini berbentuk rentang bulan, bukan tanggal harian.)"
-    )
-
-    daily_periode = daily.copy()
-    daily_periode['bulan_num'] = daily_periode['Bulan'].map(BULAN_MAP)
-    daily_periode['periode'] = daily_periode['Tahun'] * 100 + daily_periode['bulan_num']
-
-    jenis_list = sorted(daily_periode['Jenis Kopi'].unique())
-    periode_sorted = sorted(daily_periode['periode'].unique())
-    periode_label = {p: f"{BULAN_ORDER[(p % 100) - 1]} {p // 100}" for p in periode_sorted}
-
-    jenis_filter = st.multiselect("Pilih jenis kopi", options=jenis_list, default=jenis_list)
-
-    colp1, colp2 = st.columns(2)
-    with colp1:
-        periode_awal = st.selectbox("Dari bulan", periode_sorted, format_func=lambda p: periode_label[p],
-                                     index=0, key="lap_periode_awal")
-    with colp2:
-        periode_akhir = st.selectbox("Sampai bulan", periode_sorted, format_func=lambda p: periode_label[p],
-                                      index=len(periode_sorted) - 1, key="lap_periode_akhir")
-
-    if periode_awal > periode_akhir:
-        st.error("Bulan awal tidak boleh setelah bulan akhir. Silakan sesuaikan pilihan di atas.")
-    elif not jenis_filter:
-        st.warning("Pilih minimal satu jenis kopi untuk menampilkan laporan.")
-    else:
-        mask = (
-            (daily_periode['periode'] >= periode_awal)
-            & (daily_periode['periode'] <= periode_akhir)
-            & (daily_periode['Jenis Kopi'].isin(jenis_filter))
+if IS_PEMILIK and tab6 is not None:
+    with tab6:
+        st.subheader("Laporan Penjualan")
+        st.caption(
+            "Pilih filter jenis kopi dan rentang periode, lalu unduh ringkasan laporan dalam format Word atau PDF. "
+            "(Data sumber berupa transaksi per bulan, sehingga filter periode di sini berbentuk rentang bulan, bukan tanggal harian.)"
         )
-        df_filtered = daily_periode[mask].copy()
 
-        if df_filtered.empty:
-            st.warning("Tidak ada data untuk kombinasi filter yang dipilih.")
+        daily_periode = daily.copy()
+        daily_periode['bulan_num'] = daily_periode['Bulan'].map(BULAN_MAP)
+        daily_periode['periode'] = daily_periode['Tahun'] * 100 + daily_periode['bulan_num']
+
+        jenis_list = sorted(daily_periode['Jenis Kopi'].unique())
+        periode_sorted = sorted(daily_periode['periode'].unique())
+        periode_label = {p: f"{BULAN_ORDER[(p % 100) - 1]} {p // 100}" for p in periode_sorted}
+
+        jenis_filter = st.multiselect("Pilih jenis kopi", options=jenis_list, default=jenis_list)
+
+        colp1, colp2 = st.columns(2)
+        with colp1:
+            periode_awal = st.selectbox("Dari bulan", periode_sorted, format_func=lambda p: periode_label[p],
+                                         index=0, key="lap_periode_awal")
+        with colp2:
+            periode_akhir = st.selectbox("Sampai bulan", periode_sorted, format_func=lambda p: periode_label[p],
+                                          index=len(periode_sorted) - 1, key="lap_periode_akhir")
+
+        if periode_awal > periode_akhir:
+            st.error("Bulan awal tidak boleh setelah bulan akhir. Silakan sesuaikan pilihan di atas.")
+        elif not jenis_filter:
+            st.warning("Pilih minimal satu jenis kopi untuk menampilkan laporan.")
         else:
-            total_pendapatan = df_filtered['Pendapatan (Rp)'].sum()
-            total_qty = df_filtered['Jumlah Terjual'].sum()
-            rata_harga = (
-                (df_filtered['Harga (Rp)'] * df_filtered['Jumlah Terjual']).sum() / total_qty
-                if total_qty > 0 else 0
+            mask = (
+                (daily_periode['periode'] >= periode_awal)
+                & (daily_periode['periode'] <= periode_akhir)
+                & (daily_periode['Jenis Kopi'].isin(jenis_filter))
             )
+            df_filtered = daily_periode[mask].copy()
 
-            st.markdown("#### Ringkasan Penjualan")
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Total Pendapatan", rupiah(total_pendapatan))
-            c2.metric("Total Unit Terjual", f"{int(total_qty):,}".replace(",", "."))
-            c3.metric("Rata-rata Harga", rupiah(rata_harga))
-
-            ringkasan_jenis = (
-                df_filtered.groupby('Jenis Kopi')
-                .agg(**{'Total Pendapatan (Rp)': ('Pendapatan (Rp)', 'sum'),
-                        'Jumlah Terjual': ('Jumlah Terjual', 'sum')})
-                .reset_index()
-                .sort_values('Total Pendapatan (Rp)', ascending=False)
-            )
-
-            ringkasan_show = ringkasan_jenis.copy()
-            ringkasan_show['Total Pendapatan (Rp)'] = ringkasan_show['Total Pendapatan (Rp)'].apply(rupiah)
-            st.dataframe(ringkasan_show, use_container_width=True, hide_index=True)
-
-            fig_lap = px.bar(ringkasan_jenis, x='Jenis Kopi', y='Total Pendapatan (Rp)',
-                              color_discrete_sequence=[PRIMARY])
-            fig_lap.update_layout(height=360, plot_bgcolor="white")
-            st.plotly_chart(fig_lap, use_container_width=True, config={"displayModeBar": False})
-
-            st.markdown("#### Unduh Laporan")
-            periode_text = f"{periode_label[periode_awal]} – {periode_label[periode_akhir]}"
-            jenis_text = "Semua Jenis Kopi" if len(jenis_filter) == len(jenis_list) else ", ".join(jenis_filter)
-            file_tag = f"{periode_awal}_{periode_akhir}"
-
-            if DOCX_OK:
-                docx_bytes = generate_laporan_docx(periode_text, jenis_text, total_pendapatan,
-                                                     total_qty, rata_harga, ringkasan_jenis)
-                st.download_button(
-                    "⬇️ Unduh Laporan (Word)", data=docx_bytes,
-                    file_name=f"laporan_penjualan_{file_tag}.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                )
+            if df_filtered.empty:
+                st.warning("Tidak ada data untuk kombinasi filter yang dipilih.")
             else:
-                st.warning("Modul `python-docx` belum terpasang. Tambahkan `python-docx` ke requirements.txt.")
-
-            if REPORTLAB_OK:
-                pdf_bytes = generate_laporan_pdf(periode_text, jenis_text, total_pendapatan,
-                                                   total_qty, rata_harga, ringkasan_jenis)
-                st.download_button(
-                    "⬇️ Unduh Laporan (PDF)", data=pdf_bytes,
-                    file_name=f"laporan_penjualan_{file_tag}.pdf",
-                    mime="application/pdf",
+                total_pendapatan = df_filtered['Pendapatan (Rp)'].sum()
+                total_qty = df_filtered['Jumlah Terjual'].sum()
+                rata_harga = (
+                    (df_filtered['Harga (Rp)'] * df_filtered['Jumlah Terjual']).sum() / total_qty
+                    if total_qty > 0 else 0
                 )
-            else:
-                st.warning("Modul `reportlab` belum terpasang. Tambahkan `reportlab` ke requirements.txt.")
+
+                st.markdown("#### Ringkasan Penjualan")
+                c1, c2, c3 = st.columns(3)
+                c1.metric("Total Pendapatan", rupiah(total_pendapatan))
+                c2.metric("Total Unit Terjual", f"{int(total_qty):,}".replace(",", "."))
+                c3.metric("Rata-rata Harga", rupiah(rata_harga))
+
+                ringkasan_jenis = (
+                    df_filtered.groupby('Jenis Kopi')
+                    .agg(**{'Total Pendapatan (Rp)': ('Pendapatan (Rp)', 'sum'),
+                            'Jumlah Terjual': ('Jumlah Terjual', 'sum')})
+                    .reset_index()
+                    .sort_values('Total Pendapatan (Rp)', ascending=False)
+                )
+
+                ringkasan_show = ringkasan_jenis.copy()
+                ringkasan_show['Total Pendapatan (Rp)'] = ringkasan_show['Total Pendapatan (Rp)'].apply(rupiah)
+                st.dataframe(ringkasan_show, use_container_width=True, hide_index=True)
+
+                st.markdown("#### Unduh Laporan")
+                periode_text = f"{periode_label[periode_awal]} – {periode_label[periode_akhir]}"
+                jenis_text = "Semua Jenis Kopi" if len(jenis_filter) == len(jenis_list) else ", ".join(jenis_filter)
+                file_tag = f"{periode_awal}_{periode_akhir}"
+
+                if DOCX_OK:
+                    docx_bytes = generate_laporan_docx(periode_text, jenis_text, total_pendapatan,
+                                                         total_qty, rata_harga, ringkasan_jenis)
+                    st.download_button(
+                        "⬇️ Unduh Laporan (Word)", data=docx_bytes,
+                        file_name=f"laporan_penjualan_{file_tag}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    )
+                else:
+                    st.warning("Modul `python-docx` belum terpasang. Tambahkan `python-docx` ke requirements.txt.")
+
+                if REPORTLAB_OK:
+                    pdf_bytes = generate_laporan_pdf(periode_text, jenis_text, total_pendapatan,
+                                                       total_qty, rata_harga, ringkasan_jenis)
+                    st.download_button(
+                        "⬇️ Unduh Laporan (PDF)", data=pdf_bytes,
+                        file_name=f"laporan_penjualan_{file_tag}.pdf",
+                        mime="application/pdf",
+                    )
+                else:
+                    st.warning("Modul `reportlab` belum terpasang. Tambahkan `reportlab` ke requirements.txt.")
 
 st.divider()
 st.caption("Dashboard ini dijalankan di Google Colab menggunakan Python, Streamlit, Scikit-learn, dan LightGBM ")
