@@ -484,7 +484,7 @@ require_login({
     "BORDER": BORDER,
 })
 @st.cache_data
-def get_base64_image(path):
+def get_base64_image(path, _mtime):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
 
@@ -497,7 +497,7 @@ with st.sidebar:
     st.divider()
 
 if BANNER_MAIN:
-    photo_b64 = get_base64_image(BANNER_MAIN)
+    photo_b64 = get_base64_image(BANNER_MAIN, os.path.getmtime(BANNER_MAIN))
     photo_ext = os.path.splitext(BANNER_MAIN)[1].replace(".", "")
     if photo_ext == "jpg":
         photo_ext = "jpeg"
