@@ -172,21 +172,21 @@ input:-webkit-autofill:focus {{
 
 /* ---- Tabs ---- */
 .stTabs [data-baseweb="tab-list"] {{
-    gap: 2px;
+    gap: 0px;
     border-bottom: 3px solid {BORDER};
 }}
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
     color: {ESPRESSO_SOFT} !important;
     background: transparent !important;
-    border-radius: 999px !important;
-    padding: 6px 10px !important;
+    border-radius: 8px !important;
+    padding: 6px 8px !important;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }}
 .stTabs [data-baseweb="tab"] *,
 .stTabs [role="tab"] * {{
     font-weight: 700 !important;
-    font-size: 0.95rem !important;
+    font-size: 0.9rem !important;
 }}
 .stTabs [data-baseweb="tab"]:hover,
 .stTabs [role="tab"]:hover {{
