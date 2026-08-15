@@ -437,33 +437,16 @@ def forecast_next_month(df):
 
 
 # ---------- LOGIN DUA PERAN ----------
-CREDENTIALS = {
-    "peneliti": {"password": "peneliti123", "role": "Peneliti"},
-    "pemilik": {"password": "pemilik123", "role": "Pemilik/Pengelola"},
-}
+from login import require_login
 
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-    st.session_state.role = None
-
-if not st.session_state.logged_in:
-    st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
-    st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
-    st.subheader("🔒 Login")
-    st.caption("Masukkan akun sesuai peran Anda untuk mengakses dashboard.")
-    with st.form("login_form"):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        submitted = st.form_submit_button("Masuk")
-    if submitted:
-        user = CREDENTIALS.get(username.strip().lower())
-        if user and user["password"] == password:
-            st.session_state.logged_in = True
-            st.session_state.role = user["role"]
-            st.rerun()
-        else:
-            st.error("Username atau password salah.")
-    st.stop()
+require_login({
+    "PRIMARY": PRIMARY,
+    "ACCENT": ACCENT,
+    "CREAM": CREAM,
+    "ESPRESSO": ESPRESSO,
+    "ESPRESSO_SOFT": ESPRESSO_SOFT,
+    "BORDER": BORDER,
+})
 @st.cache_data
 def get_base64_image(path):
     with open(path, "rb") as f:
