@@ -41,7 +41,7 @@ def require_login(colors: dict):
     st.markdown(f"""
     <style>
     .stApp {{
-        background: linear-gradient(135deg, {TEAL_LIGHT} 0%, {TEAL_DARK} 100%) !important;
+        background: linear-gradient(135deg, {PRIMARY} 0%, {CREAM} 55%, {ACCENT} 100%) !important;
         background-attachment: fixed;
     }}
     [data-testid="stHeader"] {{
@@ -55,13 +55,12 @@ def require_login(colors: dict):
         border-radius: 20px 20px 0 0;
         padding: 2.2rem 1rem 1.6rem 1rem;
         text-align: center;
-        box-shadow: 0 -25px 50px rgba(0, 0, 0, 0);
     }}
     [data-testid="stForm"] {{
         background-color: #FFFFFF;
         border-radius: 0 0 20px 20px;
         padding: 1.8rem 2.4rem 1.6rem 2.4rem;
-        box-shadow: 0 25px 50px rgba(19, 60, 51, 0.35);
+        box-shadow: 0 25px 50px rgba(59, 42, 32, 0.3);
         border: 1px solid {BORDER};
         border-top: none;
         margin-top: -2px;
@@ -70,12 +69,13 @@ def require_login(colors: dict):
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.18);
+        background: #FFFFFF;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 0.9rem auto;
         font-size: 30px;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
     }}
     .login-title {{
         text-align: center;
