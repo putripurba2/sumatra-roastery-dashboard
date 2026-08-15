@@ -12,6 +12,23 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import lightgbm as lgb
+import io
+
+try:
+    from docx import Document
+    from docx.shared import Pt
+    DOCX_OK = True
+except ImportError:
+    DOCX_OK = False
+
+try:
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet
+    REPORTLAB_OK = True
+except ImportError:
+    REPORTLAB_OK = False
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -304,10 +321,73 @@ def rupiah(x):
 
 
 def to_excel_bytes(df, sheet_name="Data"):
-    import io
     buf = io.BytesIO()
     with pd.ExcelWriter(buf, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name=sheet_name)
+    return buf.getvalue()
+
+
+def generate_laporan_docx(periode_text, jenis_text, total_pendapatan, total_qty, rata_harga, ringkasan_jenis):
+    doc = Document()
+    doc.add_heading('Laporan Penjualan — Sumatra Roastery Medan', level=1)
+    doc.add_paragraph(f"Periode: {periode_text}")
+    doc.add_paragraph(f"Jenis Kopi: {jenis_text}")
+    doc.add_paragraph(f"Tanggal Cetak: {pd.Timestamp.now().strftime('%d %B %Y')}")
+
+    doc.add_heading('Ringkasan', level=2)
+    doc.add_paragraph(f"Total Pendapatan: {rupiah(total_pendapatan)}")
+    doc.add_paragraph(f"Total Unit Terjual: {int(total_qty):,}".replace(",", "."))
+    doc.add_paragraph(f"Rata-rata Harga: {rupiah(rata_harga)}")
+
+    doc.add_heading('Rincian per Jenis Kopi', level=2)
+    table = doc.add_table(rows=1, cols=3)
+    table.style = 'Light Grid Accent 1'
+    hdr = table.rows[0].cells
+    hdr[0].text, hdr[1].text, hdr[2].text = 'Jenis Kopi', 'Total Pendapatan (Rp)', 'Jumlah Terjual'
+    for _, row in ringkasan_jenis.iterrows():
+        cells = table.add_row().cells
+        cells[0].text = str(row['Jenis Kopi'])
+        cells[1].text = rupiah(row['Total Pendapatan (Rp)'])
+        cells[2].text = str(int(row['Jumlah Terjual']))
+
+    buf = io.BytesIO()
+    doc.save(buf)
+    return buf.getvalue()
+
+
+def generate_laporan_pdf(periode_text, jenis_text, total_pendapatan, total_qty, rata_harga, ringkasan_jenis):
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4)
+    styles = getSampleStyleSheet()
+    elements = [
+        Paragraph("Laporan Penjualan — Sumatra Roastery Medan", styles['Title']),
+        Spacer(1, 12),
+        Paragraph(f"Periode: {periode_text}", styles['Normal']),
+        Paragraph(f"Jenis Kopi: {jenis_text}", styles['Normal']),
+        Paragraph(f"Tanggal Cetak: {pd.Timestamp.now().strftime('%d %B %Y')}", styles['Normal']),
+        Spacer(1, 12),
+        Paragraph("Ringkasan", styles['Heading2']),
+        Paragraph(f"Total Pendapatan: {rupiah(total_pendapatan)}", styles['Normal']),
+        Paragraph(f"Total Unit Terjual: {int(total_qty):,}".replace(",", "."), styles['Normal']),
+        Paragraph(f"Rata-rata Harga: {rupiah(rata_harga)}", styles['Normal']),
+        Spacer(1, 12),
+        Paragraph("Rincian per Jenis Kopi", styles['Heading2']),
+        Spacer(1, 6),
+    ]
+
+    data = [['Jenis Kopi', 'Total Pendapatan (Rp)', 'Jumlah Terjual']]
+    for _, row in ringkasan_jenis.iterrows():
+        data.append([row['Jenis Kopi'], rupiah(row['Total Pendapatan (Rp)']), str(int(row['Jumlah Terjual']))])
+    tbl = Table(data, hAlign='LEFT')
+    tbl.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor(PRIMARY)),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+    ]))
+    elements.append(tbl)
+    doc.build(elements)
     return buf.getvalue()
 
 
@@ -492,7 +572,7 @@ df, rekap, avg_overall = build_dataset(daily, per_jenis, rekap_raw)
 results, fi, test_out, split_periode = train_models(df, split_ratio)
 forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan", "📄 Laporan"])
 
 components.html("""
 <script>
@@ -568,31 +648,83 @@ with tab2:
     st.plotly_chart(fig2, use_container_width=True)
 
 with tab3:
-    st.subheader("Perbandingan Performa Model")
-    res_df = pd.DataFrame(results).T
-    res_df.columns = ['MAE', 'RMSE', 'R²', 'Training Time (detik)']
-    best_model = res_df['MAE'].idxmin()
-    st.dataframe(res_df.style.format({'MAE': '{:,.0f}', 'RMSE': '{:,.0f}', 'R²': '{:.4f}', 'Training Time (detik)': '{:.4f}'}),
-                 use_container_width=True)
-    st.success(f"Model dengan performa terbaik (MAE terendah): **{best_model}**")
+    st.subheader("🔮 Prediksi & Evaluasi Model")
+    st.caption("Hasil prediksi tiap model ditampilkan terpisah, lalu dibandingkan performanya di sub-tab terakhir.")
 
-    st.subheader("Aktual vs Prediksi pada Data Uji")
-    jenis_pilih = st.selectbox("Pilih jenis kopi", sorted(test_out['Jenis Kopi'].unique()))
-    sub = test_out[test_out['Jenis Kopi'] == jenis_pilih].copy()
-    sub['label'] = sub['Bulan'].str[:3] + " " + sub['Tahun'].astype(str)
+    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 Random Forest", "💡 LightGBM", "📊 Perbandingan Performa"])
 
-    fig3 = go.Figure()
-    fig3.add_trace(go.Scatter(x=sub['label'], y=sub['Total Pendapatan (Rp)'], name="Aktual", mode='lines+markers', line=dict(color="#333", width=3)))
-    fig3.add_trace(go.Scatter(x=sub['label'], y=sub['Prediksi Random Forest'], name="Prediksi RF", mode='lines+markers', line=dict(color=PRIMARY, dash='dash')))
-    fig3.add_trace(go.Scatter(x=sub['label'], y=sub['Prediksi LightGBM'], name="Prediksi LightGBM", mode='lines+markers', line=dict(color=ACCENT, dash='dot')))
-    fig3.update_layout(height=420, plot_bgcolor="white", yaxis_title="Pendapatan (Rp)")
-    st.plotly_chart(fig3, use_container_width=True)
+    # ---------- Sub-tab: Random Forest ----------
+    with subtab_rf:
+        st.markdown("#### Hasil Prediksi Random Forest — Data Uji")
+        jenis_rf = st.selectbox("Pilih jenis kopi", sorted(test_out['Jenis Kopi'].unique()), key="jenis_rf")
+        sub_rf = test_out[test_out['Jenis Kopi'] == jenis_rf].copy()
+        sub_rf['label'] = sub_rf['Bulan'].str[:3] + " " + sub_rf['Tahun'].astype(str)
 
-    with st.expander("Lihat tabel hasil prediksi lengkap"):
-        test_show = test_out.copy()
-        for col in ['Total Pendapatan (Rp)', 'Prediksi Random Forest', 'Prediksi LightGBM']:
-            test_show[col] = test_show[col].apply(rupiah)
-        st.dataframe(test_show, use_container_width=True, hide_index=True)
+        fig_rf = go.Figure()
+        fig_rf.add_trace(go.Scatter(x=sub_rf['label'], y=sub_rf['Total Pendapatan (Rp)'], name="Aktual",
+                                     mode='lines+markers', line=dict(color="#333", width=3)))
+        fig_rf.add_trace(go.Scatter(x=sub_rf['label'], y=sub_rf['Prediksi Random Forest'], name="Prediksi Random Forest",
+                                     mode='lines+markers', line=dict(color=PRIMARY, dash='dash')))
+        fig_rf.update_layout(height=420, plot_bgcolor="white", yaxis_title="Pendapatan (Rp)")
+        st.plotly_chart(fig_rf, use_container_width=True)
+
+        with st.expander("Lihat tabel hasil prediksi Random Forest"):
+            rf_show = test_out[['Tahun', 'Bulan', 'Jenis Kopi', 'Total Pendapatan (Rp)', 'Prediksi Random Forest']].copy()
+            rf_show['Total Pendapatan (Rp)'] = rf_show['Total Pendapatan (Rp)'].apply(rupiah)
+            rf_show['Prediksi Random Forest'] = rf_show['Prediksi Random Forest'].apply(rupiah)
+            st.dataframe(rf_show, use_container_width=True, hide_index=True)
+
+    # ---------- Sub-tab: LightGBM ----------
+    with subtab_lgb:
+        st.markdown("#### Hasil Prediksi LightGBM — Data Uji")
+        jenis_lgb = st.selectbox("Pilih jenis kopi", sorted(test_out['Jenis Kopi'].unique()), key="jenis_lgb")
+        sub_lgb = test_out[test_out['Jenis Kopi'] == jenis_lgb].copy()
+        sub_lgb['label'] = sub_lgb['Bulan'].str[:3] + " " + sub_lgb['Tahun'].astype(str)
+
+        fig_lgb = go.Figure()
+        fig_lgb.add_trace(go.Scatter(x=sub_lgb['label'], y=sub_lgb['Total Pendapatan (Rp)'], name="Aktual",
+                                      mode='lines+markers', line=dict(color="#333", width=3)))
+        fig_lgb.add_trace(go.Scatter(x=sub_lgb['label'], y=sub_lgb['Prediksi LightGBM'], name="Prediksi LightGBM",
+                                      mode='lines+markers', line=dict(color=ACCENT, dash='dot')))
+        fig_lgb.update_layout(height=420, plot_bgcolor="white", yaxis_title="Pendapatan (Rp)")
+        st.plotly_chart(fig_lgb, use_container_width=True)
+
+        with st.expander("Lihat tabel hasil prediksi LightGBM"):
+            lgb_show = test_out[['Tahun', 'Bulan', 'Jenis Kopi', 'Total Pendapatan (Rp)', 'Prediksi LightGBM']].copy()
+            lgb_show['Total Pendapatan (Rp)'] = lgb_show['Total Pendapatan (Rp)'].apply(rupiah)
+            lgb_show['Prediksi LightGBM'] = lgb_show['Prediksi LightGBM'].apply(rupiah)
+            st.dataframe(lgb_show, use_container_width=True, hide_index=True)
+
+    # ---------- Sub-tab: Perbandingan Performa ----------
+    with subtab_perf:
+        st.markdown("#### Perbandingan Performa Model")
+        res_df = pd.DataFrame(results).T
+        res_df.columns = ['MAE', 'RMSE', 'R²', 'Training Time (detik)']
+        best_model = res_df['MAE'].idxmin()
+        st.dataframe(res_df.style.format({'MAE': '{:,.0f}', 'RMSE': '{:,.0f}', 'R²': '{:.4f}', 'Training Time (detik)': '{:.4f}'}),
+                     use_container_width=True)
+        st.success(f"Model dengan performa terbaik (MAE terendah): **{best_model}**")
+
+        st.markdown("#### Aktual vs Prediksi — Kedua Model (Data Uji)")
+        jenis_perf = st.selectbox("Pilih jenis kopi", sorted(test_out['Jenis Kopi'].unique()), key="jenis_perf")
+        sub_perf = test_out[test_out['Jenis Kopi'] == jenis_perf].copy()
+        sub_perf['label'] = sub_perf['Bulan'].str[:3] + " " + sub_perf['Tahun'].astype(str)
+
+        fig_perf = go.Figure()
+        fig_perf.add_trace(go.Scatter(x=sub_perf['label'], y=sub_perf['Total Pendapatan (Rp)'], name="Aktual",
+                                       mode='lines+markers', line=dict(color="#333", width=3)))
+        fig_perf.add_trace(go.Scatter(x=sub_perf['label'], y=sub_perf['Prediksi Random Forest'], name="Prediksi RF",
+                                       mode='lines+markers', line=dict(color=PRIMARY, dash='dash')))
+        fig_perf.add_trace(go.Scatter(x=sub_perf['label'], y=sub_perf['Prediksi LightGBM'], name="Prediksi LightGBM",
+                                       mode='lines+markers', line=dict(color=ACCENT, dash='dot')))
+        fig_perf.update_layout(height=420, plot_bgcolor="white", yaxis_title="Pendapatan (Rp)")
+        st.plotly_chart(fig_perf, use_container_width=True)
+
+        with st.expander("Lihat tabel hasil prediksi lengkap (kedua model)"):
+            test_show = test_out.copy()
+            for col in ['Total Pendapatan (Rp)', 'Prediksi Random Forest', 'Prediksi LightGBM']:
+                test_show[col] = test_show[col].apply(rupiah)
+            st.dataframe(test_show, use_container_width=True, hide_index=True)
 
 with tab4:
     st.subheader("Feature Importance — Random Forest vs LightGBM")
@@ -629,6 +761,105 @@ with tab5:
     st.plotly_chart(fig5, use_container_width=True)
 
     st.info("Catatan asumsi: harga rata-rata memakai rata-rata 3 bulan terakhir per jenis kopi, dan kategori tren memakai kategori bulan terakhir yang datanya tersedia (karena kategori tren bulan depan belum bisa diketahui sebelum pendapatan aktualnya terjadi).")
+
+with tab6:
+    st.subheader("Laporan Penjualan")
+    st.caption(
+        "Pilih filter jenis kopi dan rentang periode, lalu unduh ringkasan laporan dalam format Word atau PDF. "
+        "(Data sumber berupa transaksi per bulan, sehingga filter periode di sini berbentuk rentang bulan, bukan tanggal harian.)"
+    )
+
+    daily_periode = daily.copy()
+    daily_periode['bulan_num'] = daily_periode['Bulan'].map(BULAN_MAP)
+    daily_periode['periode'] = daily_periode['Tahun'] * 100 + daily_periode['bulan_num']
+
+    jenis_list = sorted(daily_periode['Jenis Kopi'].unique())
+    periode_sorted = sorted(daily_periode['periode'].unique())
+    periode_label = {p: f"{BULAN_ORDER[(p % 100) - 1]} {p // 100}" for p in periode_sorted}
+
+    jenis_filter = st.multiselect("Pilih jenis kopi", options=jenis_list, default=jenis_list)
+
+    colp1, colp2 = st.columns(2)
+    with colp1:
+        periode_awal = st.selectbox("Dari bulan", periode_sorted, format_func=lambda p: periode_label[p],
+                                     index=0, key="lap_periode_awal")
+    with colp2:
+        periode_akhir = st.selectbox("Sampai bulan", periode_sorted, format_func=lambda p: periode_label[p],
+                                      index=len(periode_sorted) - 1, key="lap_periode_akhir")
+
+    if periode_awal > periode_akhir:
+        st.error("Bulan awal tidak boleh setelah bulan akhir. Silakan sesuaikan pilihan di atas.")
+    elif not jenis_filter:
+        st.warning("Pilih minimal satu jenis kopi untuk menampilkan laporan.")
+    else:
+        mask = (
+            (daily_periode['periode'] >= periode_awal)
+            & (daily_periode['periode'] <= periode_akhir)
+            & (daily_periode['Jenis Kopi'].isin(jenis_filter))
+        )
+        df_filtered = daily_periode[mask].copy()
+
+        if df_filtered.empty:
+            st.warning("Tidak ada data untuk kombinasi filter yang dipilih.")
+        else:
+            total_pendapatan = df_filtered['Pendapatan (Rp)'].sum()
+            total_qty = df_filtered['Jumlah Terjual'].sum()
+            rata_harga = (
+                (df_filtered['Harga (Rp)'] * df_filtered['Jumlah Terjual']).sum() / total_qty
+                if total_qty > 0 else 0
+            )
+
+            st.markdown("#### Ringkasan Penjualan")
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Total Pendapatan", rupiah(total_pendapatan))
+            c2.metric("Total Unit Terjual", f"{int(total_qty):,}".replace(",", "."))
+            c3.metric("Rata-rata Harga", rupiah(rata_harga))
+
+            ringkasan_jenis = (
+                df_filtered.groupby('Jenis Kopi')
+                .agg(**{'Total Pendapatan (Rp)': ('Pendapatan (Rp)', 'sum'),
+                        'Jumlah Terjual': ('Jumlah Terjual', 'sum')})
+                .reset_index()
+                .sort_values('Total Pendapatan (Rp)', ascending=False)
+            )
+
+            ringkasan_show = ringkasan_jenis.copy()
+            ringkasan_show['Total Pendapatan (Rp)'] = ringkasan_show['Total Pendapatan (Rp)'].apply(rupiah)
+            st.dataframe(ringkasan_show, use_container_width=True, hide_index=True)
+
+            fig_lap = px.bar(ringkasan_jenis, x='Jenis Kopi', y='Total Pendapatan (Rp)',
+                              color_discrete_sequence=[PRIMARY])
+            fig_lap.update_layout(height=360, plot_bgcolor="white")
+            st.plotly_chart(fig_lap, use_container_width=True)
+
+            st.markdown("#### Unduh Laporan")
+            periode_text = f"{periode_label[periode_awal]} – {periode_label[periode_akhir]}"
+            jenis_text = "Semua Jenis Kopi" if len(jenis_filter) == len(jenis_list) else ", ".join(jenis_filter)
+            file_tag = f"{periode_awal}_{periode_akhir}"
+
+            colw, colpdf = st.columns(2)
+            with colw:
+                if DOCX_OK:
+                    docx_bytes = generate_laporan_docx(periode_text, jenis_text, total_pendapatan,
+                                                         total_qty, rata_harga, ringkasan_jenis)
+                    st.download_button(
+                        "⬇️ Unduh Laporan (Word)", data=docx_bytes,
+                        file_name=f"laporan_penjualan_{file_tag}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    )
+                else:
+                    st.warning("Modul `python-docx` belum terpasang. Tambahkan `python-docx` ke requirements.txt.")
+            with colpdf:
+                if REPORTLAB_OK:
+                    pdf_bytes = generate_laporan_pdf(periode_text, jenis_text, total_pendapatan,
+                                                       total_qty, rata_harga, ringkasan_jenis)
+                    st.download_button(
+                        "⬇️ Unduh Laporan (PDF)", data=pdf_bytes,
+                        file_name=f"laporan_penjualan_{file_tag}.pdf",
+                        mime="application/pdf",
+                    )
+                else:
+                    st.warning("Modul `reportlab` belum terpasang. Tambahkan `reportlab` ke requirements.txt.")
 
 st.divider()
 st.caption("Dashboard ini dijalankan di Google Colab menggunakan Python, Streamlit, Scikit-learn, dan LightGBM ")
