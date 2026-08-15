@@ -488,6 +488,13 @@ def get_base64_image(path):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
 
+from navbar import render_navbar
+
+render_navbar({
+    "PRIMARY": PRIMARY,
+    "CREAM": CREAM,
+    "ESPRESSO": ESPRESSO,
+})
 
 if BANNER_MAIN:
     photo_b64 = get_base64_image(BANNER_MAIN)
@@ -549,14 +556,6 @@ else:
         f"({SCRIPT_DIR}). Pastikan file gambar ini sudah di-upload/push ke repository "
         "yang sama dengan app.py, sejajar (bukan di dalam subfolder lain)."
     )
-
-from navbar import render_navbar
-
-render_navbar({
-    "PRIMARY": PRIMARY,
-    "CREAM": CREAM,
-    "ESPRESSO": ESPRESSO,
-})
 
 IS_PENELITI = st.session_state.role == "Peneliti"
 
