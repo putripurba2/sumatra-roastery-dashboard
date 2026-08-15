@@ -488,13 +488,13 @@ def get_base64_image(path):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
 
-from navbar import render_navbar
-
-render_navbar({
-    "PRIMARY": PRIMARY,
-    "CREAM": CREAM,
-    "ESPRESSO": ESPRESSO,
-})
+with st.sidebar:
+    st.markdown(f"Login sebagai: **{st.session_state.role}**")
+    if st.button("Logout"):
+        st.session_state.logged_in = False
+        st.session_state.role = None
+        st.rerun()
+    st.divider()
 
 if BANNER_MAIN:
     photo_b64 = get_base64_image(BANNER_MAIN)
