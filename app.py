@@ -172,14 +172,15 @@ input:-webkit-autofill:focus {{
 
 /* ---- Tabs ---- */
 .stTabs [data-baseweb="tab-list"] {{
-    gap: 4px;
+    gap: 6px;
     border-bottom: 3px solid {BORDER};
 }}
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
     color: {ESPRESSO_SOFT} !important;
-    border-radius: 8px 8px 0 0 !important;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    border-radius: 999px !important;
+    padding: 6px 16px !important;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }}
 .stTabs [data-baseweb="tab"] *,
 .stTabs [role="tab"] * {{
@@ -189,12 +190,14 @@ input:-webkit-autofill:focus {{
 .stTabs [data-baseweb="tab"]:hover,
 .stTabs [role="tab"]:hover {{
     color: {ESPRESSO} !important;
-    background-color: {GOLD} !important;
+    background: linear-gradient(135deg, #B79CED 0%, #F0A8C9 100%) !important;
+    box-shadow: 0 3px 8px rgba(120, 80, 160, 0.25);
 }}
 .stTabs [aria-selected="true"] {{
     color: {ESPRESSO} !important;
-    background-color: {GOLD} !important;
-    border-bottom: 4px solid {GOLD} !important;
+    background: linear-gradient(135deg, #B79CED 0%, #F0A8C9 100%) !important;
+    box-shadow: 0 3px 8px rgba(120, 80, 160, 0.25);
+    border-bottom: none !important;
 }}
 
 /* ---- Metrics ---- */
@@ -525,7 +528,6 @@ else:
     )
 
 with st.sidebar:
-    st.markdown(f"Login sebagai: **{st.session_state.role}**")
     if st.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.role = None
