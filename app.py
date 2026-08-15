@@ -638,10 +638,10 @@ with tab1:
     st.dataframe(per_jenis_show, use_container_width=True, hide_index=True)
 
     st.subheader("Data Transaksi Harian")
-    daily_show = daily.head(50).copy()
+    daily_show = daily.copy()
     daily_show['Harga (Rp)'] = daily_show['Harga (Rp)'].apply(rupiah)
     daily_show['Pendapatan (Rp)'] = daily_show['Pendapatan (Rp)'].apply(rupiah)
-    st.dataframe(daily_show, use_container_width=True, hide_index=True)
+    st.dataframe(daily_show, use_container_width=True, hide_index=True, height=400)
     st.download_button("⬇️ Download Excel — Data Transaksi Harian",
                         data=to_excel_bytes(daily_show, "Transaksi Harian"),
                         file_name="data_transaksi_harian.xlsx",
