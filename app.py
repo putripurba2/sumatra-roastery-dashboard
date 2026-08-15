@@ -57,6 +57,7 @@ CREAM_DARK = "#F0E8DC"
 ESPRESSO = "#3B2A20"
 ESPRESSO_SOFT = "#5C4633"
 BORDER = "#D9C9B4"
+GOLD = "#E0A526"
 
 st.markdown(f"""
 <style>
@@ -177,15 +178,23 @@ input:-webkit-autofill:focus {{
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
     color: {ESPRESSO_SOFT} !important;
+    border-radius: 8px 8px 0 0 !important;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }}
 .stTabs [data-baseweb="tab"] *,
 .stTabs [role="tab"] * {{
     font-weight: 700 !important;
     font-size: 1rem !important;
 }}
+.stTabs [data-baseweb="tab"]:hover,
+.stTabs [role="tab"]:hover {{
+    color: {ESPRESSO} !important;
+    background-color: {GOLD} !important;
+}}
 .stTabs [aria-selected="true"] {{
-    color: {PRIMARY} !important;
-    border-bottom: 4px solid {PRIMARY} !important;
+    color: {ESPRESSO} !important;
+    background-color: {GOLD} !important;
+    border-bottom: 4px solid {GOLD} !important;
 }}
 
 /* ---- Metrics ---- */
@@ -516,7 +525,7 @@ else:
     )
 
 with st.sidebar:
-    st.success(f"Login sebagai: **{st.session_state.role}**")
+    st.markdown(f"Login sebagai: **{st.session_state.role}**")
     if st.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.role = None
