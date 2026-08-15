@@ -26,6 +26,9 @@ def require_login(colors: dict):
     ESPRESSO_SOFT = colors["ESPRESSO_SOFT"]
     BORDER = colors["BORDER"]
 
+    TEAL = "#2E8F84"
+    TEAL_DARK = "#256F66"
+
     if "logged_in" not in st.session_state:
         st.session_state.logged_in = False
         st.session_state.role = None
@@ -53,16 +56,23 @@ def require_login(colors: dict):
         box-shadow: 0 25px 50px rgba(59, 42, 32, 0.28);
         border: 1px solid {BORDER};
     }}
-    .login-icon {{
-        font-size: 46px;
-        text-align: center;
-        margin-bottom: 0.3rem;
+    .login-icon-badge {{
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, {TEAL} 0%, {TEAL_DARK} 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.9rem auto;
+        font-size: 30px;
+        box-shadow: 0 8px 18px rgba(46, 143, 132, 0.35);
     }}
     .login-title {{
         text-align: center;
         font-size: 1.4rem;
         font-weight: 800;
-        color: {ESPRESSO};
+        color: {TEAL_DARK};
         letter-spacing: 1px;
         margin-bottom: 0.15rem;
     }}
@@ -78,18 +88,28 @@ def require_login(colors: dict):
         color: #A8998A;
         margin-top: 1.2rem;
     }}
+    [data-testid="stForm"] .stTextInput input:focus {{
+        border-color: {TEAL} !important;
+        box-shadow: 0 0 0 1px {TEAL} !important;
+    }}
+    [data-testid="stForm"] .stFormSubmitButton button {{
+        background: linear-gradient(135deg, {TEAL} 0%, {TEAL_DARK} 100%) !important;
+    }}
+    [data-testid="stForm"] .stFormSubmitButton button:hover {{
+        background: {TEAL_DARK} !important;
+    }}
     </style>
     """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 1.1, 1])
     with col2:
         with st.form("login_form"):
-            st.markdown('<div class="login-icon">☕</div>', unsafe_allow_html=True)
+            st.markdown('<div class="login-icon-badge">☕</div>', unsafe_allow_html=True)
             st.markdown('<div class="login-title">SUMATRA ROASTERY</div>', unsafe_allow_html=True)
             st.markdown('<div class="login-subtitle">Dashboard Analisis & Prediksi Pendapatan</div>', unsafe_allow_html=True)
-            username = st.text_input("Username")
-            password = st.text_input("Password", type="password")
-            submitted = st.form_submit_button("Masuk", use_container_width=True)
+            username = st.text_input("Username", placeholder="Masukkan Username")
+            password = st.text_input("Password", type="password", placeholder="Masukkan Password")
+            submitted = st.form_submit_button("➜ Login", use_container_width=True)
         st.markdown('<div class="login-footer">© 2026 Sumatra Roastery Medan</div>', unsafe_allow_html=True)
 
     if submitted:
