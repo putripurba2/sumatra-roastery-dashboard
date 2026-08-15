@@ -198,6 +198,9 @@ input:-webkit-autofill:focus {{
     box-shadow: 0 3px 8px rgba(46, 143, 132, 0.35);
     border-bottom: none !important;
 }}
+.stTabs [aria-selected="true"] * {{
+    color: #FFFFFF !important;
+}}
 
 /* ---- Metrics ---- */
 [data-testid="stMetric"] {{
@@ -612,6 +615,10 @@ with tab1:
     daily_show['Harga (Rp)'] = daily_show['Harga (Rp)'].apply(rupiah)
     daily_show['Pendapatan (Rp)'] = daily_show['Pendapatan (Rp)'].apply(rupiah)
     st.dataframe(daily_show, use_container_width=True, hide_index=True)
+    st.download_button("⬇️ Download Excel — Data Transaksi Harian",
+                        data=to_excel_bytes(daily_show, "Transaksi Harian"),
+                        file_name="data_transaksi_harian.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 with tab2:
     st.subheader("Tren Pendapatan Bulanan (2023–2025)")
