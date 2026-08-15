@@ -177,25 +177,25 @@ input:-webkit-autofill:focus {{
 }}
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
-    color: {ESPRESSO_SOFT} !important;
+    color: #000000 !important;
     background: transparent !important;
     border-radius: 8px !important;
-    padding: 6px 8px !important;
+    padding: 5px 6px !important;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }}
 .stTabs [data-baseweb="tab"] *,
 .stTabs [role="tab"] * {{
     font-weight: 700 !important;
-    font-size: 0.9rem !important;
+    font-size: 0.85rem !important;
 }}
 .stTabs [data-baseweb="tab"]:hover,
 .stTabs [role="tab"]:hover {{
-    color: {ESPRESSO} !important;
+    color: #000000 !important;
 }}
 .stTabs [aria-selected="true"] {{
-    color: #D8B26C !important;
-    background: {PRIMARY} !important;
-    box-shadow: 0 3px 8px rgba(15, 107, 92, 0.35);
+    color: #FFFFFF !important;
+    background: #2E8F84 !important;
+    box-shadow: 0 3px 8px rgba(46, 143, 132, 0.35);
     border-bottom: none !important;
 }}
 
@@ -612,10 +612,6 @@ with tab1:
     daily_show['Harga (Rp)'] = daily_show['Harga (Rp)'].apply(rupiah)
     daily_show['Pendapatan (Rp)'] = daily_show['Pendapatan (Rp)'].apply(rupiah)
     st.dataframe(daily_show, use_container_width=True, hide_index=True)
-    st.download_button("⬇️ Download Excel — Data Transaksi Harian",
-                        data=to_excel_bytes(daily_show, "Transaksi Harian"),
-                        file_name="data_transaksi_harian.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 with tab2:
     st.subheader("Tren Pendapatan Bulanan (2023–2025)")
