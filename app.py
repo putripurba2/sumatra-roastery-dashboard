@@ -194,8 +194,8 @@ input:-webkit-autofill:focus {{
 }}
 .stTabs [aria-selected="true"] {{
     color: #FFFFFF !important;
-    background: linear-gradient(135deg, #1E4D3F 0%, #1B2A4A 100%) !important;
-    box-shadow: 0 3px 8px rgba(20, 30, 50, 0.3);
+    background: linear-gradient(135deg, {PRIMARY} 0%, #0A4E42 100%) !important;
+    box-shadow: 0 3px 8px rgba(15, 107, 92, 0.35);
     border-bottom: none !important;
 }}
 
