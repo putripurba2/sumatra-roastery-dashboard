@@ -62,7 +62,8 @@ st.markdown(f"""
 <style>
 /* ---- Base app background & typography ---- */
 .stApp {{
-    background-color: {CREAM};
+    background: linear-gradient(135deg, {PRIMARY} 0%, {CREAM} 55%, {ACCENT} 100%) !important;
+    background-attachment: fixed;
 }}
 html, body, [class*="css"] {{
     color: {ESPRESSO} !important;
@@ -71,7 +72,7 @@ html, body, [class*="css"] {{
 
 /* ---- Kill the stray white top toolbar ---- */
 [data-testid="stHeader"] {{
-    background-color: {CREAM};
+    background-color: transparent !important;
 }}
 [data-testid="stToolbar"] {{
     background-color: transparent;
@@ -84,7 +85,7 @@ html, body, [class*="css"] {{
 
 /* ---- Sidebar ---- */
 [data-testid="stSidebar"] {{
-    background-color: {CREAM_DARK};
+    background: linear-gradient(180deg, {PRIMARY} 0%, {CREAM} 55%, {ACCENT} 100%) !important;
     border-right: 1px solid {BORDER};
 }}
 [data-testid="stSidebar"] * {{
