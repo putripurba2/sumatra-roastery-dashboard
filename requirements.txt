@@ -5,3 +5,5 @@ scikit-learn
 lightgbm
 plotly
 openpyxl
+python-docx
+reportlab
