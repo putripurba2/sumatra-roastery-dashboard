@@ -608,15 +608,20 @@ with tab1:
 
 with tab2:
     st.subheader("Tren Pendapatan Bulanan (2023–2025)")
-    bar_colors = [PRIMARY if k == 'Tinggi' else ACCENT for k in rekap['kategori_tren']]
     labels = [f"{b[:3]} {t}" for b, t in zip(rekap['Bulan'], rekap['Tahun'])]
+    nilai_tinggi = np.where(rekap['kategori_tren'] == 'Tinggi', rekap['Total Pendapatan (Rp)'], np.nan)
+    nilai_rendah = np.where(rekap['kategori_tren'] == 'Rendah', rekap['Total Pendapatan (Rp)'], np.nan)
 
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=labels, y=rekap['Total Pendapatan (Rp)'], marker_color=bar_colors, name="Pendapatan"))
+    fig.add_trace(go.Bar(x=labels, y=nilai_tinggi, marker_color=PRIMARY,
+                          name="Tinggi (≥ rata-rata)"))
+    fig.add_trace(go.Bar(x=labels, y=nilai_rendah, marker_color=ACCENT,
+                          name="Rendah (< rata-rata)"))
     fig.add_hline(y=avg_overall, line_dash="dash", line_color="#888",
                   annotation_text=f"Rata-rata: {rupiah(avg_overall)}")
     fig.update_layout(height=460, plot_bgcolor="white", yaxis_title="Pendapatan (Rp)",
-                       xaxis_tickangle=-60, showlegend=False)
+                       xaxis_tickangle=-60, showlegend=True,
+                       legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
     st.plotly_chart(fig, use_container_width=True)
 
     c1, c2, c3 = st.columns(3)
