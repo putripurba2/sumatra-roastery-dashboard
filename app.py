@@ -178,6 +178,7 @@ input:-webkit-autofill:focus {{
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
     color: {ESPRESSO_SOFT} !important;
+    background: transparent !important;
     border-radius: 999px !important;
     padding: 6px 16px !important;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
@@ -190,13 +191,11 @@ input:-webkit-autofill:focus {{
 .stTabs [data-baseweb="tab"]:hover,
 .stTabs [role="tab"]:hover {{
     color: {ESPRESSO} !important;
-    background: linear-gradient(135deg, #B79CED 0%, #F0A8C9 100%) !important;
-    box-shadow: 0 3px 8px rgba(120, 80, 160, 0.25);
 }}
 .stTabs [aria-selected="true"] {{
-    color: {ESPRESSO} !important;
-    background: linear-gradient(135deg, #B79CED 0%, #F0A8C9 100%) !important;
-    box-shadow: 0 3px 8px rgba(120, 80, 160, 0.25);
+    color: #FFFFFF !important;
+    background: linear-gradient(135deg, #1E4D3F 0%, #1B2A4A 100%) !important;
+    box-shadow: 0 3px 8px rgba(20, 30, 50, 0.3);
     border-bottom: none !important;
 }}
 
