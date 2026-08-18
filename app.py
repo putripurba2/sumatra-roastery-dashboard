@@ -58,7 +58,6 @@ ESPRESSO = "#3B2A20"
 ESPRESSO_SOFT = "#5C4633"
 BORDER = "#D9C9B4"
 GOLD = "#E0A526"
-GOLD_DARK = "#C98A1B"
 
 st.markdown(f"""
 <style>
@@ -192,22 +191,17 @@ input:-webkit-autofill:focus {{
     color: {ESPRESSO_SOFT} !important;
 }}
 
-/* ---- Tabs: full navbar-style pill bar ---- */
+/* ---- Tabs ---- */
 .stTabs [data-baseweb="tab-list"] {{
-    gap: 6px;
-    border-bottom: none !important;
-    background: linear-gradient(135deg, #C9E6DF 0%, {CREAM_DARK} 55%, #F7D9BE 100%);
-    border: 1px solid {BORDER};
-    border-radius: 14px;
-    padding: 8px;
-    box-shadow: 0 4px 12px rgba(59, 42, 32, 0.08);
+    gap: 0px;
+    border-bottom: 3px solid {BORDER};
 }}
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
-    color: {ESPRESSO} !important;
+    color: #000000 !important;
     background: transparent !important;
-    border-radius: 10px !important;
-    padding: 8px 14px !important;
+    border-radius: 8px !important;
+    padding: 5px 6px !important;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }}
 .stTabs [data-baseweb="tab"] *,
@@ -217,23 +211,16 @@ input:-webkit-autofill:focus {{
 }}
 .stTabs [data-baseweb="tab"]:hover,
 .stTabs [role="tab"]:hover {{
-    color: {ESPRESSO} !important;
-    background: rgba(255, 255, 255, 0.5) !important;
+    color: #000000 !important;
 }}
 .stTabs [aria-selected="true"] {{
     color: #FFFFFF !important;
     background: linear-gradient(135deg, #4FA89D 0%, #2E7268 100%) !important;
-    box-shadow: 0 3px 8px rgba(46, 143, 132, 0.30);
+    box-shadow: 0 3px 8px rgba(46, 143, 132, 0.25);
     border-bottom: none !important;
 }}
 .stTabs [aria-selected="true"] * {{
     color: #FFFFFF !important;
-}}
-.stTabs [data-baseweb="tab-highlight"] {{
-    display: none !important;
-}}
-.stTabs [data-baseweb="tab-border"] {{
-    display: none !important;
 }}
 
 /* ---- Metrics ---- */
@@ -606,9 +593,9 @@ forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 IS_PEMILIK = st.session_state.role == "Pemilik/Pengelola"
 
 if IS_PEMILIK:
-    tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan", "📄 Laporan"])
+    tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 Beranda", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan", "📄 Laporan"])
 else:
-    tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
+    tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Beranda", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
     tab6 = None
 
 components.html("""
