@@ -483,14 +483,17 @@ function stretchTopLevelTabBar() {
             tabList.style.removeProperty('width');
 
             const tabRect = tabList.getBoundingClientRect();
-            const leftGap = tabRect.left - leftBoundary;
-            const rightGap = rightBoundary - tabRect.right;
+            const OVERSHOOT = 2; // px lebihan supaya tidak ada celah 1-2px akibat pembulatan subpixel
+            const leftGap = tabRect.left - leftBoundary + OVERSHOOT;
+            const rightGap = rightBoundary - tabRect.right + OVERSHOOT;
             if (Math.abs(leftGap) < 1 && Math.abs(rightGap) < 1) return;
 
             tabList.style.setProperty('box-sizing', 'border-box', 'important');
             tabList.style.setProperty('margin-left', (-leftGap) + 'px', 'important');
             tabList.style.setProperty('margin-right', (-rightGap) + 'px', 'important');
             tabList.style.setProperty('width', (tabRect.width + leftGap + rightGap) + 'px', 'important');
+            // Kotakkan ujungnya (bukan bulat) supaya tidak ada celah warna latar yang mengintip di lengkungan.
+            tabList.style.setProperty('border-radius', '0px', 'important');
         });
     } catch (err) {
         // akses cross-origin diblokir browser, abaikan
