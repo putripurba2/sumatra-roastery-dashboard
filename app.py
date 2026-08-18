@@ -427,8 +427,40 @@ function attachTabAutoScroll() {
         // akses cross-origin diblokir browser, abaikan
     }
 }
+
+function stretchTabBars() {
+    try {
+        const doc = window.parent.document;
+        const mainEl = doc.querySelector('[data-testid="stMain"]')
+            || doc.querySelector('[data-testid="stAppViewContainer"] .main')
+            || doc.querySelector('.main');
+        if (!mainEl) return;
+        const mainRect = mainEl.getBoundingClientRect();
+        const tabLists = doc.querySelectorAll('.stTabs [data-baseweb="tab-list"]');
+        tabLists.forEach(function(tabList) {
+            // reset dulu supaya pengukuran ulang akurat (mis. saat resize window)
+            tabList.style.marginLeft = '0px';
+            tabList.style.marginRight = '0px';
+            tabList.style.width = '';
+            const tabRect = tabList.getBoundingClientRect();
+            const leftGap = tabRect.left - mainRect.left;
+            const rightGap = mainRect.right - tabRect.right;
+            if (leftGap <= 0 && rightGap <= 0) return;
+            tabList.style.boxSizing = 'border-box';
+            tabList.style.marginLeft = (-leftGap) + 'px';
+            tabList.style.marginRight = (-rightGap) + 'px';
+            tabList.style.width = (tabRect.width + leftGap + rightGap) + 'px';
+        });
+    } catch (err) {
+        // akses cross-origin diblokir browser, abaikan
+    }
+}
+
 attachTabAutoScroll();
+stretchTabBars();
 setInterval(attachTabAutoScroll, 800);
+setInterval(stretchTabBars, 500);
+window.addEventListener('resize', stretchTabBars);
 </script>
 """, height=1)
 
@@ -525,7 +557,7 @@ with tab3:
     st.subheader("🔮 Prediksi & Evaluasi Model")
     st.caption("Hasil prediksi tiap model ditampilkan terpisah, lalu dibandingkan performanya di sub-tab terakhir.")
 
-    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 Random Forest", "💡 LightGBM", "📊 Performa Model"])
+    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 RF", "💡 LightGBM", "📊 Performa"])
 
     # ---------- Sub-tab: Random Forest ----------
     with subtab_rf:
