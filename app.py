@@ -194,26 +194,28 @@ input:-webkit-autofill:focus {{
 
 /* ---- Tabs: full navbar-style pill bar ---- */
 .stTabs [data-baseweb="tab-list"] {{
-    gap: 6px;
+    gap: 2px;
     border-bottom: none !important;
-    background: linear-gradient(135deg, #C9E6DF 0%, {CREAM_DARK} 55%, #F7D9BE 100%);
-    border: 1px solid {BORDER};
+    background: #E1F0EC;
+    border: 1px solid #B9DED6;
     border-radius: 14px;
-    padding: 8px;
+    padding: 6px;
     box-shadow: 0 4px 12px rgba(59, 42, 32, 0.08);
+    flex-wrap: nowrap;
 }}
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
     color: {ESPRESSO} !important;
     background: transparent !important;
     border-radius: 10px !important;
-    padding: 8px 14px !important;
+    padding: 7px 8px !important;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }}
 .stTabs [data-baseweb="tab"] *,
 .stTabs [role="tab"] * {{
     font-weight: 700 !important;
-    font-size: 0.85rem !important;
+    font-size: 0.78rem !important;
+    white-space: nowrap !important;
 }}
 .stTabs [data-baseweb="tab"]:hover,
 .stTabs [role="tab"]:hover {{
@@ -607,9 +609,9 @@ forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 IS_PEMILIK = st.session_state.role == "Pemilik/Pengelola"
 
 if IS_PEMILIK:
-    tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan", "📄 Laporan"])
+    tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Perkiraan Bulan Berikutnya", "📄 Laporan"])
 else:
-    tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
+    tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Perkiraan Bulan Berikutnya"])
     tab6 = None
 
 components.html("""
@@ -667,7 +669,7 @@ with tab0:
 - **📈 Analisis Tren** — grafik tren pendapatan bulanan dan kontribusi tiap jenis kopi.
 - **🔮 Prediksi & Evaluasi** — hasil prediksi Random Forest & LightGBM dibandingkan dengan data aktual, beserta metrik evaluasinya.
 - **⭐ Feature Importance** — variabel yang paling berpengaruh terhadap hasil prediksi.
-- **📅 Prediksi Bulan Depan** — estimasi pendapatan untuk periode berikutnya.
+- **📅 Perkiraan Bulan Berikutnya** — estimasi pendapatan untuk periode berikutnya.
 """
     if IS_PEMILIK:
         panduan += "- **📄 Laporan** — unduh ringkasan laporan penjualan dalam format Word atau PDF.\n"
