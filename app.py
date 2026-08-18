@@ -177,26 +177,27 @@ input:-webkit-autofill:focus {{
     color: {ESPRESSO_SOFT} !important;
 }}
 
-/* ---- Tabs: full navbar-style pill bar ---- */
+/* ---- Tabs: full navbar-style pill bar (setiap tab punya kotak/background) ---- */
 .stTabs [data-baseweb="tab-list"] {{
-    gap: 2px;
+    gap: 5px !important;
     border-bottom: none !important;
-    background: #E1F0EC;
-    border: 1px solid #B9DED6;
-    border-radius: 14px;
-    padding: 6px;
+    background: #DDEFEA !important;
+    border: 1px solid #B9DED6 !important;
+    border-radius: 14px !important;
+    padding: 7px !important;
     box-shadow: 0 4px 12px rgba(59, 42, 32, 0.08);
     flex-wrap: nowrap;
 }}
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
     color: {ESPRESSO} !important;
-    background: transparent !important;
+    background: #FFFFFF !important;
+    border: 1px solid #C7E4DC !important;
     border-radius: 10px !important;
-    padding: 7px 8px !important;
+    padding: 7px 10px !important;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     outline: none !important;
-    box-shadow: none !important;
+    box-shadow: 0 1px 3px rgba(59, 42, 32, 0.06) !important;
     text-decoration: none !important;
 }}
 .stTabs [data-baseweb="tab"]:focus,
@@ -204,7 +205,6 @@ input:-webkit-autofill:focus {{
 .stTabs [data-baseweb="tab"]:focus-visible,
 .stTabs [role="tab"]:focus-visible {{
     outline: none !important;
-    box-shadow: none !important;
 }}
 .stTabs [data-baseweb="tab"] *,
 .stTabs [role="tab"] * {{
@@ -215,13 +215,15 @@ input:-webkit-autofill:focus {{
 .stTabs [data-baseweb="tab"]:hover:not([aria-selected="true"]),
 .stTabs [role="tab"]:hover:not([aria-selected="true"]) {{
     color: {ESPRESSO} !important;
-    background: rgba(255, 255, 255, 0.5) !important;
+    background: #EAF6F2 !important;
+    border-color: #9ED6C6 !important;
 }}
 .stTabs [aria-selected="true"] {{
     color: #FFFFFF !important;
     background: linear-gradient(135deg, #4FA89D 0%, #2E7268 100%) !important;
-    box-shadow: 0 3px 8px rgba(46, 143, 132, 0.30);
-    border-bottom: none !important;
+    border: 1px solid #2E7268 !important;
+    box-shadow: 0 3px 8px rgba(46, 143, 132, 0.35) !important;
+    border-bottom: 1px solid #2E7268 !important;
 }}
 .stTabs [aria-selected="true"]:hover,
 .stTabs [aria-selected="true"]:focus,
