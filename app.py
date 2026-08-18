@@ -210,6 +210,16 @@ input:-webkit-autofill:focus {{
     border-radius: 10px !important;
     padding: 7px 8px !important;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    outline: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+}}
+.stTabs [data-baseweb="tab"]:focus,
+.stTabs [role="tab"]:focus,
+.stTabs [data-baseweb="tab"]:focus-visible,
+.stTabs [role="tab"]:focus-visible {{
+    outline: none !important;
+    box-shadow: none !important;
 }}
 .stTabs [data-baseweb="tab"] *,
 .stTabs [role="tab"] * {{
@@ -217,8 +227,8 @@ input:-webkit-autofill:focus {{
     font-size: 0.78rem !important;
     white-space: nowrap !important;
 }}
-.stTabs [data-baseweb="tab"]:hover,
-.stTabs [role="tab"]:hover {{
+.stTabs [data-baseweb="tab"]:hover:not([aria-selected="true"]),
+.stTabs [role="tab"]:hover:not([aria-selected="true"]) {{
     color: {ESPRESSO} !important;
     background: rgba(255, 255, 255, 0.5) !important;
 }}
@@ -227,6 +237,13 @@ input:-webkit-autofill:focus {{
     background: linear-gradient(135deg, #4FA89D 0%, #2E7268 100%) !important;
     box-shadow: 0 3px 8px rgba(46, 143, 132, 0.30);
     border-bottom: none !important;
+}}
+.stTabs [aria-selected="true"]:hover,
+.stTabs [aria-selected="true"]:focus,
+.stTabs [aria-selected="true"]:focus-visible {{
+    color: #FFFFFF !important;
+    background: linear-gradient(135deg, #4FA89D 0%, #2E7268 100%) !important;
+    outline: none !important;
 }}
 .stTabs [aria-selected="true"] * {{
     color: #FFFFFF !important;
