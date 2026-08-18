@@ -185,8 +185,9 @@ input:-webkit-autofill:focus {{
 .stTabs div[role="tablist"],
 [data-testid="stTabs"] [data-baseweb="tab-list"],
 [data-testid="stTabs"] div[role="tablist"] {{
-    display: flex !important;
-    width: 100% !important;
+    display: inline-flex !important;
+    width: fit-content !important;
+    max-width: 100%;
     gap: 4px !important;
     border-bottom: none !important;
     background: linear-gradient(135deg, #C9E6DF 0%, {CREAM_DARK} 55%, #F7D9BE 100%) !important;
@@ -197,6 +198,9 @@ input:-webkit-autofill:focus {{
     box-shadow: 0 4px 12px rgba(59, 42, 32, 0.08);
     flex-wrap: nowrap;
 }}
+/* Bar navigasi utama (top-level) dipaksa melebar penuh lewat JS di bawah;
+   sub-tab bersarang (mis. RF / LightGBM / Performa) sengaja dibiarkan
+   sependek isinya (fit-content) sesuai aturan di atas. */
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
     color: {ESPRESSO} !important;
@@ -428,28 +432,44 @@ function attachTabAutoScroll() {
     }
 }
 
-function stretchTabBars() {
+function stretchTopLevelTabBar() {
     try {
         const doc = window.parent.document;
-        const mainEl = doc.querySelector('[data-testid="stMain"]')
-            || doc.querySelector('[data-testid="stAppViewContainer"] .main')
-            || doc.querySelector('.main');
-        if (!mainEl) return;
-        const mainRect = mainEl.getBoundingClientRect();
-        const tabLists = doc.querySelectorAll('.stTabs [data-baseweb="tab-list"]');
-        tabLists.forEach(function(tabList) {
-            // reset dulu supaya pengukuran ulang akurat (mis. saat resize window)
-            tabList.style.marginLeft = '0px';
-            tabList.style.marginRight = '0px';
-            tabList.style.width = '';
+
+        // Batas kiri = tepi kanan sidebar (0 kalau sidebar sedang disembunyikan).
+        // Batas kanan = tepi jendela browser (bukan nebak container, biar pasti akurat).
+        const sidebarEl = doc.querySelector('[data-testid="stSidebar"]');
+        let leftBoundary = 0;
+        if (sidebarEl) {
+            const sbRect = sidebarEl.getBoundingClientRect();
+            if (sbRect.width > 0) leftBoundary = sbRect.right;
+        }
+        const rightBoundary = doc.documentElement.clientWidth;
+
+        const allTabsBlocks = doc.querySelectorAll('[data-testid="stTabs"]');
+        allTabsBlocks.forEach(function(block) {
+            // Lewati sub-tab yang bersarang di dalam tab lain (mis. RF/LightGBM/Performa)
+            // — itu sengaja dibiarkan sependek isinya, tidak di-stretch.
+            const parentBlock = block.parentElement ? block.parentElement.closest('[data-testid="stTabs"]') : null;
+            if (parentBlock) return;
+
+            const tabList = block.querySelector('[data-baseweb="tab-list"]') || block.querySelector('[role="tablist"]');
+            if (!tabList) return;
+
+            // Reset dulu supaya pengukuran lebar alami akurat (mis. saat resize window).
+            tabList.style.removeProperty('margin-left');
+            tabList.style.removeProperty('margin-right');
+            tabList.style.removeProperty('width');
+
             const tabRect = tabList.getBoundingClientRect();
-            const leftGap = tabRect.left - mainRect.left;
-            const rightGap = mainRect.right - tabRect.right;
-            if (leftGap <= 0 && rightGap <= 0) return;
-            tabList.style.boxSizing = 'border-box';
-            tabList.style.marginLeft = (-leftGap) + 'px';
-            tabList.style.marginRight = (-rightGap) + 'px';
-            tabList.style.width = (tabRect.width + leftGap + rightGap) + 'px';
+            const leftGap = tabRect.left - leftBoundary;
+            const rightGap = rightBoundary - tabRect.right;
+            if (Math.abs(leftGap) < 1 && Math.abs(rightGap) < 1) return;
+
+            tabList.style.setProperty('box-sizing', 'border-box', 'important');
+            tabList.style.setProperty('margin-left', (-leftGap) + 'px', 'important');
+            tabList.style.setProperty('margin-right', (-rightGap) + 'px', 'important');
+            tabList.style.setProperty('width', (tabRect.width + leftGap + rightGap) + 'px', 'important');
         });
     } catch (err) {
         // akses cross-origin diblokir browser, abaikan
@@ -457,10 +477,10 @@ function stretchTabBars() {
 }
 
 attachTabAutoScroll();
-stretchTabBars();
+stretchTopLevelTabBar();
 setInterval(attachTabAutoScroll, 800);
-setInterval(stretchTabBars, 500);
-window.addEventListener('resize', stretchTabBars);
+setInterval(stretchTopLevelTabBar, 500);
+window.addEventListener('resize', stretchTopLevelTabBar);
 </script>
 """, height=1)
 
@@ -557,7 +577,7 @@ with tab3:
     st.subheader("🔮 Prediksi & Evaluasi Model")
     st.caption("Hasil prediksi tiap model ditampilkan terpisah, lalu dibandingkan performanya di sub-tab terakhir.")
 
-    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 RF", "💡 LightGBM", "📊 Performa"])
+    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 Random Forest", "💡 LightGBM", "📊 Performa"])
 
     # ---------- Sub-tab: Random Forest ----------
     with subtab_rf:
