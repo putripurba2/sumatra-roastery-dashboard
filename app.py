@@ -177,27 +177,27 @@ input:-webkit-autofill:focus {{
     color: {ESPRESSO_SOFT} !important;
 }}
 
-/* ---- Tabs: full navbar-style pill bar (setiap tab punya kotak/background) ---- */
+/* ---- Tabs: bar berwarna, hanya tab aktif yang berbentuk kotak ---- */
 .stTabs [data-baseweb="tab-list"] {{
-    gap: 5px !important;
+    gap: 4px !important;
     border-bottom: none !important;
-    background: #DDEFEA !important;
-    border: 1px solid #B9DED6 !important;
+    background: linear-gradient(135deg, #C9E6DF 0%, {CREAM_DARK} 55%, #F7D9BE 100%) !important;
+    border: 1px solid {BORDER} !important;
     border-radius: 14px !important;
-    padding: 7px !important;
+    padding: 8px !important;
     box-shadow: 0 4px 12px rgba(59, 42, 32, 0.08);
     flex-wrap: nowrap;
 }}
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
     color: {ESPRESSO} !important;
-    background: #FFFFFF !important;
-    border: 1px solid #C7E4DC !important;
+    background: transparent !important;
+    border: none !important;
     border-radius: 10px !important;
     padding: 7px 10px !important;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     outline: none !important;
-    box-shadow: 0 1px 3px rgba(59, 42, 32, 0.06) !important;
+    box-shadow: none !important;
     text-decoration: none !important;
 }}
 .stTabs [data-baseweb="tab"]:focus,
@@ -215,15 +215,13 @@ input:-webkit-autofill:focus {{
 .stTabs [data-baseweb="tab"]:hover:not([aria-selected="true"]),
 .stTabs [role="tab"]:hover:not([aria-selected="true"]) {{
     color: {ESPRESSO} !important;
-    background: #EAF6F2 !important;
-    border-color: #9ED6C6 !important;
+    background: rgba(255, 255, 255, 0.45) !important;
 }}
 .stTabs [aria-selected="true"] {{
     color: #FFFFFF !important;
     background: linear-gradient(135deg, #4FA89D 0%, #2E7268 100%) !important;
-    border: 1px solid #2E7268 !important;
     box-shadow: 0 3px 8px rgba(46, 143, 132, 0.35) !important;
-    border-bottom: 1px solid #2E7268 !important;
+    border-bottom: none !important;
 }}
 .stTabs [aria-selected="true"]:hover,
 .stTabs [aria-selected="true"]:focus,
