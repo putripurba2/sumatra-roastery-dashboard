@@ -185,6 +185,8 @@ input:-webkit-autofill:focus {{
 .stTabs div[role="tablist"],
 [data-testid="stTabs"] [data-baseweb="tab-list"],
 [data-testid="stTabs"] div[role="tablist"] {{
+    display: flex !important;
+    width: 100% !important;
     gap: 4px !important;
     border-bottom: none !important;
     background: linear-gradient(135deg, #C9E6DF 0%, {CREAM_DARK} 55%, #F7D9BE 100%) !important;
@@ -523,7 +525,7 @@ with tab3:
     st.subheader("🔮 Prediksi & Evaluasi Model")
     st.caption("Hasil prediksi tiap model ditampilkan terpisah, lalu dibandingkan performanya di sub-tab terakhir.")
 
-    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 Random Forest", "💡 LightGBM", "📊 Perbandingan Performa"])
+    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 Random Forest", "💡 LightGBM", "📊 Performa Model"])
 
     # ---------- Sub-tab: Random Forest ----------
     with subtab_rf:
