@@ -48,23 +48,23 @@ st.set_page_config(
     layout="wide",
 )
 
-PRIMARY = "#4E7FEA"
-ACCENT = "#9B6FE0"
-GRID = "#E4E1F5"
+PRIMARY = "#0F6B5C"
+ACCENT = "#B5502D"
+GRID = "#e5e0d8"
 
-CREAM = "#F6F5FC"
-CREAM_DARK = "#ECE9FA"
-ESPRESSO = "#2B2650"
-ESPRESSO_SOFT = "#5B5480"
-BORDER = "#DCD6F5"
-GOLD = "#FFB627"
-GOLD_DARK = "#F2941A"
+CREAM = "#FAF6F0"
+CREAM_DARK = "#F0E8DC"
+ESPRESSO = "#3B2A20"
+ESPRESSO_SOFT = "#5C4633"
+BORDER = "#D9C9B4"
+GOLD = "#E0A526"
+GOLD_DARK = "#C98A1B"
 
 st.markdown(f"""
 <style>
 /* ---- Base app background & typography ---- */
 .stApp {{
-    background: linear-gradient(135deg, #EAF1FE 0%, {CREAM} 45%, #FBEAF3 100%) !important;
+    background: linear-gradient(135deg, #EAF2EF 0%, {CREAM} 45%, #FBEEE4 100%) !important;
     background-attachment: fixed;
 }}
 html, body, [class*="css"] {{
@@ -87,7 +87,7 @@ html, body, [class*="css"] {{
 
 /* ---- Sidebar ---- */
 [data-testid="stSidebar"] {{
-    background: linear-gradient(180deg, #BFD6FB 0%, {CREAM_DARK} 55%, #F3D4EC 100%) !important;
+    background: linear-gradient(180deg, #C9E6DF 0%, {CREAM_DARK} 55%, #F7D9BE 100%) !important;
     border-right: 1px solid {BORDER};
 }}
 [data-testid="stSidebar"] * {{
@@ -126,27 +126,26 @@ h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, .stCaption {{
 
 /* ---- Buttons (target inner text explicitly so it doesn't get overridden) ---- */
 .stButton button, .stFormSubmitButton button {{
-    background: linear-gradient(135deg, {GOLD} 0%, {GOLD_DARK} 100%) !important;
+    background-color: {ESPRESSO} !important;
     border: none !important;
-    border-radius: 8px;
-    font-weight: 700;
-    box-shadow: 0 4px 10px rgba(242, 148, 26, 0.35);
+    border-radius: 6px;
+    font-weight: 600;
 }}
 .stButton button p, .stFormSubmitButton button p,
 .stButton button div, .stFormSubmitButton button div,
 .stButton button span, .stFormSubmitButton button span {{
-    color: {ESPRESSO} !important;
+    color: {CREAM} !important;
 }}
 .stButton button:hover, .stFormSubmitButton button:hover {{
-    background: linear-gradient(135deg, {GOLD_DARK} 0%, {GOLD} 100%) !important;
+    background-color: {ESPRESSO_SOFT} !important;
 }}
 
 /* ---- Download buttons (Unduh Laporan) ---- */
 .stDownloadButton button {{
-    background: linear-gradient(135deg, {PRIMARY} 0%, {ACCENT} 100%) !important;
+    background-color: #2E8F84 !important;
     border: none !important;
-    border-radius: 8px;
-    font-weight: 700;
+    border-radius: 6px;
+    font-weight: 600;
 }}
 .stDownloadButton button p,
 .stDownloadButton button div,
@@ -154,7 +153,7 @@ h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, .stCaption {{
     color: #FFFFFF !important;
 }}
 .stDownloadButton button:hover {{
-    filter: brightness(0.92);
+    background-color: #256F66 !important;
 }}
 
 /* ---- Sembunyikan ikon link kecil di samping heading ---- */
@@ -193,17 +192,22 @@ input:-webkit-autofill:focus {{
     color: {ESPRESSO_SOFT} !important;
 }}
 
-/* ---- Tabs ---- */
+/* ---- Tabs: full navbar-style pill bar ---- */
 .stTabs [data-baseweb="tab-list"] {{
-    gap: 0px;
-    border-bottom: 3px solid {BORDER};
+    gap: 6px;
+    border-bottom: none !important;
+    background: linear-gradient(135deg, #C9E6DF 0%, {CREAM_DARK} 55%, #F7D9BE 100%);
+    border: 1px solid {BORDER};
+    border-radius: 14px;
+    padding: 8px;
+    box-shadow: 0 4px 12px rgba(59, 42, 32, 0.08);
 }}
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
-    color: #000000 !important;
+    color: {ESPRESSO} !important;
     background: transparent !important;
-    border-radius: 8px !important;
-    padding: 5px 6px !important;
+    border-radius: 10px !important;
+    padding: 8px 14px !important;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }}
 .stTabs [data-baseweb="tab"] *,
@@ -213,16 +217,23 @@ input:-webkit-autofill:focus {{
 }}
 .stTabs [data-baseweb="tab"]:hover,
 .stTabs [role="tab"]:hover {{
-    color: #000000 !important;
+    color: {ESPRESSO} !important;
+    background: rgba(255, 255, 255, 0.5) !important;
 }}
 .stTabs [aria-selected="true"] {{
     color: #FFFFFF !important;
-    background: linear-gradient(135deg, {PRIMARY} 0%, {ACCENT} 100%) !important;
-    box-shadow: 0 3px 8px rgba(78, 127, 234, 0.30);
+    background: linear-gradient(135deg, #4FA89D 0%, #2E7268 100%) !important;
+    box-shadow: 0 3px 8px rgba(46, 143, 132, 0.30);
     border-bottom: none !important;
 }}
 .stTabs [aria-selected="true"] * {{
     color: #FFFFFF !important;
+}}
+.stTabs [data-baseweb="tab-highlight"] {{
+    display: none !important;
+}}
+.stTabs [data-baseweb="tab-border"] {{
+    display: none !important;
 }}
 
 /* ---- Metrics ---- */
@@ -498,93 +509,66 @@ with st.sidebar:
         st.rerun()
     st.divider()
 
-BANNER_HEIGHT = 300
+if BANNER_MAIN:
+    photo_b64 = get_base64_image(BANNER_MAIN, os.path.getmtime(BANNER_MAIN))
+    photo_ext = os.path.splitext(BANNER_MAIN)[1].replace(".", "")
+    if photo_ext == "jpg":
+        photo_ext = "jpeg"
 
-hero_html = f"""
-<html>
-<head>
-<style>
-    html, body {{
-        margin:0;
-        padding:0;
-        width:100%;
-        background:transparent;
-        overflow:hidden;
-        font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;
-    }}
-    .hero-card{{
-        position:relative;
-        width:100%;
-        height:{BANNER_HEIGHT}px;
-        border-radius:20px;
-        overflow:hidden;
-        box-sizing:border-box;
-        background:linear-gradient(135deg, #6EA4F2 0%, #9B7FE8 55%, #F2A9CE 100%);
-        display:flex;
-        align-items:center;
-        padding:0 48px;
-    }}
-    .hero-decor-1{{
-        position:absolute; top:-40px; left:-40px;
-        width:150px; height:150px; border-radius:50%;
-        background:rgba(255,255,255,0.14);
-    }}
-    .hero-decor-2{{
-        position:absolute; bottom:-60px; right:120px;
-        width:200px; height:200px; border-radius:50%;
-        background:rgba(255,255,255,0.10);
-    }}
-    .hero-star{{
-        position:absolute; top:26px; right:34px;
-        color:#FFD75E; font-size:22px;
-    }}
-    .hero-text{{ position:relative; z-index:2; max-width:78%; }}
-    .hero-title{{
-        color:#FFFFFF; font-size:2.1rem; font-weight:800;
-        margin:0 0 10px 0; letter-spacing:0.2px;
-    }}
-    .hero-subtitle{{
-        color:#FFE9A8; font-size:1.05rem; font-weight:700; margin:0 0 10px 0;
-    }}
-    .hero-rule{{
-        width:70px; height:3px; background:#FFB627; border:none;
-        margin:0 0 14px 0; border-radius:2px;
-    }}
-    .hero-caption{{
-        color:#FFFFFF; font-size:0.95rem; font-style:italic; opacity:0.92;
-        margin:0; line-height:1.45;
-    }}
-    .hero-icon{{
-        position:absolute; right:44px; top:50%; transform:translateY(-50%);
-        z-index:2; opacity:0.95;
-    }}
-</style>
-</head>
-<body>
-    <div class="hero-card">
-        <div class="hero-decor-1"></div>
-        <div class="hero-decor-2"></div>
-        <div class="hero-star">&#9733;</div>
-        <div class="hero-text">
-            <p class="hero-title">&#9749; Dashboard Analisis Tren &amp; Prediksi Pendapatan</p>
-            <p class="hero-subtitle">Sumatra Roastery Medan &mdash; Random Forest vs LightGBM</p>
-            <hr class="hero-rule">
-            <p class="hero-caption">Kopi asli Sumatra Roastery Medan &mdash; dari kebun hingga wawasan bisnis</p>
+    BANNER_HEIGHT = 360
+
+    banner_html = f"""
+    <html>
+    <head>
+    <style>
+        html, body {{
+            margin:0;
+            padding:0;
+            width:100%;
+            background:transparent;
+            overflow:hidden;
+        }}
+        .hero-banner{{
+            position:relative;
+            width:100%;
+            height:{BANNER_HEIGHT}px;
+            border-radius:18px;
+            overflow:hidden;
+            background:#0d3b2e;
+            box-sizing:border-box;
+        }}
+        .hero-image{{
+            position:absolute;
+            left:0;
+            top:0;
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            object-position:center;
+            display:block;
+        }}
+    </style>
+    </head>
+    <body>
+        <div class="hero-banner">
+            <img class="hero-image" src="data:image/{photo_ext};base64,{photo_b64}">
         </div>
-        <svg class="hero-icon" width="110" height="110" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 40h50v22a16 16 0 0 1-16 16H36a16 16 0 0 1-16-16V40Z" stroke="white" stroke-width="4" stroke-linejoin="round"/>
-            <path d="M70 46h6a10 10 0 0 1 0 20h-6" stroke="white" stroke-width="4" stroke-linejoin="round"/>
-            <path d="M15 78h60" stroke="white" stroke-width="4" stroke-linecap="round"/>
-            <path d="M32 28c-3-4-3-7 1-11" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
-            <path d="M45 28c-3-4-3-7 1-11" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
-            <path d="M58 28c-3-4-3-7 1-11" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
-        </svg>
-    </div>
-</body>
-</html>
-"""
+    </body>
+    </html>
+    """
 
-components.html(hero_html, height=BANNER_HEIGHT, scrolling=False)
+    components.html(banner_html, height=BANNER_HEIGHT, scrolling=False)
+
+
+
+else:
+    st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
+    st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
+    st.warning(
+        "File banner `preview_banner_dashboard.*` tidak ditemukan di folder aplikasi "
+        f"({SCRIPT_DIR}). Pastikan file gambar ini sudah di-upload/push ke repository "
+        "yang sama dengan app.py, sejajar (bukan di dalam subfolder lain)."
+    )
 
 IS_PENELITI = st.session_state.role == "Peneliti"
 
@@ -622,9 +606,9 @@ forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 IS_PEMILIK = st.session_state.role == "Pemilik/Pengelola"
 
 if IS_PEMILIK:
-    tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 Beranda", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan", "📄 Laporan"])
+    tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan", "📄 Laporan"])
 else:
-    tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Beranda", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
+    tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
     tab6 = None
 
 components.html("""
