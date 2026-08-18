@@ -437,14 +437,35 @@ function stretchTopLevelTabBar() {
         const doc = window.parent.document;
 
         // Batas kiri = tepi kanan sidebar (0 kalau sidebar sedang disembunyikan).
-        // Batas kanan = tepi jendela browser (bukan nebak container, biar pasti akurat).
         const sidebarEl = doc.querySelector('[data-testid="stSidebar"]');
         let leftBoundary = 0;
         if (sidebarEl) {
             const sbRect = sidebarEl.getBoundingClientRect();
             if (sbRect.width > 0) leftBoundary = sbRect.right;
         }
-        const rightBoundary = doc.documentElement.clientWidth;
+
+        // Batas kanan = tepi kanan area konten utama yang sesungguhnya
+        // (bukan lebar jendela browser mentah — itu ternyata lebih lebar dari
+        // area yang benar-benar dipakai, makanya sebelumnya berhenti sebelum
+        // garis ikon titik-tiga di kanan atas).
+        let mainEl = doc.querySelector('[data-testid="stMain"]') || doc.querySelector('section.main');
+        if (!mainEl) {
+            const appViewContainer = doc.querySelector('[data-testid="stAppViewContainer"]');
+            if (appViewContainer) {
+                const kids = appViewContainer.querySelectorAll(':scope > section, :scope > div');
+                for (let i = 0; i < kids.length; i++) {
+                    const testid = kids[i].getAttribute('data-testid');
+                    if (testid === 'stSidebar' || testid === 'stHeader') continue;
+                    mainEl = kids[i];
+                    break;
+                }
+            }
+        }
+        let rightBoundary = doc.documentElement.clientWidth;
+        if (mainEl) {
+            const mr = mainEl.getBoundingClientRect();
+            if (mr.right > 0) rightBoundary = mr.right;
+        }
 
         const allTabsBlocks = doc.querySelectorAll('[data-testid="stTabs"]');
         allTabsBlocks.forEach(function(block) {
@@ -577,7 +598,7 @@ with tab3:
     st.subheader("🔮 Prediksi & Evaluasi Model")
     st.caption("Hasil prediksi tiap model ditampilkan terpisah, lalu dibandingkan performanya di sub-tab terakhir.")
 
-    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 Random Forest", "💡 LightGBM", "📊 Performa"])
+    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 Random Forest", "💡 LightGBM", "📊 Performa Dua Model"])
 
     # ---------- Sub-tab: Random Forest ----------
     with subtab_rf:
