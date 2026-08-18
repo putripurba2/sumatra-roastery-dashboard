@@ -185,9 +185,8 @@ input:-webkit-autofill:focus {{
 .stTabs div[role="tablist"],
 [data-testid="stTabs"] [data-baseweb="tab-list"],
 [data-testid="stTabs"] div[role="tablist"] {{
-    display: inline-flex !important;
-    width: fit-content !important;
-    max-width: 100%;
+    display: flex !important;
+    width: 100% !important;
     gap: 4px !important;
     border-bottom: none !important;
     background: linear-gradient(135deg, #C9E6DF 0%, {CREAM_DARK} 55%, #F7D9BE 100%) !important;
@@ -198,9 +197,6 @@ input:-webkit-autofill:focus {{
     box-shadow: 0 4px 12px rgba(59, 42, 32, 0.08);
     flex-wrap: nowrap;
 }}
-/* Bar navigasi utama (top-level) dipaksa melebar penuh lewat JS di bawah;
-   sub-tab bersarang (mis. RF / LightGBM / Performa) sengaja dibiarkan
-   sependek isinya (fit-content) sesuai aturan di atas. */
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
     color: {ESPRESSO} !important;
@@ -431,80 +427,8 @@ function attachTabAutoScroll() {
         // akses cross-origin diblokir browser, abaikan
     }
 }
-
-function stretchTopLevelTabBar() {
-    try {
-        const doc = window.parent.document;
-
-        // Batas kiri = tepi kanan sidebar (0 kalau sidebar sedang disembunyikan).
-        const sidebarEl = doc.querySelector('[data-testid="stSidebar"]');
-        let leftBoundary = 0;
-        if (sidebarEl) {
-            const sbRect = sidebarEl.getBoundingClientRect();
-            if (sbRect.width > 0) leftBoundary = sbRect.right;
-        }
-
-        // Batas kanan = tepi kanan area konten utama yang sesungguhnya
-        // (bukan lebar jendela browser mentah — itu ternyata lebih lebar dari
-        // area yang benar-benar dipakai, makanya sebelumnya berhenti sebelum
-        // garis ikon titik-tiga di kanan atas).
-        let mainEl = doc.querySelector('[data-testid="stMain"]') || doc.querySelector('section.main');
-        if (!mainEl) {
-            const appViewContainer = doc.querySelector('[data-testid="stAppViewContainer"]');
-            if (appViewContainer) {
-                const kids = appViewContainer.querySelectorAll(':scope > section, :scope > div');
-                for (let i = 0; i < kids.length; i++) {
-                    const testid = kids[i].getAttribute('data-testid');
-                    if (testid === 'stSidebar' || testid === 'stHeader') continue;
-                    mainEl = kids[i];
-                    break;
-                }
-            }
-        }
-        let rightBoundary = doc.documentElement.clientWidth;
-        if (mainEl) {
-            const mr = mainEl.getBoundingClientRect();
-            if (mr.right > 0) rightBoundary = mr.right;
-        }
-
-        const allTabsBlocks = doc.querySelectorAll('[data-testid="stTabs"]');
-        allTabsBlocks.forEach(function(block) {
-            // Lewati sub-tab yang bersarang di dalam tab lain (mis. RF/LightGBM/Performa)
-            // — itu sengaja dibiarkan sependek isinya, tidak di-stretch.
-            const parentBlock = block.parentElement ? block.parentElement.closest('[data-testid="stTabs"]') : null;
-            if (parentBlock) return;
-
-            const tabList = block.querySelector('[data-baseweb="tab-list"]') || block.querySelector('[role="tablist"]');
-            if (!tabList) return;
-
-            // Reset dulu supaya pengukuran lebar alami akurat (mis. saat resize window).
-            tabList.style.removeProperty('margin-left');
-            tabList.style.removeProperty('margin-right');
-            tabList.style.removeProperty('width');
-
-            const tabRect = tabList.getBoundingClientRect();
-            const OVERSHOOT = 2; // px lebihan supaya tidak ada celah 1-2px akibat pembulatan subpixel
-            const leftGap = tabRect.left - leftBoundary + OVERSHOOT;
-            const rightGap = rightBoundary - tabRect.right + OVERSHOOT;
-            if (Math.abs(leftGap) < 1 && Math.abs(rightGap) < 1) return;
-
-            tabList.style.setProperty('box-sizing', 'border-box', 'important');
-            tabList.style.setProperty('margin-left', (-leftGap) + 'px', 'important');
-            tabList.style.setProperty('margin-right', (-rightGap) + 'px', 'important');
-            tabList.style.setProperty('width', (tabRect.width + leftGap + rightGap) + 'px', 'important');
-            // Kotakkan ujungnya (bukan bulat) supaya tidak ada celah warna latar yang mengintip di lengkungan.
-            tabList.style.setProperty('border-radius', '0px', 'important');
-        });
-    } catch (err) {
-        // akses cross-origin diblokir browser, abaikan
-    }
-}
-
 attachTabAutoScroll();
-stretchTopLevelTabBar();
 setInterval(attachTabAutoScroll, 800);
-setInterval(stretchTopLevelTabBar, 500);
-window.addEventListener('resize', stretchTopLevelTabBar);
 </script>
 """, height=1)
 
@@ -601,7 +525,7 @@ with tab3:
     st.subheader("🔮 Prediksi & Evaluasi Model")
     st.caption("Hasil prediksi tiap model ditampilkan terpisah, lalu dibandingkan performanya di sub-tab terakhir.")
 
-    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 Random Forest", "💡 LightGBM", "📊 Performa Dua Model"])
+    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 Random Forest", "💡 LightGBM", "📊 Performa Model"])
 
     # ---------- Sub-tab: Random Forest ----------
     with subtab_rf:
