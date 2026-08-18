@@ -178,10 +178,17 @@ input:-webkit-autofill:focus {{
 }}
 
 /* ---- Tabs: bar berwarna, hanya tab aktif yang berbentuk kotak ---- */
-.stTabs [data-baseweb="tab-list"] {{
+[data-testid="stTabs"] {{
+    background: transparent !important;
+}}
+.stTabs [data-baseweb="tab-list"],
+.stTabs div[role="tablist"],
+[data-testid="stTabs"] [data-baseweb="tab-list"],
+[data-testid="stTabs"] div[role="tablist"] {{
     gap: 4px !important;
     border-bottom: none !important;
     background: linear-gradient(135deg, #C9E6DF 0%, {CREAM_DARK} 55%, #F7D9BE 100%) !important;
+    background-color: #DCEEE8 !important;
     border: 1px solid {BORDER} !important;
     border-radius: 14px !important;
     padding: 8px !important;
