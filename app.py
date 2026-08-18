@@ -58,6 +58,7 @@ ESPRESSO = "#3B2A20"
 ESPRESSO_SOFT = "#5C4633"
 BORDER = "#D9C9B4"
 GOLD = "#E0A526"
+GOLD_DARK = "#C98A1B"
 
 st.markdown(f"""
 <style>
@@ -191,17 +192,22 @@ input:-webkit-autofill:focus {{
     color: {ESPRESSO_SOFT} !important;
 }}
 
-/* ---- Tabs ---- */
+/* ---- Tabs: full navbar-style pill bar ---- */
 .stTabs [data-baseweb="tab-list"] {{
-    gap: 0px;
-    border-bottom: 3px solid {BORDER};
+    gap: 6px;
+    border-bottom: none !important;
+    background: linear-gradient(135deg, #C9E6DF 0%, {CREAM_DARK} 55%, #F7D9BE 100%);
+    border: 1px solid {BORDER};
+    border-radius: 14px;
+    padding: 8px;
+    box-shadow: 0 4px 12px rgba(59, 42, 32, 0.08);
 }}
 .stTabs [data-baseweb="tab"],
 .stTabs [role="tab"] {{
-    color: #000000 !important;
+    color: {ESPRESSO} !important;
     background: transparent !important;
-    border-radius: 8px !important;
-    padding: 5px 6px !important;
+    border-radius: 10px !important;
+    padding: 8px 14px !important;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }}
 .stTabs [data-baseweb="tab"] *,
@@ -211,16 +217,23 @@ input:-webkit-autofill:focus {{
 }}
 .stTabs [data-baseweb="tab"]:hover,
 .stTabs [role="tab"]:hover {{
-    color: #000000 !important;
+    color: {ESPRESSO} !important;
+    background: rgba(255, 255, 255, 0.5) !important;
 }}
 .stTabs [aria-selected="true"] {{
     color: #FFFFFF !important;
     background: linear-gradient(135deg, #4FA89D 0%, #2E7268 100%) !important;
-    box-shadow: 0 3px 8px rgba(46, 143, 132, 0.25);
+    box-shadow: 0 3px 8px rgba(46, 143, 132, 0.30);
     border-bottom: none !important;
 }}
 .stTabs [aria-selected="true"] * {{
     color: #FFFFFF !important;
+}}
+.stTabs [data-baseweb="tab-highlight"] {{
+    display: none !important;
+}}
+.stTabs [data-baseweb="tab-border"] {{
+    display: none !important;
 }}
 
 /* ---- Metrics ---- */
@@ -496,66 +509,67 @@ with st.sidebar:
         st.rerun()
     st.divider()
 
-if BANNER_MAIN:
-    photo_b64 = get_base64_image(BANNER_MAIN, os.path.getmtime(BANNER_MAIN))
-    photo_ext = os.path.splitext(BANNER_MAIN)[1].replace(".", "")
-    if photo_ext == "jpg":
-        photo_ext = "jpeg"
+def render_hero_banner():
+    """Render banner foto hero. Dipanggil hanya di dalam tab Dashboard,
+    supaya banner hilang saat pindah ke tab lain."""
+    if BANNER_MAIN:
+        photo_b64 = get_base64_image(BANNER_MAIN, os.path.getmtime(BANNER_MAIN))
+        photo_ext = os.path.splitext(BANNER_MAIN)[1].replace(".", "")
+        if photo_ext == "jpg":
+            photo_ext = "jpeg"
 
-    BANNER_HEIGHT = 360
+        banner_height = 360
 
-    banner_html = f"""
-    <html>
-    <head>
-    <style>
-        html, body {{
-            margin:0;
-            padding:0;
-            width:100%;
-            background:transparent;
-            overflow:hidden;
-        }}
-        .hero-banner{{
-            position:relative;
-            width:100%;
-            height:{BANNER_HEIGHT}px;
-            border-radius:18px;
-            overflow:hidden;
-            background:#0d3b2e;
-            box-sizing:border-box;
-        }}
-        .hero-image{{
-            position:absolute;
-            left:0;
-            top:0;
-            width:100%;
-            height:100%;
-            object-fit:cover;
-            object-position:center;
-            display:block;
-        }}
-    </style>
-    </head>
-    <body>
-        <div class="hero-banner">
-            <img class="hero-image" src="data:image/{photo_ext};base64,{photo_b64}">
-        </div>
-    </body>
-    </html>
-    """
+        banner_html = f"""
+        <html>
+        <head>
+        <style>
+            html, body {{
+                margin:0;
+                padding:0;
+                width:100%;
+                background:transparent;
+                overflow:hidden;
+            }}
+            .hero-banner{{
+                position:relative;
+                width:100%;
+                height:{banner_height}px;
+                border-radius:18px;
+                overflow:hidden;
+                background:#0d3b2e;
+                box-sizing:border-box;
+            }}
+            .hero-image{{
+                position:absolute;
+                left:0;
+                top:0;
+                width:100%;
+                height:100%;
+                object-fit:cover;
+                object-position:center;
+                display:block;
+            }}
+        </style>
+        </head>
+        <body>
+            <div class="hero-banner">
+                <img class="hero-image" src="data:image/{photo_ext};base64,{photo_b64}">
+            </div>
+        </body>
+        </html>
+        """
 
-    components.html(banner_html, height=BANNER_HEIGHT, scrolling=False)
+        components.html(banner_html, height=banner_height, scrolling=False)
+    else:
+        st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
+        st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
+        st.warning(
+            "File banner `preview_banner_dashboard.*` tidak ditemukan di folder aplikasi "
+            f"({SCRIPT_DIR}). Pastikan file gambar ini sudah di-upload/push ke repository "
+            "yang sama dengan app.py, sejajar (bukan di dalam subfolder lain)."
+        )
 
-
-
-else:
-    st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
-    st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
-    st.warning(
-        "File banner `preview_banner_dashboard.*` tidak ditemukan di folder aplikasi "
-        f"({SCRIPT_DIR}). Pastikan file gambar ini sudah di-upload/push ke repository "
-        "yang sama dengan app.py, sejajar (bukan di dalam subfolder lain)."
-    )
 
 IS_PENELITI = st.session_state.role == "Peneliti"
 
@@ -593,9 +607,9 @@ forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 IS_PEMILIK = st.session_state.role == "Pemilik/Pengelola"
 
 if IS_PEMILIK:
-    tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 Beranda", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan", "📄 Laporan"])
+    tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan", "📄 Laporan"])
 else:
-    tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Beranda", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
+    tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
     tab6 = None
 
 components.html("""
@@ -625,6 +639,7 @@ setInterval(attachTabAutoScroll, 800);
 """, height=1)
 
 with tab0:
+    render_hero_banner()
     st.markdown(f"### Selamat datang, **{st.session_state.role}** 👋")
     st.write(
         "Dashboard ini menyajikan analisis tren pendapatan penjualan kopi serta prediksi "
