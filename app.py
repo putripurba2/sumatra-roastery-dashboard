@@ -593,9 +593,9 @@ forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 IS_PEMILIK = st.session_state.role == "Pemilik/Pengelola"
 
 if IS_PEMILIK:
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan", "📄 Laporan"])
+    tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 Beranda", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan", "📄 Laporan"])
 else:
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
+    tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Beranda", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Prediksi Bulan Depan"])
     tab6 = None
 
 components.html("""
@@ -623,6 +623,42 @@ attachTabAutoScroll();
 setInterval(attachTabAutoScroll, 800);
 </script>
 """, height=1)
+
+with tab0:
+    st.markdown(f"### Selamat datang, **{st.session_state.role}** 👋")
+    st.write(
+        "Dashboard ini menyajikan analisis tren pendapatan penjualan kopi serta prediksi "
+        "pendapatan bulanan **Sumatra Roastery Medan** menggunakan dua algoritma machine "
+        "learning, yaitu **Random Forest** dan **LightGBM**, lengkap dengan perbandingan "
+        "performa dan variabel yang paling berpengaruh terhadap hasil prediksi."
+    )
+
+    total_pendapatan_all = rekap['Total Pendapatan (Rp)'].sum()
+    periode_awal_label = f"{rekap['Bulan'].iloc[0][:3]} {rekap['Tahun'].iloc[0]}"
+    periode_akhir_label = f"{rekap['Bulan'].iloc[-1][:3]} {rekap['Tahun'].iloc[-1]}"
+    best_model_home = pd.DataFrame(results).T['MAE'].idxmin()
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Total Pendapatan Historis", rupiah(total_pendapatan_all))
+    c2.metric("Rata-rata Pendapatan / Bulan", rupiah(avg_overall))
+    c3.metric("Periode Data", f"{periode_awal_label} – {periode_akhir_label}")
+    c4.metric("Model Terbaik (MAE terendah)", best_model_home)
+
+    st.divider()
+
+    st.markdown("#### 🧭 Panduan Navigasi")
+    panduan = """
+- **📋 Data Aktual** — data mentah dan rekap pendapatan yang menjadi dasar seluruh analisis.
+- **📈 Analisis Tren** — grafik tren pendapatan bulanan dan kontribusi tiap jenis kopi.
+- **🔮 Prediksi & Evaluasi** — hasil prediksi Random Forest & LightGBM dibandingkan dengan data aktual, beserta metrik evaluasinya.
+- **⭐ Feature Importance** — variabel yang paling berpengaruh terhadap hasil prediksi.
+- **📅 Prediksi Bulan Depan** — estimasi pendapatan untuk periode berikutnya.
+"""
+    if IS_PEMILIK:
+        panduan += "- **📄 Laporan** — unduh ringkasan laporan penjualan dalam format Word atau PDF.\n"
+    st.markdown(panduan)
+
+    st.info("Gunakan menu tab di bagian atas untuk berpindah antar bagian dashboard.")
 
 with tab1:
     st.subheader("Rekap Pendapatan Bulanan")
