@@ -48,22 +48,23 @@ st.set_page_config(
     layout="wide",
 )
 
-PRIMARY = "#0F6B5C"
-ACCENT = "#B5502D"
-GRID = "#e5e0d8"
+PRIMARY = "#4E7FEA"
+ACCENT = "#9B6FE0"
+GRID = "#E4E1F5"
 
-CREAM = "#FAF6F0"
-CREAM_DARK = "#F0E8DC"
-ESPRESSO = "#3B2A20"
-ESPRESSO_SOFT = "#5C4633"
-BORDER = "#D9C9B4"
-GOLD = "#E0A526"
+CREAM = "#F6F5FC"
+CREAM_DARK = "#ECE9FA"
+ESPRESSO = "#2B2650"
+ESPRESSO_SOFT = "#5B5480"
+BORDER = "#DCD6F5"
+GOLD = "#FFB627"
+GOLD_DARK = "#F2941A"
 
 st.markdown(f"""
 <style>
 /* ---- Base app background & typography ---- */
 .stApp {{
-    background: linear-gradient(135deg, #EAF2EF 0%, {CREAM} 45%, #FBEEE4 100%) !important;
+    background: linear-gradient(135deg, #EAF1FE 0%, {CREAM} 45%, #FBEAF3 100%) !important;
     background-attachment: fixed;
 }}
 html, body, [class*="css"] {{
@@ -86,7 +87,7 @@ html, body, [class*="css"] {{
 
 /* ---- Sidebar ---- */
 [data-testid="stSidebar"] {{
-    background: linear-gradient(180deg, #C9E6DF 0%, {CREAM_DARK} 55%, #F7D9BE 100%) !important;
+    background: linear-gradient(180deg, #BFD6FB 0%, {CREAM_DARK} 55%, #F3D4EC 100%) !important;
     border-right: 1px solid {BORDER};
 }}
 [data-testid="stSidebar"] * {{
@@ -125,26 +126,27 @@ h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, .stCaption {{
 
 /* ---- Buttons (target inner text explicitly so it doesn't get overridden) ---- */
 .stButton button, .stFormSubmitButton button {{
-    background-color: {ESPRESSO} !important;
+    background: linear-gradient(135deg, {GOLD} 0%, {GOLD_DARK} 100%) !important;
     border: none !important;
-    border-radius: 6px;
-    font-weight: 600;
+    border-radius: 8px;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(242, 148, 26, 0.35);
 }}
 .stButton button p, .stFormSubmitButton button p,
 .stButton button div, .stFormSubmitButton button div,
 .stButton button span, .stFormSubmitButton button span {{
-    color: {CREAM} !important;
+    color: {ESPRESSO} !important;
 }}
 .stButton button:hover, .stFormSubmitButton button:hover {{
-    background-color: {ESPRESSO_SOFT} !important;
+    background: linear-gradient(135deg, {GOLD_DARK} 0%, {GOLD} 100%) !important;
 }}
 
 /* ---- Download buttons (Unduh Laporan) ---- */
 .stDownloadButton button {{
-    background-color: #2E8F84 !important;
+    background: linear-gradient(135deg, {PRIMARY} 0%, {ACCENT} 100%) !important;
     border: none !important;
-    border-radius: 6px;
-    font-weight: 600;
+    border-radius: 8px;
+    font-weight: 700;
 }}
 .stDownloadButton button p,
 .stDownloadButton button div,
@@ -152,7 +154,7 @@ h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, .stCaption {{
     color: #FFFFFF !important;
 }}
 .stDownloadButton button:hover {{
-    background-color: #256F66 !important;
+    filter: brightness(0.92);
 }}
 
 /* ---- Sembunyikan ikon link kecil di samping heading ---- */
@@ -215,8 +217,8 @@ input:-webkit-autofill:focus {{
 }}
 .stTabs [aria-selected="true"] {{
     color: #FFFFFF !important;
-    background: linear-gradient(135deg, #4FA89D 0%, #2E7268 100%) !important;
-    box-shadow: 0 3px 8px rgba(46, 143, 132, 0.25);
+    background: linear-gradient(135deg, {PRIMARY} 0%, {ACCENT} 100%) !important;
+    box-shadow: 0 3px 8px rgba(78, 127, 234, 0.30);
     border-bottom: none !important;
 }}
 .stTabs [aria-selected="true"] * {{
@@ -496,66 +498,93 @@ with st.sidebar:
         st.rerun()
     st.divider()
 
-if BANNER_MAIN:
-    photo_b64 = get_base64_image(BANNER_MAIN, os.path.getmtime(BANNER_MAIN))
-    photo_ext = os.path.splitext(BANNER_MAIN)[1].replace(".", "")
-    if photo_ext == "jpg":
-        photo_ext = "jpeg"
+BANNER_HEIGHT = 300
 
-    BANNER_HEIGHT = 360
-
-    banner_html = f"""
-    <html>
-    <head>
-    <style>
-        html, body {{
-            margin:0;
-            padding:0;
-            width:100%;
-            background:transparent;
-            overflow:hidden;
-        }}
-        .hero-banner{{
-            position:relative;
-            width:100%;
-            height:{BANNER_HEIGHT}px;
-            border-radius:18px;
-            overflow:hidden;
-            background:#0d3b2e;
-            box-sizing:border-box;
-        }}
-        .hero-image{{
-            position:absolute;
-            left:0;
-            top:0;
-            width:100%;
-            height:100%;
-            object-fit:cover;
-            object-position:center;
-            display:block;
-        }}
-    </style>
-    </head>
-    <body>
-        <div class="hero-banner">
-            <img class="hero-image" src="data:image/{photo_ext};base64,{photo_b64}">
+hero_html = f"""
+<html>
+<head>
+<style>
+    html, body {{
+        margin:0;
+        padding:0;
+        width:100%;
+        background:transparent;
+        overflow:hidden;
+        font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+    }}
+    .hero-card{{
+        position:relative;
+        width:100%;
+        height:{BANNER_HEIGHT}px;
+        border-radius:20px;
+        overflow:hidden;
+        box-sizing:border-box;
+        background:linear-gradient(135deg, #6EA4F2 0%, #9B7FE8 55%, #F2A9CE 100%);
+        display:flex;
+        align-items:center;
+        padding:0 48px;
+    }}
+    .hero-decor-1{{
+        position:absolute; top:-40px; left:-40px;
+        width:150px; height:150px; border-radius:50%;
+        background:rgba(255,255,255,0.14);
+    }}
+    .hero-decor-2{{
+        position:absolute; bottom:-60px; right:120px;
+        width:200px; height:200px; border-radius:50%;
+        background:rgba(255,255,255,0.10);
+    }}
+    .hero-star{{
+        position:absolute; top:26px; right:34px;
+        color:#FFD75E; font-size:22px;
+    }}
+    .hero-text{{ position:relative; z-index:2; max-width:78%; }}
+    .hero-title{{
+        color:#FFFFFF; font-size:2.1rem; font-weight:800;
+        margin:0 0 10px 0; letter-spacing:0.2px;
+    }}
+    .hero-subtitle{{
+        color:#FFE9A8; font-size:1.05rem; font-weight:700; margin:0 0 10px 0;
+    }}
+    .hero-rule{{
+        width:70px; height:3px; background:#FFB627; border:none;
+        margin:0 0 14px 0; border-radius:2px;
+    }}
+    .hero-caption{{
+        color:#FFFFFF; font-size:0.95rem; font-style:italic; opacity:0.92;
+        margin:0; line-height:1.45;
+    }}
+    .hero-icon{{
+        position:absolute; right:44px; top:50%; transform:translateY(-50%);
+        z-index:2; opacity:0.95;
+    }}
+</style>
+</head>
+<body>
+    <div class="hero-card">
+        <div class="hero-decor-1"></div>
+        <div class="hero-decor-2"></div>
+        <div class="hero-star">&#9733;</div>
+        <div class="hero-text">
+            <p class="hero-title">&#9749; Dashboard Analisis Tren &amp; Prediksi Pendapatan</p>
+            <p class="hero-subtitle">Sumatra Roastery Medan &mdash; Random Forest vs LightGBM</p>
+            <hr class="hero-rule">
+            <p class="hero-caption">Kopi asli Sumatra Roastery Medan &mdash; dari kebun hingga wawasan bisnis</p>
         </div>
-    </body>
-    </html>
-    """
+        <svg class="hero-icon" width="110" height="110" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 40h50v22a16 16 0 0 1-16 16H36a16 16 0 0 1-16-16V40Z" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M70 46h6a10 10 0 0 1 0 20h-6" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M15 78h60" stroke="white" stroke-width="4" stroke-linecap="round"/>
+            <path d="M32 28c-3-4-3-7 1-11" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M45 28c-3-4-3-7 1-11" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M58 28c-3-4-3-7 1-11" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+        </svg>
+    </div>
+</body>
+</html>
+"""
 
-    components.html(banner_html, height=BANNER_HEIGHT, scrolling=False)
-
-
-
-else:
-    st.title("☕ Dashboard Analisis Tren & Prediksi Pendapatan")
-    st.caption("Sumatra Roastery Medan — Random Forest vs LightGBM")
-    st.warning(
-        "File banner `preview_banner_dashboard.*` tidak ditemukan di folder aplikasi "
-        f"({SCRIPT_DIR}). Pastikan file gambar ini sudah di-upload/push ke repository "
-        "yang sama dengan app.py, sejajar (bukan di dalam subfolder lain)."
-    )
+components.html(hero_html, height=BANNER_HEIGHT, scrolling=False)
 
 IS_PENELITI = st.session_state.role == "Peneliti"
 
