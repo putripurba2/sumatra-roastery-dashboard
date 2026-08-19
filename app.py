@@ -218,7 +218,7 @@ input:-webkit-autofill:focus {{
 .stTabs [data-baseweb="tab"] *,
 .stTabs [role="tab"] * {{
     font-weight: 700 !important;
-    font-size: 0.95rem !important;
+    font-size: 0.88rem !important;
     white-space: nowrap !important;
 }}
 .stTabs [data-baseweb="tab"]:hover:not([aria-selected="true"]),
