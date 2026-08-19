@@ -218,7 +218,7 @@ input:-webkit-autofill:focus {{
 .stTabs [data-baseweb="tab"] *,
 .stTabs [role="tab"] * {{
     font-weight: 700 !important;
-    font-size: 0.78rem !important;
+    font-size: 0.88rem !important;
     white-space: nowrap !important;
 }}
 .stTabs [data-baseweb="tab"]:hover:not([aria-selected="true"]),
@@ -247,6 +247,13 @@ input:-webkit-autofill:focus {{
 }}
 .stTabs [data-baseweb="tab-border"] {{
     display: none !important;
+}}
+
+/* ---- Sub-tab bersarang (Random Forest / LightGBM / Performa Model): menyempit sesuai isi ---- */
+[data-baseweb="tab-panel"] [data-baseweb="tab-list"],
+[data-baseweb="tab-panel"] div[role="tablist"] {{
+    display: inline-flex !important;
+    width: auto !important;
 }}
 
 /* ---- Metrics ---- */
