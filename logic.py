@@ -195,7 +195,7 @@ def generate_laporan_pdf(periode_text, jenis_text, total_pendapatan, total_qty, 
         data.append([row['Jenis Kopi'], rupiah(row['Total Pendapatan (Rp)']), str(int(row['Jumlah Terjual']))])
     tbl = Table(data, hAlign='LEFT')
     tbl.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor(PRIMARY)),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0F6B5C")),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
         ('FONTSIZE', (0, 0), (-1, -1), 9),
