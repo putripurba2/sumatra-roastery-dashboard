@@ -409,6 +409,23 @@ forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
 IS_PEMILIK = st.session_state.role == "Pemilik/Pengelola"
 
 if IS_PEMILIK:
+    # CSS tambahan khusus akun Pemilik saja (7 tab, termasuk Laporan) —
+    # merapatkan jarak antar tab supaya semua muat rapi. Tidak memengaruhi akun Peneliti.
+    st.markdown("""
+    <style>
+    .stTabs [data-baseweb="tab-list"],
+    .stTabs div[role="tablist"],
+    [data-testid="stTabs"] [data-baseweb="tab-list"],
+    [data-testid="stTabs"] div[role="tablist"] {
+        gap: 1px !important;
+        padding: 6px !important;
+    }
+    .stTabs [data-baseweb="tab"],
+    .stTabs [role="tab"] {
+        padding: 7px 7px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Perkiraan Bulan Berikutnya", "📄 Laporan"])
 else:
     tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Perkiraan Bulan Berikutnya"])
