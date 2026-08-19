@@ -417,12 +417,16 @@ if IS_PEMILIK:
     .stTabs div[role="tablist"],
     [data-testid="stTabs"] [data-baseweb="tab-list"],
     [data-testid="stTabs"] div[role="tablist"] {
-        gap: 1px !important;
-        padding: 6px !important;
+        gap: 0px !important;
+        padding: 5px !important;
     }
     .stTabs [data-baseweb="tab"],
     .stTabs [role="tab"] {
-        padding: 7px 7px !important;
+        padding: 6px 5px !important;
+    }
+    .stTabs [data-baseweb="tab"] *,
+    .stTabs [role="tab"] * {
+        font-size: 0.72rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
