@@ -410,23 +410,27 @@ IS_PEMILIK = st.session_state.role == "Pemilik/Pengelola"
 
 if IS_PEMILIK:
     # CSS tambahan khusus akun Pemilik saja (7 tab, termasuk Laporan) —
-    # merapatkan jarak antar tab supaya semua muat rapi. Tidak memengaruhi akun Peneliti.
+    # merapatkan jarak antar tab & menyempitkan bar sesuai isi supaya tidak ada
+    # sisa background kosong. Tidak memengaruhi akun Peneliti.
     st.markdown("""
     <style>
     .stTabs [data-baseweb="tab-list"],
     .stTabs div[role="tablist"],
     [data-testid="stTabs"] [data-baseweb="tab-list"],
     [data-testid="stTabs"] div[role="tablist"] {
-        gap: 0px !important;
-        padding: 5px !important;
+        display: inline-flex !important;
+        width: auto !important;
+        max-width: fit-content !important;
+        gap: 2px !important;
+        padding: 6px !important;
     }
     .stTabs [data-baseweb="tab"],
     .stTabs [role="tab"] {
-        padding: 6px 5px !important;
+        padding: 7px 8px !important;
     }
     .stTabs [data-baseweb="tab"] *,
     .stTabs [role="tab"] * {
-        font-size: 0.72rem !important;
+        font-size: 0.85rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
