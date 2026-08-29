@@ -26,6 +26,7 @@ def find_asset(basename):
 FAVICON = find_asset("favicon")
 BANNER_LOGIN = find_asset("preview_banner_dashboard")
 BANNER_MAIN = find_asset("preview_banner_dashboard")
+LOGO_PATH = find_asset("logo")
 
 st.set_page_config(
     page_title="Dashboard Prediksi Pendapatan - Sumatra Roastery Medan",
@@ -742,7 +743,8 @@ if IS_PEMILIK and tab6 is not None:
 
                 if DOCX_OK:
                     docx_bytes = generate_laporan_docx(periode_text, jenis_text, total_pendapatan,
-                                                         total_qty, rata_harga, ringkasan_jenis)
+                                                         total_qty, rata_harga, ringkasan_jenis,
+                                                         logo_path=LOGO_PATH)
                     st.download_button(
                         "⬇️ Unduh Laporan (Word)", data=docx_bytes,
                         file_name=f"laporan_penjualan_{file_tag}.docx",
@@ -753,7 +755,8 @@ if IS_PEMILIK and tab6 is not None:
 
                 if REPORTLAB_OK:
                     pdf_bytes = generate_laporan_pdf(periode_text, jenis_text, total_pendapatan,
-                                                       total_qty, rata_harga, ringkasan_jenis)
+                                                       total_qty, rata_harga, ringkasan_jenis,
+                                                       logo_path=LOGO_PATH)
                     st.download_button(
                         "⬇️ Unduh Laporan (PDF)", data=pdf_bytes,
                         file_name=f"laporan_penjualan_{file_tag}.pdf",
