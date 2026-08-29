@@ -16,7 +16,11 @@ import lightgbm as lgb
 
 try:
     from docx import Document
-    from docx.shared import Pt
+    from docx.shared import Pt, Inches, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.enum.table import WD_TABLE_ALIGNMENT
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
     DOCX_OK = True
 except ImportError:
     DOCX_OK = False
@@ -24,11 +28,101 @@ except ImportError:
 try:
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.platypus import (
+        SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image as RLImage, HRFlowable,
+    )
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.enums import TA_RIGHT, TA_CENTER
     REPORTLAB_OK = True
 except ImportError:
     REPORTLAB_OK = False
+
+
+# --- Identitas usaha untuk kop surat laporan (sesuaikan di sini jika berubah) ---
+BUSINESS_NAME = "SUMATRA ROASTERY"
+BUSINESS_TAGLINE = "Toko Bubuk Kopi"
+BUSINESS_ADDRESS = "Jl. Ring Road No. 109, Sei Sikambing B, Kec. Medan Sunggal, Kota Medan, Sumatera Utara 20122"
+BUSINESS_PHONE = "0811-610-088"
+BUSINESS_WEBSITE = "sumatraroastery.com"
+SIGNER_NAME = "Rahmad Fikri"
+SIGNER_TITLE = "Pengelola Sumatra Roastery Medan"
+
+
+def _docx_add_bottom_border(paragraph, color="0F6B5C", size=12):
+    """Tambahkan garis horizontal (border bawah) pada sebuah paragraph python-docx."""
+    p_pr = paragraph._p.get_or_add_pPr()
+    p_bdr = OxmlElement('w:pBdr')
+    bottom = OxmlElement('w:bottom')
+    bottom.set(qn('w:val'), 'single')
+    bottom.set(qn('w:sz'), str(size))
+    bottom.set(qn('w:space'), '1')
+    bottom.set(qn('w:color'), color)
+    p_bdr.append(bottom)
+    p_pr.append(p_bdr)
+
+
+def _docx_add_letterhead(doc, logo_path=None):
+    """Tambahkan kop surat (logo + identitas usaha) di bagian atas dokumen Word."""
+    table = doc.add_table(rows=1, cols=2)
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table.autofit = False
+    table.columns[0].width = Inches(1.0)
+    table.columns[1].width = Inches(5.5)
+
+    cell_logo, cell_text = table.rows[0].cells
+    if logo_path:
+        try:
+            cell_logo.paragraphs[0].add_run().add_picture(logo_path, width=Inches(0.85))
+        except Exception:
+            pass
+
+    p_name = cell_text.paragraphs[0]
+    run_name = p_name.add_run(f"{BUSINESS_NAME} — {BUSINESS_TAGLINE}")
+    run_name.bold = True
+    run_name.font.size = Pt(15)
+    run_name.font.color.rgb = RGBColor(0x0F, 0x6B, 0x5C)
+
+    p_addr = cell_text.add_paragraph()
+    p_addr.add_run(BUSINESS_ADDRESS).font.size = Pt(9.5)
+
+    p_contact = cell_text.add_paragraph()
+    p_contact.add_run(f"Telepon: {BUSINESS_PHONE}   |   {BUSINESS_WEBSITE}").font.size = Pt(9.5)
+
+    # remove default table borders (biar kop surat rapi, tanpa kotak tabel)
+    tbl_pr = table._tbl.tblPr
+    borders = OxmlElement('w:tblBorders')
+    for edge in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'):
+        el = OxmlElement(f'w:{edge}')
+        el.set(qn('w:val'), 'none')
+        borders.append(el)
+    tbl_pr.append(borders)
+
+    line_p = doc.add_paragraph()
+    _docx_add_bottom_border(line_p)
+    doc.add_paragraph()
+
+
+def _docx_add_signature(doc):
+    """Tambahkan blok tanda tangan pemilik di bagian bawah dokumen Word."""
+    doc.add_paragraph()
+    p_place = doc.add_paragraph()
+    p_place.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p_place.add_run(f"Medan, {pd.Timestamp.now().strftime('%d %B %Y')}")
+
+    for _ in range(3):
+        p_space = doc.add_paragraph()
+        p_space.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+
+    p_signer_name = doc.add_paragraph()
+    p_signer_name.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    run_signer_name = p_signer_name.add_run(SIGNER_NAME)
+    run_signer_name.bold = True
+    run_signer_name.underline = True
+
+    p_signer_title = doc.add_paragraph()
+    p_signer_title.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p_signer_title.add_run(SIGNER_TITLE)
 
 
 BULAN_ORDER = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
@@ -142,9 +236,12 @@ def to_excel_bytes(df, sheet_name="Data"):
     return buf.getvalue()
 
 
-def generate_laporan_docx(periode_text, jenis_text, total_pendapatan, total_qty, rata_harga, ringkasan_jenis):
+def generate_laporan_docx(periode_text, jenis_text, total_pendapatan, total_qty, rata_harga,
+                           ringkasan_jenis, logo_path=None):
     doc = Document()
-    doc.add_heading('Laporan Penjualan — Sumatra Roastery Medan', level=1)
+    _docx_add_letterhead(doc, logo_path=logo_path)
+
+    doc.add_heading('Laporan Penjualan', level=1)
     doc.add_paragraph(f"Periode: {periode_text}")
     doc.add_paragraph(f"Jenis Kopi: {jenis_text}")
     doc.add_paragraph(f"Tanggal Cetak: {pd.Timestamp.now().strftime('%d %B %Y')}")
@@ -165,17 +262,70 @@ def generate_laporan_docx(periode_text, jenis_text, total_pendapatan, total_qty,
         cells[1].text = rupiah(row['Total Pendapatan (Rp)'])
         cells[2].text = str(int(row['Jumlah Terjual']))
 
+    _docx_add_signature(doc)
+
     buf = io.BytesIO()
     doc.save(buf)
     return buf.getvalue()
 
 
-def generate_laporan_pdf(periode_text, jenis_text, total_pendapatan, total_qty, rata_harga, ringkasan_jenis):
+def _pdf_letterhead_elements(styles, logo_path=None):
+    """Buat elemen kop surat (logo + identitas usaha + garis) untuk laporan PDF."""
+    name_style = ParagraphStyle('BizName', parent=styles['Normal'], fontSize=14, leading=17,
+                                 textColor=colors.HexColor("#0F6B5C"), fontName='Helvetica-Bold')
+    info_style = ParagraphStyle('BizInfo', parent=styles['Normal'], fontSize=9, leading=12,
+                                 textColor=colors.HexColor("#3B2A20"))
+
+    text_cell = [
+        Paragraph(f"{BUSINESS_NAME} \u2014 {BUSINESS_TAGLINE}", name_style),
+        Paragraph(BUSINESS_ADDRESS, info_style),
+        Paragraph(f"Telepon: {BUSINESS_PHONE}   |   {BUSINESS_WEBSITE}", info_style),
+    ]
+
+    if logo_path:
+        try:
+            logo = RLImage(logo_path, width=22 * mm, height=22 * mm)
+        except Exception:
+            logo = ""
+    else:
+        logo = ""
+
+    head_table = Table([[logo, text_cell]], colWidths=[26 * mm, 140 * mm])
+    head_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+    ]))
+
+    return [
+        head_table,
+        Spacer(1, 6),
+        HRFlowable(width="100%", thickness=1.2, color=colors.HexColor("#0F6B5C")),
+        Spacer(1, 14),
+    ]
+
+
+def _pdf_signature_elements(styles):
+    """Buat elemen blok tanda tangan pemilik untuk laporan PDF."""
+    right_style = ParagraphStyle('SignRight', parent=styles['Normal'], alignment=TA_RIGHT, fontSize=10)
+    right_bold = ParagraphStyle('SignRightBold', parent=right_style, fontName='Helvetica-Bold')
+    return [
+        Spacer(1, 24),
+        Paragraph(f"Medan, {pd.Timestamp.now().strftime('%d %B %Y')}", right_style),
+        Spacer(1, 42),
+        Paragraph(SIGNER_NAME, right_bold),
+        Paragraph(SIGNER_TITLE, right_style),
+    ]
+
+
+def generate_laporan_pdf(periode_text, jenis_text, total_pendapatan, total_qty, rata_harga,
+                          ringkasan_jenis, logo_path=None):
     buf = io.BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=A4)
     styles = getSampleStyleSheet()
-    elements = [
-        Paragraph("Laporan Penjualan — Sumatra Roastery Medan", styles['Title']),
+    elements = _pdf_letterhead_elements(styles, logo_path=logo_path)
+    elements += [
+        Paragraph("Laporan Penjualan", styles['Title']),
         Spacer(1, 12),
         Paragraph(f"Periode: {periode_text}", styles['Normal']),
         Paragraph(f"Jenis Kopi: {jenis_text}", styles['Normal']),
@@ -202,6 +352,7 @@ def generate_laporan_pdf(periode_text, jenis_text, total_pendapatan, total_qty, 
         ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
     ]))
     elements.append(tbl)
+    elements += _pdf_signature_elements(styles)
     doc.build(elements)
     return buf.getvalue()
 
