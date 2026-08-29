@@ -63,40 +63,40 @@ def _docx_add_bottom_border(paragraph, color="0F6B5C", size=12):
 
 
 def _docx_add_letterhead(doc, logo_path=None):
-    """Tambahkan kop surat (logo + identitas usaha) di bagian atas dokumen Word."""
-    table = doc.add_table(rows=1, cols=2)
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    table.autofit = False
-    table.columns[0].width = Inches(1.0)
-    table.columns[1].width = Inches(5.5)
-
-    cell_logo, cell_text = table.rows[0].cells
+    """Tambahkan kop surat (logo + identitas usaha) di bagian atas dokumen Word.
+    Menggunakan paragraf biasa (bukan tabel) supaya rata kiri konsisten di semua versi Word."""
+    logo_inserted = False
+    p_head = doc.add_paragraph()
+    p_head.paragraph_format.space_after = Pt(2)
     if logo_path:
         try:
-            cell_logo.paragraphs[0].add_run().add_picture(logo_path, width=Inches(0.85))
+            run_logo = p_head.add_run()
+            run_logo.add_picture(logo_path, width=Inches(0.55))
+            p_head.add_run("  ")
+            logo_inserted = True
+        except Exception:
+            pass
+    if not logo_inserted:
+        try:
+            st.warning(
+                "Logo tidak ditemukan/gagal dimuat untuk laporan — pastikan file `logo.png` "
+                "berada satu folder dengan app.py. Laporan tetap dibuat tanpa logo."
+            )
         except Exception:
             pass
 
-    p_name = cell_text.paragraphs[0]
-    run_name = p_name.add_run(f"{BUSINESS_NAME} — {BUSINESS_TAGLINE}")
+    run_name = p_head.add_run(f"{BUSINESS_NAME} \u2014 {BUSINESS_TAGLINE}")
     run_name.bold = True
     run_name.font.size = Pt(15)
     run_name.font.color.rgb = RGBColor(0x0F, 0x6B, 0x5C)
 
-    p_addr = cell_text.add_paragraph()
+    p_addr = doc.add_paragraph()
+    p_addr.paragraph_format.space_after = Pt(0)
     p_addr.add_run(BUSINESS_ADDRESS).font.size = Pt(9.5)
 
-    p_contact = cell_text.add_paragraph()
+    p_contact = doc.add_paragraph()
+    p_contact.paragraph_format.space_after = Pt(6)
     p_contact.add_run(f"Telepon: {BUSINESS_PHONE}   |   {BUSINESS_WEBSITE}").font.size = Pt(9.5)
-
-    # remove default table borders (biar kop surat rapi, tanpa kotak tabel)
-    tbl_pr = table._tbl.tblPr
-    borders = OxmlElement('w:tblBorders')
-    for edge in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'):
-        el = OxmlElement(f'w:{edge}')
-        el.set(qn('w:val'), 'none')
-        borders.append(el)
-    tbl_pr.append(borders)
 
     line_p = doc.add_paragraph()
     _docx_add_bottom_border(line_p)
