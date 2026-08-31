@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import time
 import io
+import copy
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -49,6 +50,15 @@ SIGNER_NAME = "Rahmad Fikri"
 SIGNER_TITLE = "Pengelola Sumatra Roastery Medan"
 
 
+def _docx_heading(doc, text, level=1):
+    """Tambahkan heading dengan warna hijau brand (bukan biru bawaan Word),
+    supaya senada dengan warna kop surat."""
+    h = doc.add_heading(level=level)
+    run = h.add_run(text)
+    run.font.color.rgb = RGBColor(0x0F, 0x6B, 0x5C)
+    return h
+
+
 def _docx_add_bottom_border(paragraph, color="0F6B5C", size=12):
     """Tambahkan garis horizontal (border bawah) pada sebuah paragraph python-docx."""
     p_pr = paragraph._p.get_or_add_pPr()
@@ -62,17 +72,100 @@ def _docx_add_bottom_border(paragraph, color="0F6B5C", size=12):
     p_pr.append(p_bdr)
 
 
+def _docx_force_left(paragraph):
+    """Pastikan paragraf benar-benar rata kiri tanpa indent, apa pun style bawaannya."""
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    pf = paragraph.paragraph_format
+    pf.left_indent = Inches(0)
+    pf.first_line_indent = Inches(0)
+
+
+def _docx_float_logo_left(run, wrap_height_inches=0.95):
+    """Ubah gambar inline (hasil run.add_picture) menjadi gambar melayang (anchored)
+    yang menempel di kiri, dengan teks di paragraf-paragraf berikutnya melingkar
+    di sebelah kanannya. Ini memungkinkan teks nama usaha & alamat tampil rata
+    tengah di ruang sebelah kanan logo, seperti kop surat resmi."""
+    drawing = run._r.find(qn('w:drawing'))
+    if drawing is None:
+        return
+    inline = drawing.find(qn('wp:inline'))
+    if inline is None:
+        return
+
+    extent = inline.find(qn('wp:extent'))
+    doc_pr = inline.find(qn('wp:docPr'))
+    cnv_pr = inline.find(qn('wp:cNvGraphicFramePr'))
+    graphic = inline.find(qn('a:graphic'))
+
+    cy = extent.get('cy') if extent is not None else str(int(Inches(0.6)))
+
+    anchor = OxmlElement('wp:anchor')
+    anchor.set('distT', '0')
+    anchor.set('distB', '0')
+    anchor.set('distL', '0')
+    anchor.set('distR', '137160')
+    anchor.set('simplePos', '0')
+    anchor.set('relativeHeight', '251659264')
+    anchor.set('behindDoc', '0')
+    anchor.set('locked', '0')
+    anchor.set('layoutInCell', '1')
+    anchor.set('allowOverlap', '1')
+
+    simple_pos = OxmlElement('wp:simplePos')
+    simple_pos.set('x', '0')
+    simple_pos.set('y', '0')
+    anchor.append(simple_pos)
+
+    pos_h = OxmlElement('wp:positionH')
+    pos_h.set('relativeFrom', 'column')
+    off_h = OxmlElement('wp:posOffset')
+    off_h.text = '0'
+    pos_h.append(off_h)
+    anchor.append(pos_h)
+
+    pos_v = OxmlElement('wp:positionV')
+    pos_v.set('relativeFrom', 'paragraph')
+    off_v = OxmlElement('wp:posOffset')
+    off_v.text = '0'
+    pos_v.append(off_v)
+    anchor.append(pos_v)
+
+    if extent is not None:
+        anchor.append(copy.deepcopy(extent))
+    eff_extent = OxmlElement('wp:effectExtent')
+    eff_extent.set('l', '0'); eff_extent.set('t', '0'); eff_extent.set('r', '0'); eff_extent.set('b', '0')
+    anchor.append(eff_extent)
+
+    wrap_square = OxmlElement('wp:wrapSquare')
+    wrap_square.set('wrapText', 'right')
+    anchor.append(wrap_square)
+
+    if doc_pr is not None:
+        anchor.append(copy.deepcopy(doc_pr))
+    if cnv_pr is not None:
+        anchor.append(copy.deepcopy(cnv_pr))
+    if graphic is not None:
+        anchor.append(copy.deepcopy(graphic))
+
+    drawing.remove(inline)
+    drawing.append(anchor)
+
+
 def _docx_add_letterhead(doc, logo_path=None):
     """Tambahkan kop surat (logo + identitas usaha) di bagian atas dokumen Word.
-    Menggunakan paragraf biasa (bukan tabel) supaya rata kiri konsisten di semua versi Word."""
+    Logo melayang (anchored) di kiri, nama usaha & alamat rata tengah di ruang
+    sebelah kanannya — meniru format kop surat resmi instansi."""
     logo_inserted = False
-    p_head = doc.add_paragraph()
-    p_head.paragraph_format.space_after = Pt(2)
+    p_name = doc.add_paragraph()
+    p_name.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_name.paragraph_format.space_before = Pt(0)
+    p_name.paragraph_format.space_after = Pt(2)
+
     if logo_path:
         try:
-            run_logo = p_head.add_run()
-            run_logo.add_picture(logo_path, width=Inches(0.55))
-            p_head.add_run("  ")
+            run_logo = p_name.add_run()
+            run_logo.add_picture(logo_path, width=Inches(0.85))
+            _docx_float_logo_left(run_logo)
             logo_inserted = True
         except Exception:
             pass
@@ -85,20 +178,21 @@ def _docx_add_letterhead(doc, logo_path=None):
         except Exception:
             pass
 
-    run_name = p_head.add_run(f"{BUSINESS_NAME} \u2014 {BUSINESS_TAGLINE}")
+    run_name = p_name.add_run(f"{BUSINESS_NAME} - {BUSINESS_TAGLINE}")
     run_name.bold = True
     run_name.font.size = Pt(15)
     run_name.font.color.rgb = RGBColor(0x0F, 0x6B, 0x5C)
 
     p_addr = doc.add_paragraph()
-    p_addr.paragraph_format.space_after = Pt(0)
-    p_addr.add_run(BUSINESS_ADDRESS).font.size = Pt(9.5)
-
-    p_contact = doc.add_paragraph()
-    p_contact.paragraph_format.space_after = Pt(6)
-    p_contact.add_run(f"Telepon: {BUSINESS_PHONE}   |   {BUSINESS_WEBSITE}").font.size = Pt(9.5)
+    p_addr.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_addr.paragraph_format.space_after = Pt(10)
+    contact_line = f"{BUSINESS_ADDRESS}   |   Telepon: {BUSINESS_PHONE}   |   {BUSINESS_WEBSITE}"
+    run_addr = p_addr.add_run(contact_line)
+    run_addr.font.size = Pt(9.5)
+    run_addr.font.color.rgb = RGBColor(0x3B, 0x2A, 0x20)
 
     line_p = doc.add_paragraph()
+    _docx_force_left(line_p)
     _docx_add_bottom_border(line_p)
     doc.add_paragraph()
 
@@ -110,19 +204,21 @@ def _docx_add_signature(doc):
     p_place.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     p_place.add_run(f"Medan, {pd.Timestamp.now().strftime('%d %B %Y')}")
 
-    for _ in range(3):
-        p_space = doc.add_paragraph()
-        p_space.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    for _ in range(2):
+        doc.add_paragraph()
+
+    p_line = doc.add_paragraph()
+    p_line.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p_line.add_run("_" * 28).font.color.rgb = RGBColor(0x9A, 0x9A, 0x9A)
 
     p_signer_name = doc.add_paragraph()
     p_signer_name.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     run_signer_name = p_signer_name.add_run(SIGNER_NAME)
     run_signer_name.bold = True
-    run_signer_name.underline = True
 
     p_signer_title = doc.add_paragraph()
     p_signer_title.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    p_signer_title.add_run(SIGNER_TITLE)
+    p_signer_title.add_run(SIGNER_TITLE).font.size = Pt(10)
 
 
 BULAN_ORDER = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
@@ -241,17 +337,17 @@ def generate_laporan_docx(periode_text, jenis_text, total_pendapatan, total_qty,
     doc = Document()
     _docx_add_letterhead(doc, logo_path=logo_path)
 
-    doc.add_heading('Laporan Penjualan', level=1)
+    _docx_heading(doc, 'Laporan Penjualan', level=1)
     doc.add_paragraph(f"Periode: {periode_text}")
     doc.add_paragraph(f"Jenis Kopi: {jenis_text}")
     doc.add_paragraph(f"Tanggal Cetak: {pd.Timestamp.now().strftime('%d %B %Y')}")
 
-    doc.add_heading('Ringkasan', level=2)
+    _docx_heading(doc, 'Ringkasan', level=2)
     doc.add_paragraph(f"Total Pendapatan: {rupiah(total_pendapatan)}")
     doc.add_paragraph(f"Total Unit Terjual: {int(total_qty):,}".replace(",", "."))
     doc.add_paragraph(f"Rata-rata Harga: {rupiah(rata_harga)}")
 
-    doc.add_heading('Rincian per Jenis Kopi', level=2)
+    _docx_heading(doc, 'Rincian per Jenis Kopi', level=2)
     table = doc.add_table(rows=1, cols=3)
     table.style = 'Light Grid Accent 1'
     hdr = table.rows[0].cells
