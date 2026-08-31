@@ -366,11 +366,15 @@ def generate_laporan_docx(periode_text, jenis_text, total_pendapatan, total_qty,
 
 
 def _pdf_letterhead_elements(styles, logo_path=None):
-    """Buat elemen kop surat (logo + identitas usaha + garis) untuk laporan PDF."""
+    """Buat elemen kop surat (logo + identitas usaha + garis) untuk laporan PDF.
+    Teks identitas dibuat RATA TENGAH sebagai satu blok (bukan rata kiri) di ruang
+    sebelah kanan logo, meniru format kop surat resmi instansi (judul, subjudul,
+    alamat, telepon semuanya center sehingga tepinya 'naik turun')."""
     name_style = ParagraphStyle('BizName', parent=styles['Normal'], fontSize=14, leading=17,
-                                 textColor=colors.HexColor("#0F6B5C"), fontName='Helvetica-Bold')
-    info_style = ParagraphStyle('BizInfo', parent=styles['Normal'], fontSize=9, leading=12,
-                                 textColor=colors.HexColor("#3B2A20"))
+                                 textColor=colors.HexColor("#0F6B5C"), fontName='Helvetica-Bold',
+                                 alignment=TA_CENTER)
+    info_style = ParagraphStyle('BizInfo', parent=styles['Normal'], fontSize=9, leading=13,
+                                 textColor=colors.HexColor("#3B2A20"), alignment=TA_CENTER)
 
     text_cell = [
         Paragraph(f"{BUSINESS_NAME} \u2014 {BUSINESS_TAGLINE}", name_style),
@@ -386,11 +390,18 @@ def _pdf_letterhead_elements(styles, logo_path=None):
     else:
         logo = ""
 
-    head_table = Table([[logo, text_cell]], colWidths=[26 * mm, 140 * mm])
+    # Kolom teks dibuat lebih lebar & kolom logo tetap kecil di kiri, supaya blok
+    # teks yang center benar-benar center relatif ke sisa lebar halaman (bukan
+    # ketarik ke kiri oleh kolom logo yang sempit).
+    head_table = Table([[logo, text_cell]], colWidths=[24 * mm, 142 * mm])
     head_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 0),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+        ('ALIGN', (1, 0), (1, 0), 'CENTER'),
+        ('LEFTPADDING', (0, 0), (0, 0), 0),
+        ('RIGHTPADDING', (0, 0), (0, 0), 4),
+        ('LEFTPADDING', (1, 0), (1, 0), 0),
+        ('RIGHTPADDING', (1, 0), (1, 0), 0),
     ]))
 
     return [
