@@ -372,16 +372,16 @@ def _pdf_letterhead_elements(styles, logo_path=None):
     Teks identitas dibuat RATA TENGAH sebagai satu blok (bukan rata kiri) di ruang
     sebelah kanan logo, meniru format kop surat resmi instansi (judul, subjudul,
     alamat, telepon semuanya center sehingga tepinya 'naik turun')."""
-    name_style = ParagraphStyle('BizName', parent=styles['Normal'], fontSize=14, leading=17,
+    name_style = ParagraphStyle('BizName', parent=styles['Normal'], fontSize=15, leading=18,
                                  textColor=colors.HexColor("#0F6B5C"), fontName='Helvetica-Bold',
                                  alignment=TA_CENTER)
-    info_style = ParagraphStyle('BizInfo', parent=styles['Normal'], fontSize=9, leading=13,
+    info_style = ParagraphStyle('BizInfo', parent=styles['Normal'], fontSize=9.5, leading=13,
                                  textColor=colors.HexColor("#3B2A20"), alignment=TA_CENTER)
 
+    contact_line = f"{BUSINESS_ADDRESS}   |   Telepon: {BUSINESS_PHONE}   |   {BUSINESS_WEBSITE}"
     text_cell = [
-        Paragraph(f"{BUSINESS_NAME} \u2014 {BUSINESS_TAGLINE}", name_style),
-        Paragraph(BUSINESS_ADDRESS, info_style),
-        Paragraph(f"Telepon: {BUSINESS_PHONE}   |   {BUSINESS_WEBSITE}", info_style),
+        Paragraph(f"{BUSINESS_NAME} - {BUSINESS_TAGLINE}", name_style),
+        Paragraph(contact_line, info_style),
     ]
 
     if logo_path:
