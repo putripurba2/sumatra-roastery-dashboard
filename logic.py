@@ -201,24 +201,21 @@ def _docx_add_signature(doc):
     """Tambahkan blok tanda tangan pemilik di bagian bawah dokumen Word."""
     doc.add_paragraph()
     p_place = doc.add_paragraph()
-    p_place.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p_place.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_place.add_run(f"Medan, {pd.Timestamp.now().strftime('%d %B %Y')}")
 
-    for _ in range(2):
+    for _ in range(3):
         doc.add_paragraph()
 
-    p_line = doc.add_paragraph()
-    p_line.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    p_line.add_run("_" * 28).font.color.rgb = RGBColor(0x9A, 0x9A, 0x9A)
-
     p_signer_name = doc.add_paragraph()
-    p_signer_name.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p_signer_name.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run_signer_name = p_signer_name.add_run(SIGNER_NAME)
     run_signer_name.bold = True
+    run_signer_name.underline = True
 
     p_signer_title = doc.add_paragraph()
-    p_signer_title.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    p_signer_title.add_run(SIGNER_TITLE).font.size = Pt(10)
+    p_signer_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_signer_title.add_run(SIGNER_TITLE)
 
 
 BULAN_ORDER = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
@@ -414,14 +411,14 @@ def _pdf_letterhead_elements(styles, logo_path=None):
 
 def _pdf_signature_elements(styles):
     """Buat elemen blok tanda tangan pemilik untuk laporan PDF."""
-    right_style = ParagraphStyle('SignRight', parent=styles['Normal'], alignment=TA_RIGHT, fontSize=10)
-    right_bold = ParagraphStyle('SignRightBold', parent=right_style, fontName='Helvetica-Bold')
+    center_style = ParagraphStyle('SignCenter', parent=styles['Normal'], alignment=TA_CENTER, fontSize=10)
+    center_bold = ParagraphStyle('SignCenterBold', parent=center_style, fontName='Helvetica-Bold')
     return [
         Spacer(1, 24),
-        Paragraph(f"Medan, {pd.Timestamp.now().strftime('%d %B %Y')}", right_style),
+        Paragraph(f"Medan, {pd.Timestamp.now().strftime('%d %B %Y')}", center_style),
         Spacer(1, 42),
-        Paragraph(SIGNER_NAME, right_bold),
-        Paragraph(SIGNER_TITLE, right_style),
+        Paragraph(f"<u>{SIGNER_NAME}</u>", center_bold),
+        Paragraph(SIGNER_TITLE, center_style),
     ]
 
 
