@@ -199,7 +199,7 @@ def _docx_add_letterhead(doc, logo_path=None):
 
 def _docx_add_signature(doc):
     """Tambahkan blok tanda tangan pemilik di bagian bawah dokumen Word."""
-    SIGN_INDENT = Inches(2.6)
+    SIGN_INDENT = Inches(3.0)
 
     doc.add_paragraph()
     p_place = doc.add_paragraph()
@@ -416,7 +416,7 @@ def _pdf_letterhead_elements(styles, logo_path=None):
 
 def _pdf_signature_elements(styles):
     """Buat elemen blok tanda tangan pemilik untuk laporan PDF."""
-    SIGN_INDENT = 200
+    SIGN_INDENT = 240
     center_style = ParagraphStyle('SignCenter', parent=styles['Normal'], alignment=TA_CENTER,
                                    fontSize=10, leftIndent=SIGN_INDENT)
     center_bold = ParagraphStyle('SignCenterBold', parent=center_style, fontName='Helvetica-Bold')
