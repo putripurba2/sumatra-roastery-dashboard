@@ -199,9 +199,12 @@ def _docx_add_letterhead(doc, logo_path=None):
 
 def _docx_add_signature(doc):
     """Tambahkan blok tanda tangan pemilik di bagian bawah dokumen Word."""
+    SIGN_INDENT = Inches(2.6)
+
     doc.add_paragraph()
     p_place = doc.add_paragraph()
     p_place.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_place.paragraph_format.left_indent = SIGN_INDENT
     p_place.add_run(f"Medan, {pd.Timestamp.now().strftime('%d %B %Y')}")
 
     for _ in range(3):
@@ -209,12 +212,14 @@ def _docx_add_signature(doc):
 
     p_signer_name = doc.add_paragraph()
     p_signer_name.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_signer_name.paragraph_format.left_indent = SIGN_INDENT
     run_signer_name = p_signer_name.add_run(SIGNER_NAME)
     run_signer_name.bold = True
     run_signer_name.underline = True
 
     p_signer_title = doc.add_paragraph()
     p_signer_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_signer_title.paragraph_format.left_indent = SIGN_INDENT
     p_signer_title.add_run(SIGNER_TITLE)
 
 
@@ -411,7 +416,9 @@ def _pdf_letterhead_elements(styles, logo_path=None):
 
 def _pdf_signature_elements(styles):
     """Buat elemen blok tanda tangan pemilik untuk laporan PDF."""
-    center_style = ParagraphStyle('SignCenter', parent=styles['Normal'], alignment=TA_CENTER, fontSize=10)
+    SIGN_INDENT = 200
+    center_style = ParagraphStyle('SignCenter', parent=styles['Normal'], alignment=TA_CENTER,
+                                   fontSize=10, leftIndent=SIGN_INDENT)
     center_bold = ParagraphStyle('SignCenterBold', parent=center_style, fontName='Helvetica-Bold')
     return [
         Spacer(1, 24),
