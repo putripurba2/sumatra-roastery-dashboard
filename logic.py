@@ -10,6 +10,7 @@ import numpy as np
 import time
 import io
 import copy
+import calendar as cal_module
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -511,3 +512,66 @@ def forecast_next_month(df):
 
     forecast_df = pd.DataFrame(rows).sort_values('Prediksi Random Forest (Rp)', ascending=False).reset_index(drop=True)
     return forecast_df, next_bulan_nama, next_tahun
+
+
+# ---------------------------------------------------------------------------
+# KALENDER & ESTIMASI HARIAN/MINGGUAN
+# Catatan penting: dataset sumber hanya mencatat transaksi pada level
+# Tahun + Bulan (tidak ada tanggal harian), begitu pula model Random Forest
+# dan LightGBM dilatih dan dievaluasi pada level bulanan (lihat BAB III).
+# Karena itu, nilai "harian" dan "mingguan" di bagian ini BUKAN hasil
+# prediksi model, melainkan estimasi kasar dari pembagian rata pendapatan
+# bulanan (aktual atau prediksi) sesuai jumlah hari/minggu kalender pada
+# bulan tersebut. Tujuannya murni membantu visualisasi & perencanaan,
+# bukan mengklaim akurasi prediksi pada level harian/mingguan.
+# ---------------------------------------------------------------------------
+
+def build_calendar_matrix(rekap):
+    """Bentuk matriks Tahun x Bulan berisi Total Pendapatan (Rp) aktual,
+    dipakai untuk kalender heatmap tahunan."""
+    pivot = rekap.pivot_table(index='Tahun', columns='Bulan', values='Total Pendapatan (Rp)', aggfunc='sum')
+    pivot = pivot.reindex(columns=BULAN_ORDER)
+    pivot = pivot.sort_index()
+    return pivot
+
+
+def get_periode_options(rekap, forecast_total, next_bulan_nama, next_tahun):
+    """Daftar (Tahun, Bulan) yang bisa dipilih di kalender: seluruh bulan
+    aktual pada data + satu bulan prediksi (bulan berikutnya setelah data
+    terakhir)."""
+    opsi = [
+        {'Tahun': int(row['Tahun']), 'Bulan': row['Bulan'], 'bulan_num': BULAN_MAP[row['Bulan']],
+         'Total Pendapatan (Rp)': row['Total Pendapatan (Rp)'], 'tipe': 'Aktual'}
+        for _, row in rekap.iterrows()
+    ]
+    opsi.append({
+        'Tahun': int(next_tahun), 'Bulan': next_bulan_nama, 'bulan_num': BULAN_MAP[next_bulan_nama],
+        'Total Pendapatan (Rp)': forecast_total, 'tipe': 'Prediksi',
+    })
+    return opsi
+
+
+def daily_weekly_estimate(tahun, bulan_num, total_pendapatan):
+    """Bagi rata total pendapatan satu bulan ke estimasi harian, dan ke
+    estimasi mingguan mengikuti struktur kalender (Senin-Minggu) bulan itu."""
+    _, num_days = cal_module.monthrange(int(tahun), int(bulan_num))
+    daily_avg = total_pendapatan / num_days
+
+    weeks = cal_module.Calendar(firstweekday=0).monthdatescalendar(int(tahun), int(bulan_num))
+    rows = []
+    week_no = 1
+    for week in weeks:
+        days_in_month = [d for d in week if d.month == int(bulan_num)]
+        if not days_in_month:
+            continue
+        n = len(days_in_month)
+        rows.append({
+            'Minggu ke': week_no,
+            'Rentang Tanggal': f"{days_in_month[0].strftime('%d %b')} \u2013 {days_in_month[-1].strftime('%d %b')}",
+            'Jumlah Hari': n,
+            'Estimasi Pendapatan (Rp)': daily_avg * n,
+        })
+        week_no += 1
+
+    weekly_df = pd.DataFrame(rows)
+    return num_days, daily_avg, weekly_df
