@@ -673,29 +673,6 @@ with tab5:
     st.info("Catatan asumsi: harga rata-rata memakai rata-rata 3 bulan terakhir per jenis kopi, dan kategori tren memakai kategori bulan terakhir yang datanya tersedia (karena kategori tren bulan depan belum bisa diketahui sebelum pendapatan aktualnya terjadi).")
 
 with tab_cal:
-    st.subheader("🧾 Bagaimana Sistem Penjualan Bekerja")
-    st.markdown(
-        "Setiap transaksi penjualan di **Sumatra Roastery Medan** dicatat berdasarkan jenis kopi, "
-        "varian, ukuran kemasan, harga jual, dan jumlah unit terjual. Dari data transaksi ini, "
-        "sistem melakukan agregasi bertahap sebelum sampai ke tahap analisis dan prediksi:"
-    )
-    st.markdown(
-        "1. **Transaksi mentah** — setiap baris penjualan dicatat per jenis kopi pada suatu Tahun-Bulan.\n"
-        "2. **Rekap per jenis kopi per bulan** — seluruh transaksi dijumlahkan menjadi total pendapatan "
-        "dan harga rata-rata tertimbang per jenis kopi setiap bulannya.\n"
-        "3. **Rekap bulanan keseluruhan** — total pendapatan seluruh jenis kopi digabung menjadi satu "
-        "angka per bulan, lalu dikategorikan sebagai *Tinggi* atau *Rendah* dibandingkan rata-rata "
-        "keseluruhan periode.\n"
-        "4. **Fitur untuk model** — dari rekap per jenis kopi ini dibentuk fitur `lag_1` (pendapatan "
-        "bulan sebelumnya), harga rata-rata, dan kategori tren, yang menjadi input Random Forest dan "
-        "LightGBM untuk mempelajari pola serta memprediksi pendapatan bulan berikutnya."
-    )
-    st.caption(
-        "Karena pencatatan transaksi berada di level Tahun-Bulan (bukan tanggal harian), seluruh "
-        "analisis tren dan pelatihan model pada dashboard ini juga berjalan di level bulanan."
-    )
-
-    st.divider()
     st.subheader("🗓️ Kalender Pendapatan Bulanan")
     cal_matrix = build_calendar_matrix(rekap)
     fig_cal = go.Figure(data=go.Heatmap(
