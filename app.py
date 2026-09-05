@@ -729,21 +729,132 @@ with tab_cal:
     st.caption("Warna lebih gelap = pendapatan lebih tinggi pada bulan tersebut. Sel kosong menandakan tidak ada data pada periode itu.")
 
     st.divider()
+
+    # ---------------------------------------------------------------
+    # Navigasi kalender bergaya "My Calendar" (panah kiri/kanan + Hari Ini)
+    # ---------------------------------------------------------------
     opsi_periode = get_periode_options(rekap, (total_rf + total_lgb) / 2, next_bulan_nama, next_tahun)
+    opsi_periode_sorted = sorted(opsi_periode, key=lambda o: (o['Tahun'], o['bulan_num']))
 
-    tahun_tersedia = sorted({o['Tahun'] for o in opsi_periode})
-    col_tahun, col_bulan = st.columns(2)
-    with col_tahun:
-        pilih_tahun = st.selectbox("Pilih Tahun", tahun_tersedia, index=len(tahun_tersedia) - 1, key="kalender_pilih_tahun")
+    if 'kalender_idx' not in st.session_state:
+        st.session_state['kalender_idx'] = len(opsi_periode_sorted) - 1
+    st.session_state['kalender_idx'] = max(0, min(st.session_state['kalender_idx'], len(opsi_periode_sorted) - 1))
 
-    opsi_tahun_ini = [o for o in opsi_periode if o['Tahun'] == pilih_tahun]
-    opsi_tahun_ini.sort(key=lambda o: o['bulan_num'])
-    bulan_label = {i: f"{o['Bulan']} ({o['tipe']})" for i, o in enumerate(opsi_tahun_ini)}
-    with col_bulan:
-        pilih_bulan_idx = st.selectbox("Pilih Bulan", options=list(bulan_label.keys()),
-                                        format_func=lambda i: bulan_label[i],
-                                        index=len(opsi_tahun_ini) - 1, key=f"kalender_pilih_bulan_{pilih_tahun}")
-    sel = opsi_tahun_ini[pilih_bulan_idx]
+    st.markdown("### 📅 Kalender Penjualan")
+    nav1, nav2, nav3, nav4 = st.columns([1, 4, 1, 1.6])
+    with nav1:
+        if st.button("←", key="kalender_prev", use_container_width=True):
+            st.session_state['kalender_idx'] = max(0, st.session_state['kalender_idx'] - 1)
+    with nav3:
+        if st.button("→", key="kalender_next", use_container_width=True):
+            st.session_state['kalender_idx'] = min(len(opsi_periode_sorted) - 1, st.session_state['kalender_idx'] + 1)
+    with nav4:
+        if st.button("Hari ini", key="kalender_today", use_container_width=True):
+            st.session_state['kalender_idx'] = len(opsi_periode_sorted) - 1
+
+    sel = opsi_periode_sorted[st.session_state['kalender_idx']]
+    with nav2:
+        st.markdown(
+            f"<div style='text-align:center; font-size:1.5rem; font-weight:800; color:{ESPRESSO}; padding-top:2px;'>"
+            f"{sel['Bulan']} {sel['Tahun']} <span style='font-size:0.9rem; font-weight:600; color:{PRIMARY};'>({sel['tipe']})</span></div>",
+            unsafe_allow_html=True,
+        )
+
+    tampilan = st.radio("Tampilan", ["Bulan", "Minggu", "Hari"], horizontal=True,
+                         key="kalender_tampilan", label_visibility="collapsed")
+    if tampilan != "Bulan":
+        st.info(
+            "Tampilan Minggu/Hari belum bisa ditampilkan datanya karena data sumber hanya mencatat "
+            "transaksi pada level bulanan (lihat BAB III). Kalender tetap ditampilkan pada level Bulan."
+        )
+
+    st.divider()
+
+    # ---------------------------------------------------------------
+    # Kartu KPI + gauge
+    # ---------------------------------------------------------------
+    is_aktual = sel['tipe'] == 'Aktual'
+    if is_aktual:
+        daily_bulan_sel = daily[(daily['Tahun'] == sel['Tahun']) & (daily['Bulan'] == sel['Bulan'])]
+        jumlah_transaksi = len(daily_bulan_sel)
+        jenis_terjual = daily_bulan_sel['Jenis Kopi'].nunique()
+    else:
+        jumlah_transaksi = None
+        jenis_terjual = None
+
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric("Jumlah Transaksi", f"{jumlah_transaksi:,}" if jumlah_transaksi is not None else "—")
+    k2.metric("Jenis Kopi Terjual", f"{jenis_terjual}" if jenis_terjual is not None else "—")
+    k3.metric(f"Total Pendapatan ({sel['tipe']})", rupiah(sel['Total Pendapatan (Rp)']))
+    with k4:
+        batas_atas = max(rekap['Total Pendapatan (Rp)'].max(), sel['Total Pendapatan (Rp)']) * 1.15
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=sel['Total Pendapatan (Rp)'],
+            number={'valueformat': ',.0f', 'prefix': 'Rp '},
+            gauge={
+                'axis': {'range': [0, batas_atas]},
+                'bar': {'color': PRIMARY},
+                'steps': [
+                    {'range': [0, avg_overall], 'color': '#F4D9C6'},
+                    {'range': [avg_overall, batas_atas], 'color': '#D7E8E1'},
+                ],
+                'threshold': {'line': {'color': ACCENT, 'width': 3}, 'thickness': 0.8, 'value': avg_overall},
+            },
+            title={'text': "Pendapatan vs Rata-rata", 'font': {'size': 12}},
+        ))
+        fig_gauge.update_layout(height=170, margin=dict(l=10, r=10, t=40, b=0))
+        st.plotly_chart(fig_gauge, use_container_width=True, config={"displayModeBar": False})
+    st.caption("Garis oranye pada gauge menandakan rata-rata pendapatan bulanan historis keseluruhan periode.")
+
+    st.divider()
+
+    # ---------------------------------------------------------------
+    # Dua grafik: tren bulanan (historis) & per jenis kopi (bulan terpilih)
+    # ---------------------------------------------------------------
+    chart1, chart2 = st.columns(2)
+    with chart1:
+        st.markdown("##### Pendapatan per Bulan (Tren Historis)")
+        rekap_plot = rekap.sort_values('periode').copy()
+        rekap_plot['label'] = rekap_plot['Bulan'].str[:3] + " " + rekap_plot['Tahun'].astype(str)
+        rekap_plot['kumulatif'] = rekap_plot['Total Pendapatan (Rp)'].cumsum()
+        warna_bar = [ACCENT if (r['Tahun'] == sel['Tahun'] and r['Bulan'] == sel['Bulan']) else PRIMARY
+                     for _, r in rekap_plot.iterrows()]
+        fig_a = go.Figure()
+        fig_a.add_trace(go.Bar(x=rekap_plot['label'], y=rekap_plot['Total Pendapatan (Rp)'],
+                                name="Pendapatan", marker_color=warna_bar, yaxis='y1'))
+        fig_a.add_trace(go.Scatter(x=rekap_plot['label'], y=rekap_plot['kumulatif'], name="Kumulatif",
+                                    mode='lines', line=dict(color=ESPRESSO, width=2), yaxis='y2'))
+        fig_a.update_layout(height=340, plot_bgcolor="white",
+                            yaxis=dict(title="Pendapatan (Rp)"),
+                            yaxis2=dict(title="Kumulatif (Rp)", overlaying='y', side='right'),
+                            legend=dict(orientation='h', y=1.15))
+        st.plotly_chart(fig_a, use_container_width=True, config={"displayModeBar": False})
+        st.caption("Batang oranye menandakan bulan yang sedang dipilih di navigasi kalender.")
+
+    with chart2:
+        st.markdown(f"##### Pendapatan per Jenis Kopi — {sel['Bulan']} {sel['Tahun']}")
+        if is_aktual:
+            jenis_bulan = df[(df['Tahun'] == sel['Tahun']) & (df['Bulan'] == sel['Bulan'])][['Jenis Kopi', 'Total Pendapatan (Rp)']].copy()
+        else:
+            jenis_bulan = forecast_df[['Jenis Kopi']].copy()
+            jenis_bulan['Total Pendapatan (Rp)'] = (forecast_df['Prediksi Random Forest (Rp)'] + forecast_df['Prediksi LightGBM (Rp)']) / 2
+        jenis_bulan = jenis_bulan.sort_values('Total Pendapatan (Rp)', ascending=False).reset_index(drop=True)
+        jenis_bulan['kumulatif'] = jenis_bulan['Total Pendapatan (Rp)'].cumsum()
+        fig_b = go.Figure()
+        fig_b.add_trace(go.Bar(x=jenis_bulan['Jenis Kopi'], y=jenis_bulan['Total Pendapatan (Rp)'],
+                                name="Pendapatan", marker_color=ACCENT, yaxis='y1'))
+        fig_b.add_trace(go.Scatter(x=jenis_bulan['Jenis Kopi'], y=jenis_bulan['kumulatif'], name="Kumulatif",
+                                    mode='lines', line=dict(color=ESPRESSO, width=2), yaxis='y2'))
+        fig_b.update_layout(height=340, plot_bgcolor="white",
+                            yaxis=dict(title="Pendapatan (Rp)"),
+                            yaxis2=dict(title="Kumulatif (Rp)", overlaying='y', side='right'),
+                            legend=dict(orientation='h', y=1.15), xaxis_tickangle=-25)
+        st.plotly_chart(fig_b, use_container_width=True, config={"displayModeBar": False})
+        if not is_aktual:
+            st.caption("Nilai untuk bulan prediksi merupakan rata-rata prediksi Random Forest dan LightGBM.")
+
+    st.divider()
 
     num_days, daily_avg, weekly_df = daily_weekly_estimate(sel['Tahun'], sel['bulan_num'], sel['Total Pendapatan (Rp)'])
 
