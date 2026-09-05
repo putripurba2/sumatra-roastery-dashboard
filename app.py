@@ -5,6 +5,7 @@ import numpy as np
 import os
 import glob
 import base64
+import calendar as cal_module
 
 from logic import (
     BULAN_ORDER, BULAN_MAP,
@@ -46,6 +47,46 @@ ESPRESSO_SOFT = "#5C4633"
 BORDER = "#D9C9B4"
 GOLD = "#E0A526"
 GOLD_DARK = "#C98A1B"
+
+def rupiah_singkat(x):
+    """Format ringkas untuk sel kalender kecil, mis. Rp 2,85 Jt."""
+    juta = x / 1_000_000
+    return f"Rp {juta:,.2f} Jt".replace(",", "#").replace(".", ",").replace("#", ".")
+
+def render_month_calendar_grid(tahun, bulan_num, daily_avg):
+    """Render grid kalender bulan (Senin-Minggu) bergaya kalender pada umumnya.
+    Tanggal di luar bulan yang dipilih ditampilkan abu-abu tanpa angka (spillover
+    dari bulan sebelum/sesudahnya). Karena data sumber hanya level bulanan, setiap
+    tanggal dalam bulan ini menampilkan angka estimasi harian yang SAMA (bukan
+    angka unik per tanggal)."""
+    weeks = cal_module.Calendar(firstweekday=0).monthdatescalendar(int(tahun), int(bulan_num))
+    nilai_singkat = rupiah_singkat(daily_avg)
+
+    html = ['<table style="width:100%; border-collapse:collapse; font-family:inherit; table-layout:fixed;">']
+    html.append('<tr>' + ''.join(
+        f'<th style="background:{PRIMARY}; color:white; padding:6px 4px; font-size:12px;">{h}</th>'
+        for h in ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
+    ) + '</tr>')
+
+    for week in weeks:
+        html.append('<tr>')
+        for d in week:
+            if d.month != int(bulan_num):
+                html.append(
+                    '<td style="background:#F5F2ED; color:#C9BFAF; padding:6px 4px; '
+                    f'border:1px solid {GRID}; vertical-align:top; height:52px;">{d.day}</td>'
+                )
+            else:
+                html.append(
+                    f'<td style="background:#FFFFFF; padding:6px 4px; border:1px solid {GRID}; '
+                    f'vertical-align:top; height:52px;">'
+                    f'<div style="font-weight:700; color:{ESPRESSO}; font-size:13px;">{d.day}</div>'
+                    f'<div style="font-size:10px; color:{PRIMARY}; font-weight:600;">{nilai_singkat}</div>'
+                    '</td>'
+                )
+        html.append('</tr>')
+    html.append('</table>')
+    return ''.join(html)
 
 st.markdown(f"""
 <style>
@@ -716,6 +757,14 @@ with tab_cal:
     c1.metric(f"Total Pendapatan {sel['Bulan']} {sel['Tahun']} ({sel['tipe']})", rupiah(sel['Total Pendapatan (Rp)']))
     c2.metric("Estimasi Harian (rata-rata)", rupiah(daily_avg))
     c3.metric("Jumlah Hari dalam Bulan", f"{num_days} hari")
+
+    st.markdown(f"#### Tampilan Kalender — {sel['Bulan']} {sel['Tahun']}")
+    st.caption(
+        "Karena data sumber hanya mencatat transaksi di level bulanan, setiap tanggal pada bulan ini "
+        "menampilkan angka estimasi harian yang sama (bukan angka unik per tanggal). Tanggal abu-abu "
+        "adalah tanggal dari bulan sebelum/sesudahnya."
+    )
+    st.markdown(render_month_calendar_grid(sel['Tahun'], sel['bulan_num'], daily_avg), unsafe_allow_html=True)
 
     st.markdown("#### Estimasi Pendapatan per Minggu")
     weekly_show = weekly_df.copy()
