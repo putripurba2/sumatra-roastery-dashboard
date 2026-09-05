@@ -689,11 +689,20 @@ with tab_cal:
 
     st.divider()
     opsi_periode = get_periode_options(rekap, (total_rf + total_lgb) / 2, next_bulan_nama, next_tahun)
-    opsi_label = {i: f"{o['Bulan']} {o['Tahun']} ({o['tipe']})" for i, o in enumerate(opsi_periode)}
-    default_idx = len(opsi_periode) - 1  # default ke bulan prediksi terbaru
-    pilih_idx = st.selectbox("Pilih bulan & tahun", options=list(opsi_label.keys()),
-                              format_func=lambda i: opsi_label[i], index=default_idx, key="kalender_pilih_bulan")
-    sel = opsi_periode[pilih_idx]
+
+    tahun_tersedia = sorted({o['Tahun'] for o in opsi_periode})
+    col_tahun, col_bulan = st.columns(2)
+    with col_tahun:
+        pilih_tahun = st.selectbox("Pilih Tahun", tahun_tersedia, index=len(tahun_tersedia) - 1, key="kalender_pilih_tahun")
+
+    opsi_tahun_ini = [o for o in opsi_periode if o['Tahun'] == pilih_tahun]
+    opsi_tahun_ini.sort(key=lambda o: o['bulan_num'])
+    bulan_label = {i: f"{o['Bulan']} ({o['tipe']})" for i, o in enumerate(opsi_tahun_ini)}
+    with col_bulan:
+        pilih_bulan_idx = st.selectbox("Pilih Bulan", options=list(bulan_label.keys()),
+                                        format_func=lambda i: bulan_label[i],
+                                        index=len(opsi_tahun_ini) - 1, key=f"kalender_pilih_bulan_{pilih_tahun}")
+    sel = opsi_tahun_ini[pilih_bulan_idx]
 
     num_days, daily_avg, weekly_df = daily_weekly_estimate(sel['Tahun'], sel['bulan_num'], sel['Total Pendapatan (Rp)'])
 
