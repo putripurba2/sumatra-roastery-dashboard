@@ -11,7 +11,7 @@ from logic import (
     load_raw, build_dataset, train_models, forecast_next_month,
     rupiah, to_excel_bytes, generate_laporan_docx, generate_laporan_pdf,
     DOCX_OK, REPORTLAB_OK,
-    build_calendar_matrix, get_periode_options,
+    build_calendar_matrix, get_periode_options, daily_weekly_estimate,
 )
 import plotly.graph_objects as go
 import plotly.express as px
@@ -561,7 +561,7 @@ with tab3:
     st.subheader("🔮 Prediksi & Evaluasi Model")
     st.caption("Hasil prediksi tiap model ditampilkan terpisah, lalu dibandingkan performanya di sub-tab terakhir.")
 
-    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 Random Forest", "💡 LightGBM", "📊 Performa Model"])
+    subtab_rf, subtab_lgb, subtab_perf, subtab_hm = st.tabs(["🌲 Random Forest", "💡 LightGBM", "📊 Performa Model", "📆 Harian & Mingguan"])
 
     # ---------- Sub-tab: Random Forest ----------
     with subtab_rf:
@@ -635,6 +635,51 @@ with tab3:
             for col in ['Total Pendapatan (Rp)', 'Prediksi Random Forest', 'Prediksi LightGBM']:
                 test_show[col] = test_show[col].apply(rupiah)
             st.dataframe(test_show, use_container_width=True, hide_index=True)
+
+    # ---------- Sub-tab: Prediksi Harian & Mingguan ----------
+    with subtab_hm:
+        st.markdown("#### Prediksi Harian & Mingguan (Turunan dari Prediksi Bulanan)")
+        st.info(
+            "Random Forest dan LightGBM dilatih dan dievaluasi pada level **bulanan** (lihat BAB III). "
+            "Angka harian dan mingguan di bawah ini diturunkan dari hasil prediksi bulanan tersebut "
+            "dengan membagi rata sesuai jumlah hari dalam bulan, bukan hasil prediksi langsung model "
+            "pada level harian/mingguan."
+        )
+
+        jenis_hm = st.selectbox("Pilih jenis kopi", sorted(test_out['Jenis Kopi'].unique()), key="jenis_hm")
+        sub_hm = test_out[test_out['Jenis Kopi'] == jenis_hm].copy().reset_index(drop=True)
+        sub_hm['label'] = sub_hm['Bulan'] + " " + sub_hm['Tahun'].astype(str)
+
+        col_periode, col_model = st.columns([2, 1])
+        with col_periode:
+            periode_label = st.selectbox("Pilih periode (data uji)", sub_hm['label'].tolist(),
+                                          index=len(sub_hm) - 1, key="periode_hm")
+        with col_model:
+            model_hm = st.radio("Model", ["Random Forest", "LightGBM"], key="model_hm")
+
+        row_hm = sub_hm[sub_hm['label'] == periode_label].iloc[0]
+        pred_col = 'Prediksi Random Forest' if model_hm == "Random Forest" else 'Prediksi LightGBM'
+        pred_value = row_hm[pred_col]
+
+        num_days, daily_avg, weekly_df = daily_weekly_estimate(int(row_hm['Tahun']), BULAN_MAP[row_hm['Bulan']], pred_value)
+
+        c1, c2, c3 = st.columns(3)
+        c1.metric(f"Prediksi {model_hm} — {row_hm['Bulan']} {row_hm['Tahun']}", rupiah(pred_value))
+        c2.metric("Prediksi Harian (rata-rata)", rupiah(daily_avg))
+        c3.metric("Jumlah Hari dalam Bulan", f"{num_days} hari")
+
+        st.markdown("##### Prediksi Pendapatan per Minggu")
+        weekly_show = weekly_df.rename(columns={'Estimasi Pendapatan (Rp)': 'Prediksi Pendapatan (Rp)'}).copy()
+        weekly_show['Prediksi Pendapatan (Rp)'] = weekly_show['Prediksi Pendapatan (Rp)'].apply(rupiah)
+        st.dataframe(weekly_show, use_container_width=True, hide_index=True)
+
+        warna_hm = PRIMARY if model_hm == "Random Forest" else ACCENT
+        fig_hm = px.bar(weekly_df, x='Minggu ke', y='Estimasi Pendapatan (Rp)',
+                         text=weekly_df['Estimasi Pendapatan (Rp)'].apply(rupiah),
+                         color_discrete_sequence=[warna_hm])
+        fig_hm.update_traces(textposition='outside')
+        fig_hm.update_layout(height=360, plot_bgcolor="white", yaxis_title="Prediksi Pendapatan (Rp)")
+        st.plotly_chart(fig_hm, use_container_width=True, config={"displayModeBar": False})
 
 with tab4:
     st.subheader("Feature Importance — Random Forest vs LightGBM")
