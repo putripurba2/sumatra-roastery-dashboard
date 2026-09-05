@@ -11,7 +11,7 @@ from logic import (
     load_raw, build_dataset, train_models, forecast_next_month,
     rupiah, to_excel_bytes, generate_laporan_docx, generate_laporan_pdf,
     DOCX_OK, REPORTLAB_OK,
-    build_calendar_matrix, get_periode_options, daily_weekly_estimate,
+    build_calendar_matrix, get_periode_options,
 )
 import plotly.graph_objects as go
 import plotly.express as px
@@ -436,9 +436,9 @@ if IS_PEMILIK:
     }
     </style>
     """, unsafe_allow_html=True)
-    tab0, tab1, tab2, tab3, tab4, tab5, tab_cal, tab6 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Perkiraan Bulan Berikutnya", "🗓️ Kalender & Estimasi", "📄 Laporan"])
+    tab0, tab1, tab2, tab3, tab4, tab5, tab_cal, tab6 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Perkiraan Bulan Berikutnya", "🗓️ Kalender", "📄 Laporan"])
 else:
-    tab0, tab1, tab2, tab3, tab4, tab5, tab_cal = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Perkiraan Bulan Berikutnya", "🗓️ Kalender & Estimasi"])
+    tab0, tab1, tab2, tab3, tab4, tab5, tab_cal = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Perkiraan Bulan Berikutnya", "🗓️ Kalender"])
     tab6 = None
 
 components.html("""
@@ -497,7 +497,7 @@ with tab0:
 - **🔮 Prediksi & Evaluasi** — hasil prediksi Random Forest & LightGBM dibandingkan dengan data aktual, beserta metrik evaluasinya.
 - **⭐ Feature Importance** — variabel yang paling berpengaruh terhadap hasil prediksi.
 - **📅 Perkiraan Bulan Berikutnya** — estimasi pendapatan untuk periode berikutnya.
-- **🗓️ Kalender & Estimasi** — alur sistem penjualan, kalender pendapatan bulanan, serta estimasi harian & mingguan.
+- **🗓️ Kalender** — kalender heatmap pendapatan bulanan serta pemilihan bulan/tahun untuk melihat detailnya.
 """
     if IS_PEMILIK:
         panduan += "- **📄 Laporan** — unduh ringkasan laporan penjualan dalam format Word atau PDF.\n"
@@ -688,39 +688,13 @@ with tab_cal:
     st.caption("Warna lebih gelap = pendapatan lebih tinggi pada bulan tersebut. Sel kosong menandakan tidak ada data pada periode itu.")
 
     st.divider()
-    st.subheader("📆 Estimasi Harian & Mingguan per Bulan")
-    st.info(
-        "Data sumber dan model prediksi (Random Forest & LightGBM) bekerja di level **bulanan**. "
-        "Angka harian/mingguan di bawah ini **bukan hasil prediksi model**, melainkan estimasi kasar "
-        "dari pembagian rata pendapatan bulanan (aktual atau prediksi) sesuai jumlah hari/minggu "
-        "kalender pada bulan yang dipilih."
-    )
-
     opsi_periode = get_periode_options(rekap, (total_rf + total_lgb) / 2, next_bulan_nama, next_tahun)
     opsi_label = {i: f"{o['Bulan']} {o['Tahun']} ({o['tipe']})" for i, o in enumerate(opsi_periode)}
     default_idx = len(opsi_periode) - 1  # default ke bulan prediksi terbaru
     pilih_idx = st.selectbox("Pilih bulan & tahun", options=list(opsi_label.keys()),
                               format_func=lambda i: opsi_label[i], index=default_idx, key="kalender_pilih_bulan")
     sel = opsi_periode[pilih_idx]
-
-    num_days, daily_avg, weekly_df = daily_weekly_estimate(sel['Tahun'], sel['bulan_num'], sel['Total Pendapatan (Rp)'])
-
-    cek1, cek2, cek3 = st.columns(3)
-    cek1.metric(f"Total Pendapatan {sel['Bulan']} {sel['Tahun']} ({sel['tipe']})", rupiah(sel['Total Pendapatan (Rp)']))
-    cek2.metric("Estimasi Harian (rata-rata)", rupiah(daily_avg))
-    cek3.metric("Jumlah Hari dalam Bulan", f"{num_days} hari")
-
-    st.markdown("#### Estimasi Pendapatan per Minggu")
-    weekly_show = weekly_df.copy()
-    weekly_show['Estimasi Pendapatan (Rp)'] = weekly_show['Estimasi Pendapatan (Rp)'].apply(rupiah)
-    st.dataframe(weekly_show, use_container_width=True, hide_index=True)
-
-    fig_week = px.bar(weekly_df, x='Minggu ke', y='Estimasi Pendapatan (Rp)',
-                       text=weekly_df['Estimasi Pendapatan (Rp)'].apply(rupiah),
-                       color_discrete_sequence=[ACCENT])
-    fig_week.update_traces(textposition='outside')
-    fig_week.update_layout(height=360, plot_bgcolor="white", yaxis_title="Estimasi Pendapatan (Rp)")
-    st.plotly_chart(fig_week, use_container_width=True, config={"displayModeBar": False})
+    st.metric(f"Total Pendapatan {sel['Bulan']} {sel['Tahun']} ({sel['tipe']})", rupiah(sel['Total Pendapatan (Rp)']))
 
 if IS_PEMILIK and tab6 is not None:
     with tab6:
