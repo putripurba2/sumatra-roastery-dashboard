@@ -121,6 +121,9 @@ html, body, [class*="css"] {{
 [data-testid="stSidebar"] * {{
     color: {ESPRESSO} !important;
 }}
+[data-testid="stSidebarUserContent"] {{
+    padding: 1rem 1rem 1rem 1rem !important;
+}}
 
 /* ---- Headings, captions, labels, markdown text ---- */
 h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, .stCaption {{
@@ -460,12 +463,11 @@ with st.sidebar:
         st.markdown(f"""
         <div style="
             position:relative;
-            border-radius:14px;
+            border-radius:0;
             overflow:hidden;
-            padding:16px 14px;
-            margin-bottom:14px;
+            padding:20px 16px 16px 16px;
+            margin:-1rem -1rem 14px -1rem;
             background: linear-gradient(135deg, {ACCENT} 0%, {GOLD} 50%, {PRIMARY} 100%);
-            box-shadow: 0 6px 16px rgba(59,42,32,0.28);
         ">
             <div style="display:flex; align-items:center; gap:12px;">
                 <img src="data:image/png;base64,{logo_b64}" style="
