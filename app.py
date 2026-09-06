@@ -376,10 +376,6 @@ def get_base64_image(path, _mtime):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
 
-with st.sidebar:
-    st.markdown(f"Login sebagai: **{st.session_state.role}**")
-    st.divider()
-
 def render_hero_banner():
     """Render banner foto hero. Dipanggil hanya di dalam tab Dashboard,
     supaya banner hilang saat pindah ke tab lain."""
@@ -459,8 +455,41 @@ if IS_PEMILIK:
     MENU_OPTIONS.append("📄 Laporan")
 
 with st.sidebar:
+    if LOGO_PATH:
+        logo_b64 = get_base64_image(LOGO_PATH, os.path.getmtime(LOGO_PATH))
+        st.markdown(f"""
+        <div style="
+            position:relative;
+            border-radius:14px;
+            overflow:hidden;
+            padding:16px 14px;
+            margin-bottom:14px;
+            background: linear-gradient(135deg, {ACCENT} 0%, {GOLD} 50%, {PRIMARY} 100%);
+            box-shadow: 0 6px 16px rgba(59,42,32,0.28);
+        ">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <img src="data:image/png;base64,{logo_b64}" style="
+                    width:54px; height:54px; border-radius:50%;
+                    border:2px solid #FFFFFF; object-fit:cover; background:#FFFFFF;
+                    flex-shrink:0;
+                ">
+                <div>
+                    <div style="color:#FFFFFF !important; font-weight:800; font-size:0.95rem; line-height:1.25; letter-spacing:0.3px;">
+                        SUMATRA ROASTERY<br>MEDAN
+                    </div>
+                    <div style="color:#FFF3E6 !important; font-size:0.72rem; font-weight:600; margin-top:2px;">
+                        Dashboard Analisis &amp; Prediksi
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("### ☕ Sumatra Roastery Medan")
+
     menu = st.radio("Navigasi", MENU_OPTIONS, label_visibility="collapsed", key="main_menu")
     st.divider()
+    st.markdown(f"Login sebagai: **{st.session_state.role}**")
     if st.button("Logout", use_container_width=True):
         st.session_state.logged_in = False
         st.session_state.role = None
