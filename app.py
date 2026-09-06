@@ -185,13 +185,16 @@ html, body, [class*="css"] {{
 [data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) p {{
     color: #FFFFFF !important; font-weight: 700 !important;
 }}
-/* Hilangkan bulatan native radio button (bullet putih/merah) di semua menu sidebar.
-   Pakai pendekatan "sembunyikan semua elemen langsung di dalam label KECUALI kotak teks",
-   supaya tidak bergantung pada nama class internal Streamlit yang bisa berubah-ubah. */
-[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label > *:not([data-testid="stMarkdownContainer"]) {{
+/* Hilangkan bulatan native radio button (bullet putih/merah) di semua menu sidebar,
+   tanpa menyentuh kotak teks labelnya supaya tulisan menu tidak ikut hilang. */
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label input[type="radio"] {{
     display: none !important;
 }}
-[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label input[type="radio"] {{
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label::before,
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label::after {{
+    display: none !important; content: none !important;
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label > div:first-child:not(:has(p)) {{
     display: none !important;
 }}
 /* Perbesar sedikit ikon+teks menu "Perkiraan Bulan Berikutnya" & "Kalender" */
