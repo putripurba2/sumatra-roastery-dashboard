@@ -29,6 +29,7 @@ def find_asset(basename):
 FAVICON = find_asset("favicon")
 LOGO_PATH = find_asset("logo")
 BANNER_PATH = find_asset("preview_banner_dashboard") or find_asset("banner_kopi")
+ICON_PERKIRAAN_PATH = find_asset("icon_perkiraan_bulan")
 
 st.set_page_config(
     page_title="Dashboard Prediksi Pendapatan - Sumatra Roastery Medan",
@@ -222,6 +223,10 @@ html, body, [class*="css"] {{
     width: 44px; height: 44px; border-radius: 12px; background: {PRIMARY};
     display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
 }}
+.page-header-icon-img {{
+    width: 44px; height: 44px; border-radius: 12px; object-fit: cover; flex-shrink: 0;
+    border: 1px solid {CARD_BORDER};
+}}
 .dashboard-banner-wrap {{ margin-bottom: 18px; line-height: 0; }}
 .dashboard-banner-wrap img {{
     width: 100%; max-height: 230px; object-fit: cover; border-radius: 16px; display: block;
@@ -371,15 +376,23 @@ def format_tanggal_indo(dt):
     return f"{HARI_ID[dt.weekday()]}, {dt.day} {BULAN_ORDER[dt.month - 1]} {dt.year}"
 
 
-def render_page_header(icon, title, subtitle):
+def render_page_header(icon, title, subtitle, icon_image_path=None):
     """Header putih di puncak setiap halaman: ikon+judul+subjudul di kiri,
-    tanggal hari ini & peran login di kanan (menggantikan blok 'Login sebagai' lama)."""
+    tanggal hari ini & peran login di kanan (menggantikan blok 'Login sebagai' lama).
+    Jika icon_image_path diisi dan filenya ada, kotak ikon emoji diganti gambar asli."""
     tanggal_str = format_tanggal_indo(datetime.date.today())
     role = st.session_state.role
+    if icon_image_path:
+        ext = os.path.splitext(icon_image_path)[1].lstrip(".").lower()
+        mime = "jpeg" if ext in ("jpg", "jpeg") else ext
+        img_b64 = get_base64_image(icon_image_path, os.path.getmtime(icon_image_path))
+        icon_html = f'<img src="data:image/{mime};base64,{img_b64}" class="page-header-icon-img">'
+    else:
+        icon_html = f'<div class="page-header-icon">{icon}</div>'
     st.markdown(f"""
     <div class="page-header">
       <div class="page-header-left">
-        <div class="page-header-icon">{icon}</div>
+        {icon_html}
         <div>
           <div class="page-header-title">{title}</div>
           <div class="page-header-subtitle">{subtitle}</div>
@@ -430,7 +443,7 @@ MENU_OPTIONS = [
     "🔮 Prediksi & Evaluasi",
     "⭐ Feature Importance",
     "⚖️ Perbandingan Model",
-    "🌤️ Perkiraan Bulan Berikutnya",
+    "💹 Perkiraan Bulan Berikutnya",
     "🗓️ Kalender",
 ]
 if IS_PEMILIK:
@@ -664,7 +677,7 @@ if menu == "🏠 Dashboard":
             fc1, fc2 = st.columns(2)
             fc1.metric("Random Forest", rupiah(total_rf))
             fc2.metric("LightGBM", rupiah(total_lgb))
-            st.caption("Rincian lengkap per jenis kopi ada di menu 🌤️ Perkiraan Bulan Berikutnya.")
+            st.caption("Rincian lengkap per jenis kopi ada di menu 💹 Perkiraan Bulan Berikutnya.")
 
     with col_kalender:
         with st.container(border=True):
@@ -853,7 +866,7 @@ elif menu == "⭐ Feature Importance":
 # 📅 PERKIRAAN BULAN BERIKUTNYA
 # =====================================================================
 elif menu == "💹 Perkiraan Bulan Berikutnya":
-    render_page_header("💹", "Perkiraan Bulan Berikutnya", f"Prediksi pendapatan untuk {next_bulan_nama} {next_tahun}, dilatih ulang dari seluruh data historis.")
+    render_page_header("💹", "Perkiraan Bulan Berikutnya", f"Prediksi pendapatan untuk {next_bulan_nama} {next_tahun}, dilatih ulang dari seluruh data historis.", icon_image_path=ICON_PERKIRAAN_PATH)
 
     with st.container(border=True):
         c1, c2, c3 = st.columns(3)
