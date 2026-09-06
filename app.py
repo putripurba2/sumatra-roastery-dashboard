@@ -378,10 +378,6 @@ def get_base64_image(path, _mtime):
 
 with st.sidebar:
     st.markdown(f"Login sebagai: **{st.session_state.role}**")
-    if st.button("Logout"):
-        st.session_state.logged_in = False
-        st.session_state.role = None
-        st.rerun()
     st.divider()
 
 def render_hero_banner():
@@ -450,17 +446,25 @@ IS_PENELITI = st.session_state.role == "Peneliti"
 IS_PEMILIK = st.session_state.role == "Pemilik/Pengelola"
 
 MENU_OPTIONS = [
-    "🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi",
-    "⭐ Feature Importance", "📅 Perkiraan Bulan Berikutnya", "🗓️ Kalender",
+    "🏠 Dashboard",
+    "📥 Input Dataset",
+    "📋 Data Aktual",
+    "📈 Analisis Tren",
+    "🔮 Prediksi & Evaluasi",
+    "⭐ Feature Importance",
+    "📅 Perkiraan Bulan Berikutnya",
+    "🗓️ Kalender",
 ]
 if IS_PEMILIK:
     MENU_OPTIONS.append("📄 Laporan")
-MENU_OPTIONS.append("📥 Input Dataset")
 
 with st.sidebar:
-    st.markdown("### 🧭 Menu")
-    menu = st.radio("Menu", MENU_OPTIONS, label_visibility="collapsed", key="main_menu")
+    menu = st.radio("Navigasi", MENU_OPTIONS, label_visibility="collapsed", key="main_menu")
     st.divider()
+    if st.button("Logout", use_container_width=True):
+        st.session_state.logged_in = False
+        st.session_state.role = None
+        st.rerun()
 
 uploaded = None
 split_ratio = 0.8
@@ -560,16 +564,16 @@ if menu == "🏠 Dashboard":
 
     st.markdown("#### 🧭 Panduan Navigasi")
     panduan = """
-- **📋 Data Aktual** — data mentah dan rekap pendapatan yang menjadi dasar seluruh analisis.
-- **📈 Analisis Tren** — grafik tren pendapatan bulanan dan kontribusi tiap jenis kopi.
-- **🔮 Prediksi & Evaluasi** — hasil prediksi Random Forest & LightGBM dibandingkan dengan data aktual, beserta metrik evaluasinya.
-- **⭐ Feature Importance** — variabel yang paling berpengaruh terhadap hasil prediksi.
-- **📅 Perkiraan Bulan Berikutnya** — estimasi pendapatan untuk periode berikutnya.
-- **🗓️ Kalender** — kalender heatmap pendapatan bulanan serta pemilihan bulan/tahun untuk melihat detailnya.
+- **📥 Input Dataset** — unggah dataset baru (.xlsx) dan atur proporsi data training/testing.
+- **📋 Data Aktual** — data yang diterima & sudah diolah (preprocessing), menjadi dasar seluruh analisis.
+- **📈 Analisis Tren** — menganalisis tren pendapatan bulanan dan kontribusi tiap jenis kopi.
+- **🔮 Prediksi & Evaluasi** — melatih model Random Forest & LightGBM, menghasilkan prediksi, mengevaluasi MAE/RMSE/R²/waktu training, dan membandingkan performa kedua model.
+- **⭐ Feature Importance** — menganalisis variabel yang paling berpengaruh terhadap hasil prediksi.
+- **📅 Perkiraan Bulan Berikutnya** — menghasilkan prediksi pendapatan untuk periode berikutnya.
+- **🗓️ Kalender** — melihat periode/tanggal data dalam tampilan kalender heatmap.
 """
     if IS_PEMILIK:
         panduan += "- **📄 Laporan** — unduh ringkasan laporan penjualan dalam format Word atau PDF.\n"
-    panduan += "- **📥 Input Dataset** — unggah dataset baru (.xlsx) dan atur proporsi data training/testing.\n"
     st.markdown(panduan)
 
     st.info("Gunakan menu di sidebar sebelah kiri untuk berpindah antar bagian dashboard.")
