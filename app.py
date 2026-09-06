@@ -184,11 +184,13 @@ html, body, [class*="css"] {{
 [data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) p {{
     color: #FFFFFF !important; font-weight: 700 !important;
 }}
-/* Hilangkan bulatan native radio button (bullet putih/merah) di semua menu sidebar */
-[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label input[type="radio"] {{
+/* Hilangkan bulatan native radio button (bullet putih/merah) di semua menu sidebar.
+   Pakai pendekatan "sembunyikan semua elemen langsung di dalam label KECUALI kotak teks",
+   supaya tidak bergantung pada nama class internal Streamlit yang bisa berubah-ubah. */
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label > *:not([data-testid="stMarkdownContainer"]) {{
     display: none !important;
 }}
-[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {{
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label input[type="radio"] {{
     display: none !important;
 }}
 /* Perbesar sedikit ikon+teks menu "Perkiraan Bulan Berikutnya" & "Kalender" */
@@ -220,9 +222,10 @@ html, body, [class*="css"] {{
     width: 44px; height: 44px; border-radius: 12px; background: {PRIMARY};
     display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
 }}
-.page-header-photo {{
-    width: 50px; height: 50px; border-radius: 12px; object-fit: cover; flex-shrink: 0;
-    border: 1px solid {CARD_BORDER};
+.dashboard-banner-wrap {{ margin-bottom: 18px; line-height: 0; }}
+.dashboard-banner-wrap img {{
+    width: 100%; max-height: 230px; object-fit: cover; border-radius: 16px; display: block;
+    box-shadow: 0 2px 10px rgba(20,40,32,0.08);
 }}
 .page-header-title {{ font-size: 1.25rem; font-weight: 800; color: {ESPRESSO} !important; line-height: 1.2; }}
 .page-header-subtitle {{ font-size: 0.82rem; color: {ESPRESSO_SOFT} !important; margin-top: 2px; }}
@@ -390,31 +393,17 @@ def render_page_header(icon, title, subtitle):
     """, unsafe_allow_html=True)
 
 
-def render_page_header_photo(image_path, title, subtitle):
-    """Sama seperti render_page_header, tapi kotak ikon kiri diganti foto asli
-    (mis. foto kemasan kopi) alih-alih emoji — dipakai khusus halaman Dashboard."""
-    tanggal_str = format_tanggal_indo(datetime.date.today())
-    role = st.session_state.role
-    if image_path:
-        ext = os.path.splitext(image_path)[1].lstrip(".").lower()
-        mime = "jpeg" if ext in ("jpg", "jpeg") else ext
-        img_b64 = get_base64_image(image_path, os.path.getmtime(image_path))
-        left_icon_html = f'<img src="data:image/{mime};base64,{img_b64}" class="page-header-photo">'
-    else:
-        left_icon_html = '<div class="page-header-icon">🏠</div>'
+def render_dashboard_banner(image_path):
+    """Banner penuh lebar khusus Dashboard: hanya gambar (judul & subjudul sudah
+    ada di dalam gambarnya sendiri), tanpa kotak header putih terpisah."""
+    if not image_path:
+        return
+    ext = os.path.splitext(image_path)[1].lstrip(".").lower()
+    mime = "jpeg" if ext in ("jpg", "jpeg") else ext
+    img_b64 = get_base64_image(image_path, os.path.getmtime(image_path))
     st.markdown(f"""
-    <div class="page-header">
-      <div class="page-header-left">
-        {left_icon_html}
-        <div>
-          <div class="page-header-title">{title}</div>
-          <div class="page-header-subtitle">{subtitle}</div>
-        </div>
-      </div>
-      <div class="page-header-right">
-        <div class="header-pill">📅 {tanggal_str}</div>
-        <div class="header-pill header-pill-role">👤 {role}</div>
-      </div>
+    <div class="dashboard-banner-wrap">
+        <img src="data:image/{mime};base64,{img_b64}">
     </div>
     """, unsafe_allow_html=True)
 
@@ -441,7 +430,7 @@ MENU_OPTIONS = [
     "🔮 Prediksi & Evaluasi",
     "⭐ Feature Importance",
     "⚖️ Perbandingan Model",
-    "📅 Perkiraan Bulan Berikutnya",
+    "🌤️ Perkiraan Bulan Berikutnya",
     "🗓️ Kalender",
 ]
 if IS_PEMILIK:
@@ -555,7 +544,7 @@ if menu == "📥 Input Dataset":
 # 🏠 DASHBOARD
 # =====================================================================
 if menu == "🏠 Dashboard":
-    render_page_header_photo(BANNER_PATH, "Dashboard", "Sistem Prediksi Pendapatan Penjualan Kopi — Sumatra Roastery Medan")
+    render_dashboard_banner(BANNER_PATH)
 
     rekap_sorted = rekap.sort_values('periode').reset_index(drop=True)
     total_pendapatan_all = rekap_sorted['Total Pendapatan (Rp)'].sum()
@@ -675,7 +664,7 @@ if menu == "🏠 Dashboard":
             fc1, fc2 = st.columns(2)
             fc1.metric("Random Forest", rupiah(total_rf))
             fc2.metric("LightGBM", rupiah(total_lgb))
-            st.caption("Rincian lengkap per jenis kopi ada di menu 📅 Perkiraan Bulan Berikutnya.")
+            st.caption("Rincian lengkap per jenis kopi ada di menu 🌤️ Perkiraan Bulan Berikutnya.")
 
     with col_kalender:
         with st.container(border=True):
@@ -863,8 +852,8 @@ elif menu == "⭐ Feature Importance":
 # =====================================================================
 # 📅 PERKIRAAN BULAN BERIKUTNYA
 # =====================================================================
-elif menu == "📅 Perkiraan Bulan Berikutnya":
-    render_page_header("📅", "Perkiraan Bulan Berikutnya", f"Prediksi pendapatan untuk {next_bulan_nama} {next_tahun}, dilatih ulang dari seluruh data historis.")
+elif menu == "💹 Perkiraan Bulan Berikutnya":
+    render_page_header("💹", "Perkiraan Bulan Berikutnya", f"Prediksi pendapatan untuk {next_bulan_nama} {next_tahun}, dilatih ulang dari seluruh data historis.")
 
     with st.container(border=True):
         c1, c2, c3 = st.columns(3)
