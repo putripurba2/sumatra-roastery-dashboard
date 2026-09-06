@@ -28,6 +28,7 @@ def find_asset(basename):
 
 FAVICON = find_asset("favicon")
 LOGO_PATH = find_asset("logo")
+BANNER_PATH = find_asset("preview_banner_dashboard") or find_asset("banner_kopi")
 
 st.set_page_config(
     page_title="Dashboard Prediksi Pendapatan - Sumatra Roastery Medan",
@@ -183,6 +184,18 @@ html, body, [class*="css"] {{
 [data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) p {{
     color: #FFFFFF !important; font-weight: 700 !important;
 }}
+/* Hilangkan bulatan native radio button (bullet putih/merah) di semua menu sidebar */
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label input[type="radio"] {{
+    display: none !important;
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {{
+    display: none !important;
+}}
+/* Perbesar sedikit ikon+teks menu "Perkiraan Bulan Berikutnya" & "Kalender" */
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:nth-of-type(8) p,
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:nth-of-type(9) p {{
+    font-size: 1.05rem !important;
+}}
 
 .sidebar-footer-role {{ font-size: 0.8rem; color: #BFDCCF !important; margin-bottom: 8px; }}
 [data-testid="stSidebar"] hr {{ border-color: rgba(255,255,255,0.14) !important; }}
@@ -206,6 +219,10 @@ html, body, [class*="css"] {{
 .page-header-icon {{
     width: 44px; height: 44px; border-radius: 12px; background: {PRIMARY};
     display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+}}
+.page-header-photo {{
+    width: 50px; height: 50px; border-radius: 12px; object-fit: cover; flex-shrink: 0;
+    border: 1px solid {CARD_BORDER};
 }}
 .page-header-title {{ font-size: 1.25rem; font-weight: 800; color: {ESPRESSO} !important; line-height: 1.2; }}
 .page-header-subtitle {{ font-size: 0.82rem; color: {ESPRESSO_SOFT} !important; margin-top: 2px; }}
@@ -373,6 +390,35 @@ def render_page_header(icon, title, subtitle):
     """, unsafe_allow_html=True)
 
 
+def render_page_header_photo(image_path, title, subtitle):
+    """Sama seperti render_page_header, tapi kotak ikon kiri diganti foto asli
+    (mis. foto kemasan kopi) alih-alih emoji — dipakai khusus halaman Dashboard."""
+    tanggal_str = format_tanggal_indo(datetime.date.today())
+    role = st.session_state.role
+    if image_path:
+        ext = os.path.splitext(image_path)[1].lstrip(".").lower()
+        mime = "jpeg" if ext in ("jpg", "jpeg") else ext
+        img_b64 = get_base64_image(image_path, os.path.getmtime(image_path))
+        left_icon_html = f'<img src="data:image/{mime};base64,{img_b64}" class="page-header-photo">'
+    else:
+        left_icon_html = '<div class="page-header-icon">🏠</div>'
+    st.markdown(f"""
+    <div class="page-header">
+      <div class="page-header-left">
+        {left_icon_html}
+        <div>
+          <div class="page-header-title">{title}</div>
+          <div class="page-header-subtitle">{subtitle}</div>
+        </div>
+      </div>
+      <div class="page-header-right">
+        <div class="header-pill">📅 {tanggal_str}</div>
+        <div class="header-pill header-pill-role">👤 {role}</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
 def kpi_card(icon, label, value, sub, bg, icon_bg):
     st.markdown(f"""
     <div class="kpi-card" style="background:{bg};">
@@ -394,6 +440,7 @@ MENU_OPTIONS = [
     "📈 Analisis Tren",
     "🔮 Prediksi & Evaluasi",
     "⭐ Feature Importance",
+    "⚖️ Perbandingan Model",
     "📅 Perkiraan Bulan Berikutnya",
     "🗓️ Kalender",
 ]
@@ -426,7 +473,7 @@ with st.sidebar:
     menu = st.radio("Navigasi", MENU_OPTIONS, label_visibility="collapsed", key="main_menu")
     st.divider()
     st.markdown(f'<div class="sidebar-footer-role">Login sebagai: <b>{st.session_state.role}</b></div>', unsafe_allow_html=True)
-    if st.button("Logout", use_container_width=True):
+    if st.button("🚪 Logout", use_container_width=True):
         st.session_state.logged_in = False
         st.session_state.role = None
         st.rerun()
@@ -444,7 +491,7 @@ if menu == "📥 Input Dataset":
                 st.session_state.get("input_split_ratio", 0.8), 0.05,
                 key="input_split_ratio",
             )
-            st.caption("Sesuai BAB III: time-based split 80:20 (nilai default).")
+            st.caption("Time-based split 80:20 (nilai default).")
             if uploaded is not None:
                 st.success(f"Dataset '{uploaded.name}' berhasil diunggah dan sedang digunakan oleh dashboard.")
             else:
@@ -457,7 +504,7 @@ if menu == "📥 Input Dataset":
                 "Input dataset & pengaturan model hanya dapat diubah oleh akun Peneliti. "
                 "Anda melihat hasil analisis berdasarkan dataset yang sedang aktif."
             )
-            st.caption("Sesuai BAB III: time-based split 80:20")
+            st.caption("Time-based split 80:20 (nilai default).")
 else:
     if IS_PENELITI:
         uploaded = st.session_state.get("input_dataset_file")
@@ -508,7 +555,7 @@ if menu == "📥 Input Dataset":
 # 🏠 DASHBOARD
 # =====================================================================
 if menu == "🏠 Dashboard":
-    render_page_header("🏠", "Dashboard", "Sistem Prediksi Pendapatan Penjualan Kopi — Sumatra Roastery Medan")
+    render_page_header_photo(BANNER_PATH, "Dashboard", "Sistem Prediksi Pendapatan Penjualan Kopi — Sumatra Roastery Medan")
 
     rekap_sorted = rekap.sort_values('periode').reset_index(drop=True)
     total_pendapatan_all = rekap_sorted['Total Pendapatan (Rp)'].sum()
@@ -714,9 +761,9 @@ elif menu == "📈 Analisis Tren":
 # 🔮 PREDIKSI & EVALUASI
 # =====================================================================
 elif menu == "🔮 Prediksi & Evaluasi":
-    render_page_header("🔮", "Prediksi & Evaluasi", "Latih Random Forest & LightGBM, hasilkan prediksi, dan bandingkan performanya.")
+    render_page_header("🔮", "Prediksi & Evaluasi", "Latih Random Forest & LightGBM, dan lihat hasil prediksi masing-masing model pada data uji.")
 
-    subtab_rf, subtab_lgb, subtab_perf = st.tabs(["🌲 Random Forest", "💡 LightGBM", "📊 Performa Model"])
+    subtab_rf, subtab_lgb = st.tabs(["🌲 Random Forest", "💡 LightGBM"])
 
     with subtab_rf:
         with st.container(border=True):
@@ -760,38 +807,43 @@ elif menu == "🔮 Prediksi & Evaluasi":
                 lgb_show['Prediksi LightGBM'] = lgb_show['Prediksi LightGBM'].apply(rupiah)
                 st.dataframe(lgb_show, use_container_width=True, hide_index=True)
 
-    with subtab_perf:
-        with st.container(border=True):
-            st.markdown("##### Perbandingan Performa Model")
-            res_df = pd.DataFrame(results).T
-            res_df.columns = ['MAE', 'RMSE', 'R²', 'Training Time (detik)']
-            best_model = res_df['MAE'].idxmin()
-            st.dataframe(res_df.style.format({'MAE': '{:,.0f}', 'RMSE': '{:,.0f}', 'R²': '{:.4f}', 'Training Time (detik)': '{:.4f}'}),
-                         use_container_width=True)
-            st.success(f"Model dengan performa terbaik (MAE terendah): **{best_model}**")
+# =====================================================================
+# ⚖️ PERBANDINGAN MODEL
+# =====================================================================
+elif menu == "⚖️ Perbandingan Model":
+    render_page_header("⚖️", "Perbandingan Model", "Bandingkan performa Random Forest vs LightGBM (MAE, RMSE, R², waktu latih).")
 
-        st.write("")
-        with st.container(border=True):
-            st.markdown("##### Aktual vs Prediksi — Kedua Model (Data Uji)")
-            jenis_perf = st.selectbox("Pilih jenis kopi", sorted(test_out['Jenis Kopi'].unique()), key="jenis_perf")
-            sub_perf = test_out[test_out['Jenis Kopi'] == jenis_perf].copy()
-            sub_perf['label'] = sub_perf['Bulan'].str[:3] + " " + sub_perf['Tahun'].astype(str)
+    with st.container(border=True):
+        st.markdown("##### Perbandingan Performa Model")
+        res_df = pd.DataFrame(results).T
+        res_df.columns = ['MAE', 'RMSE', 'R²', 'Training Time (detik)']
+        best_model = res_df['MAE'].idxmin()
+        st.dataframe(res_df.style.format({'MAE': '{:,.0f}', 'RMSE': '{:,.0f}', 'R²': '{:.4f}', 'Training Time (detik)': '{:.4f}'}),
+                     use_container_width=True)
+        st.success(f"Model dengan performa terbaik (MAE terendah): **{best_model}**")
 
-            fig_perf = go.Figure()
-            fig_perf.add_trace(go.Scatter(x=sub_perf['label'], y=sub_perf['Total Pendapatan (Rp)'], name="Aktual",
-                                           mode='lines+markers', line=dict(color="#333", width=3)))
-            fig_perf.add_trace(go.Scatter(x=sub_perf['label'], y=sub_perf['Prediksi Random Forest'], name="Prediksi RF",
-                                           mode='lines+markers', line=dict(color=PRIMARY, dash='dash')))
-            fig_perf.add_trace(go.Scatter(x=sub_perf['label'], y=sub_perf['Prediksi LightGBM'], name="Prediksi LightGBM",
-                                           mode='lines+markers', line=dict(color=ACCENT, dash='dot')))
-            fig_perf.update_layout(height=420, plot_bgcolor="white", yaxis_title="Pendapatan (Rp)")
-            st.plotly_chart(fig_perf, use_container_width=True, config={"displayModeBar": False})
+    st.write("")
+    with st.container(border=True):
+        st.markdown("##### Aktual vs Prediksi — Kedua Model (Data Uji)")
+        jenis_perf = st.selectbox("Pilih jenis kopi", sorted(test_out['Jenis Kopi'].unique()), key="jenis_perf")
+        sub_perf = test_out[test_out['Jenis Kopi'] == jenis_perf].copy()
+        sub_perf['label'] = sub_perf['Bulan'].str[:3] + " " + sub_perf['Tahun'].astype(str)
 
-            with st.expander("Lihat tabel hasil prediksi lengkap (kedua model)"):
-                test_show = test_out.copy()
-                for col in ['Total Pendapatan (Rp)', 'Prediksi Random Forest', 'Prediksi LightGBM']:
-                    test_show[col] = test_show[col].apply(rupiah)
-                st.dataframe(test_show, use_container_width=True, hide_index=True)
+        fig_perf = go.Figure()
+        fig_perf.add_trace(go.Scatter(x=sub_perf['label'], y=sub_perf['Total Pendapatan (Rp)'], name="Aktual",
+                                       mode='lines+markers', line=dict(color="#333", width=3)))
+        fig_perf.add_trace(go.Scatter(x=sub_perf['label'], y=sub_perf['Prediksi Random Forest'], name="Prediksi RF",
+                                       mode='lines+markers', line=dict(color=PRIMARY, dash='dash')))
+        fig_perf.add_trace(go.Scatter(x=sub_perf['label'], y=sub_perf['Prediksi LightGBM'], name="Prediksi LightGBM",
+                                       mode='lines+markers', line=dict(color=ACCENT, dash='dot')))
+        fig_perf.update_layout(height=420, plot_bgcolor="white", yaxis_title="Pendapatan (Rp)")
+        st.plotly_chart(fig_perf, use_container_width=True, config={"displayModeBar": False})
+
+        with st.expander("Lihat tabel hasil prediksi lengkap (kedua model)"):
+            test_show = test_out.copy()
+            for col in ['Total Pendapatan (Rp)', 'Prediksi Random Forest', 'Prediksi LightGBM']:
+                test_show[col] = test_show[col].apply(rupiah)
+            st.dataframe(test_show, use_container_width=True, hide_index=True)
 
 # =====================================================================
 # ⭐ FEATURE IMPORTANCE
@@ -895,7 +947,7 @@ elif menu == "🗓️ Kalender":
         if tampilan != "Bulan":
             st.info(
                 "Tampilan Minggu/Hari belum bisa ditampilkan datanya karena data sumber hanya mencatat "
-                "transaksi pada level bulanan (lihat BAB III). Kalender tetap ditampilkan pada level Bulan."
+                "transaksi pada level bulanan. Kalender tetap ditampilkan pada level Bulan."
             )
 
     st.write("")

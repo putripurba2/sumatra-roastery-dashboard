@@ -518,7 +518,7 @@ def forecast_next_month(df):
 # KALENDER & ESTIMASI HARIAN/MINGGUAN
 # Catatan penting: dataset sumber hanya mencatat transaksi pada level
 # Tahun + Bulan (tidak ada tanggal harian), begitu pula model Random Forest
-# dan LightGBM dilatih dan dievaluasi pada level bulanan (lihat BAB III).
+# dan LightGBM dilatih dan dievaluasi pada level bulanan.
 # Karena itu, nilai "harian" dan "mingguan" di bagian ini BUKAN hasil
 # prediksi model, melainkan estimasi kasar dari pembagian rata pendapatan
 # bulanan (aktual atau prediksi) sesuai jumlah hari/minggu kalender pada
