@@ -326,6 +326,36 @@ input:-webkit-autofill:focus {{
     border: 1px solid {BORDER};
     border-radius: 8px;
 }}
+
+/* ---- Menu navigasi sidebar (pengganti tab horizontal di atas) ---- */
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] {{
+    gap: 3px !important;
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label {{
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 9px 12px !important;
+    margin-bottom: 0 !important;
+    width: 100%;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:hover {{
+    background: rgba(255, 255, 255, 0.9);
+    border-color: {BORDER};
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label p {{
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    white-space: normal !important;
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {{
+    background: linear-gradient(135deg, #4FA89D 0%, #2E7268 100%) !important;
+    border-color: transparent !important;
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) p {{
+    color: #FFFFFF !important;
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -417,17 +447,56 @@ def render_hero_banner():
 
 
 IS_PENELITI = st.session_state.role == "Peneliti"
+IS_PEMILIK = st.session_state.role == "Pemilik/Pengelola"
+
+MENU_OPTIONS = [
+    "🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi",
+    "⭐ Feature Importance", "📅 Perkiraan Bulan Berikutnya", "🗓️ Kalender",
+]
+if IS_PEMILIK:
+    MENU_OPTIONS.append("📄 Laporan")
+MENU_OPTIONS.append("📥 Input Dataset")
 
 with st.sidebar:
-    st.header("Data & Pengaturan")
-    uploaded = None
-    split_ratio = 0.8
+    st.markdown("### 🧭 Menu")
+    menu = st.radio("Menu", MENU_OPTIONS, label_visibility="collapsed", key="main_menu")
+    st.divider()
+
+uploaded = None
+split_ratio = 0.8
+
+if menu == "📥 Input Dataset":
+    st.subheader("📥 Input Dataset & Pengaturan")
+    st.caption(
+        "Unggah dataset penjualan (.xlsx) dan atur proporsi data training/testing di sini. "
+        "Perubahan akan otomatis dipakai oleh seluruh menu dashboard lainnya."
+    )
     if IS_PENELITI:
-        uploaded = st.file_uploader("Unggah dataset (.xlsx)", type=["xlsx"])
-        split_ratio = st.slider("Proporsi data training", 0.6, 0.9, 0.8, 0.05)
+        uploaded = st.file_uploader("Unggah dataset (.xlsx)", type=["xlsx"], key="input_dataset_file")
+        split_ratio = st.slider(
+            "Proporsi data training", 0.6, 0.9,
+            st.session_state.get("input_split_ratio", 0.8), 0.05,
+            key="input_split_ratio",
+        )
+        st.caption("Sesuai BAB III: time-based split 80:20 (nilai default).")
+        if uploaded is not None:
+            st.success(f"Dataset '{uploaded.name}' berhasil diunggah dan sedang digunakan oleh dashboard.")
+        else:
+            st.info(
+                "Belum ada dataset yang diunggah — dashboard memakai dataset lokal bawaan "
+                "(file .xlsx yang berada satu folder dengan app.py)."
+            )
     else:
-        st.caption("Data & pengaturan hanya dapat diubah oleh Peneliti. Anda melihat hasil analisis terkini.")
-    st.caption("Sesuai BAB III: time-based split 80:20")
+        st.warning(
+            "Input dataset & pengaturan model hanya dapat diubah oleh akun Peneliti. "
+            "Anda melihat hasil analisis berdasarkan dataset yang sedang aktif."
+        )
+        st.caption("Sesuai BAB III: time-based split 80:20")
+    st.divider()
+else:
+    if IS_PENELITI:
+        uploaded = st.session_state.get("input_dataset_file")
+        split_ratio = st.session_state.get("input_split_ratio", 0.8)
 
 def find_local_dataset():
     candidates = glob.glob(os.path.join(SCRIPT_DIR, "*.xlsx"))
@@ -436,7 +505,10 @@ def find_local_dataset():
 data_path = uploaded if uploaded is not None else find_local_dataset()
 
 if data_path is None:
-    st.warning("Tidak ada file .xlsx ditemukan di folder yang sama dengan app.py. Unggah dataset lewat sidebar di kiri.")
+    st.warning(
+        "Tidak ada file .xlsx ditemukan di folder yang sama dengan app.py. "
+        "Unggah dataset lewat menu \"📥 Input Dataset\" di sidebar kiri."
+    )
     st.stop()
 
 try:
@@ -448,67 +520,22 @@ except Exception as e:
 df, rekap, avg_overall = build_dataset(daily, per_jenis, rekap_raw)
 results, fi, test_out, split_periode = train_models(df, split_ratio)
 forecast_df, next_bulan_nama, next_tahun = forecast_next_month(df)
+total_rf = forecast_df['Prediksi Random Forest (Rp)'].sum()
+total_lgb = forecast_df['Prediksi LightGBM (Rp)'].sum()
 
-IS_PEMILIK = st.session_state.role == "Pemilik/Pengelola"
+if menu == "📥 Input Dataset":
+    st.markdown("#### 📊 Ringkasan Dataset Aktif")
+    nama_sumber = uploaded.name if uploaded is not None else os.path.basename(data_path)
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Jumlah Baris Transaksi Harian", f"{len(daily):,}".replace(",", "."))
+    c2.metric("Jumlah Bulan Terekam", int(rekap.shape[0]))
+    c3.metric(
+        "Periode Data",
+        f"{rekap['Bulan'].iloc[0][:3]} {rekap['Tahun'].iloc[0]} – {rekap['Bulan'].iloc[-1][:3]} {rekap['Tahun'].iloc[-1]}",
+    )
+    st.caption(f"Sumber dataset yang sedang aktif: `{nama_sumber}`")
 
-if IS_PEMILIK:
-    # CSS tambahan khusus akun Pemilik saja (7 tab, termasuk Laporan) —
-    # merapatkan jarak antar tab & menyempitkan bar sesuai isi supaya tidak ada
-    # sisa background kosong. Tidak memengaruhi akun Peneliti.
-    st.markdown("""
-    <style>
-    .stTabs [data-baseweb="tab-list"],
-    .stTabs div[role="tablist"],
-    [data-testid="stTabs"] [data-baseweb="tab-list"],
-    [data-testid="stTabs"] div[role="tablist"] {
-        display: inline-flex !important;
-        width: auto !important;
-        max-width: fit-content !important;
-        gap: 2px !important;
-        padding: 6px !important;
-    }
-    .stTabs [data-baseweb="tab"],
-    .stTabs [role="tab"] {
-        padding: 7px 8px !important;
-    }
-    .stTabs [data-baseweb="tab"] *,
-    .stTabs [role="tab"] * {
-        font-size: 0.85rem !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    tab0, tab1, tab2, tab3, tab4, tab5, tab_cal, tab6 = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Perkiraan Bulan Berikutnya", "🗓️ Kalender", "📄 Laporan"])
-else:
-    tab0, tab1, tab2, tab3, tab4, tab5, tab_cal = st.tabs(["🏠 Dashboard", "📋 Data Aktual", "📈 Analisis Tren", "🔮 Prediksi & Evaluasi", "⭐ Feature Importance", "📅 Perkiraan Bulan Berikutnya", "🗓️ Kalender"])
-    tab6 = None
-
-components.html("""
-<script>
-function attachTabAutoScroll() {
-    try {
-        const doc = window.parent.document;
-        const containers = doc.querySelectorAll('[data-testid="stTabs"]');
-        containers.forEach(function(container) {
-            if (container.dataset.autoscrollBound) return;
-            container.dataset.autoscrollBound = "1";
-            container.addEventListener('click', function(e) {
-                setTimeout(function() {
-                    const rect = container.getBoundingClientRect();
-                    const y = rect.top + doc.defaultView.scrollY - 70;
-                    doc.defaultView.scrollTo({top: y, behavior: 'smooth'});
-                }, 80);
-            });
-        });
-    } catch (err) {
-        // akses cross-origin diblokir browser, abaikan
-    }
-}
-attachTabAutoScroll();
-setInterval(attachTabAutoScroll, 800);
-</script>
-""", height=1)
-
-with tab0:
+if menu == "🏠 Dashboard":
     render_hero_banner()
     st.markdown(f"### Selamat datang, **{st.session_state.role}** 👋")
     st.write(
@@ -542,11 +569,12 @@ with tab0:
 """
     if IS_PEMILIK:
         panduan += "- **📄 Laporan** — unduh ringkasan laporan penjualan dalam format Word atau PDF.\n"
+    panduan += "- **📥 Input Dataset** — unggah dataset baru (.xlsx) dan atur proporsi data training/testing.\n"
     st.markdown(panduan)
 
-    st.info("Gunakan menu tab di bagian atas untuk berpindah antar bagian dashboard.")
+    st.info("Gunakan menu di sidebar sebelah kiri untuk berpindah antar bagian dashboard.")
 
-with tab1:
+elif menu == "📋 Data Aktual":
     st.subheader("Rekap Pendapatan Bulanan")
     rekap_show = rekap[['Tahun', 'Bulan', 'Total Pendapatan (Rp)', 'kategori_tren']].copy()
     rekap_show['Total Pendapatan (Rp)'] = rekap_show['Total Pendapatan (Rp)'].apply(rupiah)
@@ -569,7 +597,7 @@ with tab1:
                         file_name="data_transaksi_harian.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-with tab2:
+elif menu == "📈 Analisis Tren":
     st.subheader("Tren Pendapatan Bulanan (2023–2025)")
     labels = [f"{b[:3]} {t}" for b, t in zip(rekap['Bulan'], rekap['Tahun'])]
     nilai_tinggi = np.where(rekap['kategori_tren'] == 'Tinggi', rekap['Total Pendapatan (Rp)'], np.nan)
@@ -598,7 +626,7 @@ with tab2:
     fig2.update_layout(height=380, plot_bgcolor="white")
     st.plotly_chart(fig2, use_container_width=True, config={"displayModeBar": False})
 
-with tab3:
+elif menu == "🔮 Prediksi & Evaluasi":
     st.subheader("🔮 Prediksi & Evaluasi Model")
     st.caption("Hasil prediksi tiap model ditampilkan terpisah, lalu dibandingkan performanya di sub-tab terakhir.")
 
@@ -677,7 +705,7 @@ with tab3:
                 test_show[col] = test_show[col].apply(rupiah)
             st.dataframe(test_show, use_container_width=True, hide_index=True)
 
-with tab4:
+elif menu == "⭐ Feature Importance":
     st.subheader("Feature Importance — Random Forest vs LightGBM")
     fi_sorted = fi.sort_values('Random Forest', ascending=True)
     fig4 = go.Figure()
@@ -687,12 +715,9 @@ with tab4:
     st.plotly_chart(fig4, use_container_width=True, config={"displayModeBar": False})
     st.caption("Fitur `lag_1` (pendapatan bulan sebelumnya) dan `jenis_kopi_enc` konsisten menjadi variabel paling berpengaruh pada kedua model.")
 
-with tab5:
+elif menu == "📅 Perkiraan Bulan Berikutnya":
     st.subheader(f"Prediksi Pendapatan {next_bulan_nama} {next_tahun}")
     st.caption("Model dilatih ulang menggunakan seluruh data historis (Januari 2023 – bulan terakhir data) agar prediksi memanfaatkan informasi terbaru yang tersedia.")
-
-    total_rf = forecast_df['Prediksi Random Forest (Rp)'].sum()
-    total_lgb = forecast_df['Prediksi LightGBM (Rp)'].sum()
 
     c1, c2, c3 = st.columns(3)
     c1.metric(f"Total Prediksi {next_bulan_nama} {next_tahun} (Random Forest)", rupiah(total_rf))
@@ -713,7 +738,7 @@ with tab5:
 
     st.info("Catatan asumsi: harga rata-rata memakai rata-rata 3 bulan terakhir per jenis kopi, dan kategori tren memakai kategori bulan terakhir yang datanya tersedia (karena kategori tren bulan depan belum bisa diketahui sebelum pendapatan aktualnya terjadi).")
 
-with tab_cal:
+elif menu == "🗓️ Kalender":
     st.subheader("🗓️ Kalender Pendapatan Bulanan")
     cal_matrix = build_calendar_matrix(rekap)
     fig_cal = go.Figure(data=go.Heatmap(
@@ -889,8 +914,8 @@ with tab_cal:
     fig_week.update_layout(height=360, plot_bgcolor="white", yaxis_title="Estimasi Pendapatan (Rp)")
     st.plotly_chart(fig_week, use_container_width=True, config={"displayModeBar": False})
 
-if IS_PEMILIK and tab6 is not None:
-    with tab6:
+elif IS_PEMILIK and menu == "📄 Laporan":
+    with st.container():
         st.subheader("Laporan Penjualan")
         st.caption(
             "Pilih filter jenis kopi dan rentang periode, lalu unduh ringkasan laporan dalam format Word atau PDF. "
