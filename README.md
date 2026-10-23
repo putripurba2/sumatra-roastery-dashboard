@@ -90,7 +90,7 @@ Data yang dipakai mencakup periode **2023–2025** (36 bulan) dengan 7 jenis kop
 
 | Peran | Username | Password |
 |---|---|---|
-| Admin | `Admin` | `Admin123` |
+| Admin | `Admin` | `admin123` |
 | Pemilik/Pengelola | `pemilik` | `pemilik123` |
 
 Akun dapat diubah pada variabel `CREDENTIALS` di file `login.py`.
