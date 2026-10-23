@@ -435,7 +435,7 @@ def kpi_card(icon, label, value, sub, bg, icon_bg):
     """, unsafe_allow_html=True)
 
 
-IS_PENELITI = st.session_state.role == "Peneliti"
+IS_PENELITI = st.session_state.role == "Admin"
 IS_PEMILIK = st.session_state.role == "Pemilik/Pengelola"
 
 MENU_OPTIONS = [
@@ -506,7 +506,7 @@ if menu == "📥 Input Dataset":
                 )
         else:
             st.warning(
-                "Input dataset & pengaturan model hanya dapat diubah oleh akun Peneliti. "
+                "Input dataset & pengaturan model hanya dapat diubah oleh akun Admin. "
                 "Anda melihat hasil analisis berdasarkan dataset yang sedang aktif."
             )
             st.caption("Time-based split 80:20 (nilai default).")

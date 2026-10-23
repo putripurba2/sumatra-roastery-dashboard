@@ -5,7 +5,7 @@ Dipisah dari app.py supaya app.py tidak terlalu panjang.
 import streamlit as st
 
 CREDENTIALS = {
-    "peneliti": {"password": "peneliti123", "role": "Peneliti"},
+    "admin": {"password": "admin123", "role": "Admin"},
     "pemilik": {"password": "pemilik123", "role": "Pemilik/Pengelola"},
 }
 
