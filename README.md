@@ -60,7 +60,7 @@ Buka `http://localhost:8501`.
 
 ## Deploy ke Streamlit Cloud
 
-1. Buka https://share.streamlit.io lalu login dengan akun GitHub.
+1. Buka (https://sumatra-roastery.streamlit.app/) lalu login dengan akun GitHub.
 2. **Create app** -> pilih repository ini, branch `main`, file utama `app.py`.
 3. **Deploy**. Link aplikasi berbentuk `https://nama-app.streamlit.app`.
 
