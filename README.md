@@ -93,7 +93,6 @@ logic.py               pemuatan data (SQLite/Excel), model, laporan
 login.py               halaman login (membaca tabel users)
 roastery.db            database SQLite
 schema.sql             struktur tabel
-buat_database.py       membangun roastery.db dari Excel
 requirements.txt       pustaka Python
 logo.png, favicon.png, banner_kopi.jpg, preview_banner_dashboard.jpg
 ```
