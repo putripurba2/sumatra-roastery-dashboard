@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import time
 import io
+import sqlite3
 import copy
 import calendar as cal_module
 from sklearn.ensemble import RandomForestRegressor
@@ -235,6 +236,42 @@ def load_raw(file):
     per_jenis = pd.read_excel(xls, sheet_name='Pendapatan Per Jenis Kopi', header=2)
     rekap = pd.read_excel(xls, sheet_name='Rekap Bulanan', header=2)
     return daily, per_jenis, rekap
+
+
+@st.cache_data
+def load_db(db_path, _mtime=0):
+    """Baca data dari SQLite (roastery.db) dan kembalikan 3 DataFrame
+    dengan nama kolom yang SAMA seperti hasil load_raw (Excel), sehingga
+    build_dataset / train_models tidak perlu diubah.
+    _mtime dipakai supaya cache otomatis ter-refresh kalau file .db berubah."""
+    con = sqlite3.connect(db_path)
+    try:
+        daily = pd.read_sql_query(
+            """SELECT tahun AS Tahun, bulan AS bulan_num, jenis_kopi AS "Jenis Kopi",
+                      varian_kopi AS "Varian Kopi", ukuran_kemasan AS "Ukuran Kemasan",
+                      harga AS "Harga (Rp)", jumlah_terjual AS "Jumlah Terjual",
+                      pendapatan AS "Pendapatan (Rp)"
+               FROM transaksi ORDER BY id""", con)
+        pj = pd.read_sql_query(
+            """SELECT tahun AS Tahun, bulan AS bulan_num, jenis_kopi AS "Jenis Kopi",
+                      total_pendapatan AS "Total Pendapatan (Rp)"
+               FROM pendapatan_per_jenis ORDER BY tahun, bulan, jenis_kopi""", con)
+        rk = pd.read_sql_query(
+            """SELECT tahun AS Tahun, bulan AS bulan_num,
+                      total_pendapatan AS "Total Pendapatan (Rp)"
+               FROM rekap_bulanan ORDER BY tahun, bulan""", con)
+    finally:
+        con.close()
+    for d in (daily, pj, rk):
+        d["Bulan"] = d["bulan_num"].map(lambda n: BULAN_ORDER[int(n) - 1])
+        d.drop(columns="bulan_num", inplace=True)
+    daily = daily[["Tahun","Bulan","Jenis Kopi","Varian Kopi","Ukuran Kemasan",
+                   "Harga (Rp)","Jumlah Terjual","Pendapatan (Rp)"]]
+    rk = rk[["Tahun","Bulan","Total Pendapatan (Rp)"]]
+    total_bulan = pj.groupby(["Tahun","Bulan"])["Total Pendapatan (Rp)"].transform("sum")
+    pj["% dari Total Bulan"] = pj["Total Pendapatan (Rp)"] / total_bulan
+    pj = pj[["Tahun","Bulan","Jenis Kopi","Total Pendapatan (Rp)","% dari Total Bulan"]]
+    return daily, pj, rk
 
 
 @st.cache_data
@@ -574,4 +611,4 @@ def daily_weekly_estimate(tahun, bulan_num, total_pendapatan):
         week_no += 1
 
     weekly_df = pd.DataFrame(rows)
-    return num_days, daily_avg, weekly_df
+    return num_days, daily_avg, weekly_df

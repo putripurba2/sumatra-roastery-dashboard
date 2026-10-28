@@ -10,7 +10,7 @@ import calendar as cal_module
 
 from logic import (
     BULAN_ORDER, BULAN_MAP,
-    load_raw, build_dataset, train_models, forecast_next_month,
+    load_raw, load_db, build_dataset, train_models, forecast_next_month,
     rupiah, to_excel_bytes, generate_laporan_docx, generate_laporan_pdf,
     DOCX_OK, REPORTLAB_OK,
     build_calendar_matrix, get_periode_options, daily_weekly_estimate,
@@ -502,7 +502,7 @@ if menu == "📥 Input Dataset":
             else:
                 st.info(
                     "Belum ada dataset yang diunggah — dashboard memakai dataset lokal bawaan "
-                    "(file .xlsx yang berada satu folder dengan app.py)."
+                    "(roastery.db, atau file .xlsx di folder app.py bila database tidak ada)."
                 )
         else:
             st.warning(
@@ -521,17 +521,27 @@ def find_local_dataset():
     return candidates[0] if candidates else None
 
 
-data_path = uploaded if uploaded is not None else find_local_dataset()
+DB_PATH = os.path.join(SCRIPT_DIR, "roastery.db")
 
-if data_path is None:
-    st.warning(
-        "Tidak ada file .xlsx ditemukan di folder yang sama dengan app.py. "
-        "Unggah dataset lewat menu \"📥 Input Dataset\" di sidebar kiri."
-    )
-    st.stop()
-
+# Urutan sumber data: 1) file yang diunggah Admin, 2) database roastery.db,
+# 3) file .xlsx lokal (cadangan). Jadi aplikasi tetap jalan walau salah satunya tidak ada.
 try:
-    daily, per_jenis, rekap_raw = load_raw(data_path)
+    if uploaded is not None:
+        daily, per_jenis, rekap_raw = load_raw(uploaded)
+        nama_sumber = uploaded.name
+    elif os.path.exists(DB_PATH):
+        daily, per_jenis, rekap_raw = load_db(DB_PATH, os.path.getmtime(DB_PATH))
+        nama_sumber = "roastery.db"
+    else:
+        data_path = find_local_dataset()
+        if data_path is None:
+            st.warning(
+                "Data tidak ditemukan (roastery.db atau file .xlsx) di folder yang sama dengan app.py. "
+                "Unggah dataset lewat menu \"📥 Input Dataset\" di sidebar kiri."
+            )
+            st.stop()
+        daily, per_jenis, rekap_raw = load_raw(data_path)
+        nama_sumber = os.path.basename(data_path)
 except Exception as e:
     st.error(f"Gagal membaca dataset: {e}")
     st.stop()
@@ -546,7 +556,6 @@ if menu == "📥 Input Dataset":
     st.write("")
     with st.container(border=True):
         st.markdown("##### 📊 Ringkasan Dataset Aktif")
-        nama_sumber = uploaded.name if uploaded is not None else os.path.basename(data_path)
         c1, c2, c3 = st.columns(3)
         c1.metric("Jumlah Baris Transaksi Harian", f"{len(daily):,}".replace(",", "."))
         c2.metric("Jumlah Bulan Terekam", int(rekap.shape[0]))
@@ -1184,4 +1193,4 @@ elif IS_PEMILIK and menu == "📄 Laporan":
                     st.warning("Modul `reportlab` belum terpasang. Tambahkan `reportlab` ke requirements.txt.")
 
 st.divider()
-st.caption("Dashboard ini dijalankan di Google Colab menggunakan Python, Streamlit, Scikit-learn, dan LightGBM ")
+st.caption("Dashboard ini dijalankan di Google Colab menggunakan Python, Streamlit, Scikit-learn, dan LightGBM ")

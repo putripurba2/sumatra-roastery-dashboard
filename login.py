@@ -2,12 +2,50 @@
 Modul halaman login untuk dashboard Sumatra Roastery.
 Dipisah dari app.py supaya app.py tidak terlalu panjang.
 """
+import os
+import hashlib
+import hmac
+import sqlite3
 import streamlit as st
 
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "roastery.db")
+ROLE_LABEL = {"admin": "Admin", "pemilik": "Pemilik/Pengelola"}
+
+# Cadangan: dipakai hanya kalau roastery.db belum ada / tabel users kosong.
 CREDENTIALS = {
     "admin": {"password": "admin123", "role": "Admin"},
     "pemilik": {"password": "pemilik123", "role": "Pemilik/Pengelola"},
 }
+
+
+def _verify_password(password: str, stored: str) -> bool:
+    """stored berformat pbkdf2$<salt hex>$<hash hex> (dibuat buat_database.py)."""
+    try:
+        _, salt, h = stored.split("$")
+        cek = hashlib.pbkdf2_hmac("sha256", password.encode(), bytes.fromhex(salt), 200_000)
+        return hmac.compare_digest(cek.hex(), h)
+    except Exception:
+        return False
+
+
+def authenticate(username: str, password: str):
+    """Kembalikan label peran ('Admin' / 'Pemilik/Pengelola') kalau login benar, selain itu None."""
+    username = username.strip().lower()
+    if os.path.exists(DB_PATH):
+        try:
+            con = sqlite3.connect(DB_PATH)
+            row = con.execute(
+                "SELECT password_hash, role FROM users WHERE lower(username) = ?", (username,)
+            ).fetchone()
+            con.close()
+            if row is not None:
+                return ROLE_LABEL.get(row[1]) if _verify_password(password, row[0]) else None
+        except sqlite3.Error:
+            pass  # tabel users tidak ada -> pakai cadangan di bawah
+    user = CREDENTIALS.get(username)
+    if user and hmac.compare_digest(user["password"], password):
+        return user["role"]
+    return None
 
 
 def require_login(colors: dict):
@@ -114,10 +152,10 @@ def require_login(colors: dict):
         st.markdown('<div class="login-footer">© 2026 Sumatra Roastery Medan</div>', unsafe_allow_html=True)
 
     if submitted:
-        user = CREDENTIALS.get(username.strip().lower())
-        if user and user["password"] == password:
+        role = authenticate(username, password)
+        if role:
             st.session_state.logged_in = True
-            st.session_state.role = user["role"]
+            st.session_state.role = role
             st.rerun()
         else:
             with col2:
